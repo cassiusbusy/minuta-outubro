@@ -68,8 +68,11 @@
   </header>
 
   <nav class="abas" aria-label="Seções da ferramenta">
-    <a href="index.html" id="link-consulta">← Consulta</a>
-    <a href="#" class="ativa" aria-current="page">Grafo de impactos</a>
+    <a href="index.html#indice">Índice</a>
+    <a href="index.html#glossario">Glossário</a>
+    <a href="index.html#busca" id="link-consulta">Buscar na minuta</a>
+    <a href="grafo.html" class="ativa" aria-current="page">Grafo de impactos</a>
+    <a href="index.html#pergunte">Pergunte usando I.A.</a>
   </nav>
 
   <section class="card" id="card-busca">
@@ -86,7 +89,6 @@
       <label class="check"><input type="checkbox" id="inteira" checked> Palavra inteira</label>
       <label class="check"><input type="checkbox" id="exato"> Diferenciar acentos e maiúsculas</label>
     </div>
-    <div class="chips" id="chips-cmd"></div>
     <div class="opcoes">
       <label class="check"><input type="checkbox" id="ver-co" checked> Ligar os artigos encontrados entre si</label>
       <label class="check"><input type="checkbox" id="ver-rem" checked> Mostrar remissões entre artigos</label>
@@ -113,7 +115,6 @@
         <span><i style="background:var(--g-hit)"></i>Artigo com o termo</span>
         <span><i style="background:var(--g-ligado)"></i>Ligado por remissão</span>
         <span><i style="background:var(--g-folha)"></i>Demais artigos</span>
-        <span><i style="background:var(--surface);border:1.5px solid var(--g-remissao)"></i>Anexo</span>
         <span><i class="linha" style="border-color:var(--g-remissao)"></i>Remissão no texto</span>
         <span><i class="linha" style="border-color:var(--g-hit)"></i>Mesmo termo</span>
       </div>
@@ -152,6 +153,7 @@
   const $ = (id) => document.getElementById(id);
   const MAX_CO = 80;
   let estado = B.lerURL();
+  estado.comandos = new Set();
   if (!location.search) estado.q = 'segurança viária';
 
   // ---------- hierarquia ----------
@@ -168,7 +170,7 @@
     if (x.tipo === 'art') return { id: 'art-' + x.d.n, tipo: 'art', d: x.d };
     if (x.tipo === 'anexo') return { id: x.d.id, tipo: 'anexo', d: x.d };
     const f = (filhos.get(x.d.id) || []).map(montar);
-    if (x.d.id === 'raiz' && M.anexos && M.anexos.length) {
+    if (false) { // anexos fora do grafo por enquanto
       f.push({ id: 'anexos', tipo: 'est', d: { id: 'anexos', tipo: 'grupo-anexos', rotulo: 'Anexos', nome: 'Mapas e quadros', n_artigos: 0 }, children: M.anexos.map((a) => ({ id: a.id, tipo: 'anexo', d: a })) });
     }
     return { id: x.d.id, tipo: 'est', d: x.d, children: f };
@@ -332,9 +334,8 @@
       <div class="numero verde"><b>${n}</b><span>artigos com ${resultado.temTermo ? 'o termo' : 'o comando'}${resultado.total ? ` · ${resultado.total} ocorrências` : ''}</span></div>
       <div class="numero"><b>${titulosAlc.size}/${totTit}</b><span>títulos alcançados</span></div>
       <div class="numero"><b>${capsAlc.size}/${totCap}</b><span>capítulos alcançados</span></div>
-      <div class="numero ouro"><b>${nLig}</b><span>artigos ligados por remissão</span></div>
-      <div class="numero azul"><b>${anexosAlc.size}</b><span>anexos citados nesses artigos</span></div>`;
-    if (!tem) $('numeros').innerHTML = `<div class="numero"><b>${B.artigos.length}</b><span>artigos</span></div><div class="numero azul"><b>${M.remissoes.length}</b><span>remissões explícitas no texto</span></div><div class="numero"><b>${M.anexos.length}</b><span>anexos citados</span></div>`;
+      <div class="numero ouro"><b>${nLig}</b><span>artigos ligados por remissão</span></div>`;
+    if (!tem) $('numeros').innerHTML = `<div class="numero"><b>${B.artigos.length}</b><span>artigos</span></div><div class="numero azul"><b>${M.remissoes.filter((r) => r.tipo !== 'anexo').length}</b><span>remissões explícitas no texto</span></div>`;
 
     const titulos = M.estrutura.filter((e) => e.tipo === 'titulo');
     const cont = new Map(); resultado.artigos.forEach((x) => { const t = x.a.caminho[0]; if (t) cont.set(t.id, (cont.get(t.id) || 0) + 1); });
@@ -366,18 +367,9 @@
   }
 
   // ---------- controles ----------
-  for (const k in B.COMANDOS) {
-    const c = B.COMANDOS[k];
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.cmd = k;
-    b.style.setProperty('--cor', c.cor); b.title = 'Ex.: ' + c.exemplo;
-    b.innerHTML = `<span class="ponto"></span>${B.esc(c.nome)}`;
-    b.addEventListener('click', () => { if (estado.comandos.has(k)) estado.comandos.delete(k); else estado.comandos.add(k); executar(); });
-    $('chips-cmd').appendChild(b);
-  }
   function paraFormulario() {
     $('q').value = estado.q; $('modo-' + estado.modo).checked = true;
     $('inteira').checked = estado.inteira; $('exato').checked = estado.exato;
-    document.querySelectorAll('#chips-cmd .chip').forEach((b) => b.setAttribute('aria-pressed', estado.comandos.has(b.dataset.cmd)));
   }
   function executar(semLer) {
     if (!semLer) {
@@ -387,7 +379,7 @@
     estado.escopo = '';
     paraFormulario();
     history.replaceState(null, '', B.urlDe(estado));
-    $('link-consulta').href = B.urlDe(estado, 'index.html');
+    $('link-consulta').href = B.urlDe(estado, 'index.html') + '#busca';
     aplicar();
   }
   $('form-busca').addEventListener('submit', (e) => { e.preventDefault(); executar(); });
@@ -398,7 +390,7 @@
     const no = e.target.closest('[data-no]'); if (no) detalharNo(porId.get(no.dataset.no));
   });
 
-  $('rodape').textContent = `Fonte: ${M.documento.arquivo} · remissões detectadas automaticamente no texto (“art. 45”, “Título VI desta Lei”, “Anexo 3”); citações a leis federais ficam de fora.`;
+  $('rodape').textContent = `Fonte: ${M.documento.arquivo} · remissões detectadas automaticamente no texto (“art. 45”, “Título VI desta Lei”); citações a leis federais ficam de fora.`;
   paraFormulario();
   executar(true);
 </script>

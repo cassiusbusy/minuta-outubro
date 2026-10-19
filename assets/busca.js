@@ -195,7 +195,7 @@
     d.querySelector('#leitor-caminho').innerHTML = htmlCaminho(a);
     d.querySelector('#leitor-corpo').innerHTML =
       a.dispositivos.map((x, i) => htmlDisp(x, porDisp.get(i))).join('') +
-      `<div class="art-rodape">${htmlTags(a)}${htmlRefs(a)}</div>`;
+      `<div class="art-rodape">${htmlRefs(a)}</div>`;
     d.querySelector('#leitor-ant').onclick = () => abrirArtigo(n - 1);
     d.querySelector('#leitor-prox').onclick = () => abrirArtigo(n + 1);
     d.querySelector('#leitor-ant').disabled = !porNumero.has(n - 1);

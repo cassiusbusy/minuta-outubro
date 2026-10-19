@@ -16,20 +16,19 @@
     <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
     <p class="eyebrow">Revisão do Plano Diretor · Projeto de Lei Rev.05</p>
     <h1>Consulta à Minuta do Plano Diretor</h1>
-    <p class="subtitulo" id="subtitulo">Encontre todos os artigos da nova minuta que tratam de um tema, uma expressão ou um tipo de comando. A busca percorre o texto integral dos artigos, parágrafos, incisos e alíneas.</p>
+    <p class="subtitulo" id="subtitulo">Encontre todos os artigos da nova minuta que tratam de um tema ou de uma expressão. A busca percorre o texto integral dos artigos, parágrafos, incisos e alíneas.</p>
   </header>
 
   <nav class="abas" aria-label="Seções da ferramenta">
-    <button type="button" class="ativa" data-aba="busca">Buscar na minuta</button>
-    <button type="button" data-aba="indice">Índice</button>
+    <button type="button" class="ativa" data-aba="indice">Índice</button>
     <button type="button" data-aba="glossario">Glossário</button>
-    <button type="button" data-aba="pergunte">Pergunte à minuta</button>
-    <span class="sep"></span>
-    <a href="grafo.html" id="link-grafo">Grafo de impactos →</a>
+    <button type="button" data-aba="busca">Buscar na minuta</button>
+    <a href="grafo.html" id="link-grafo">Grafo de impactos</a>
+    <button type="button" data-aba="pergunte">Pergunte usando I.A.</button>
   </nav>
 
   <!-- ================= BUSCA ================= -->
-  <div id="aba-busca" class="aba" style="display:flex;flex-direction:column;gap:14px">
+  <div id="aba-busca" class="aba" style="display:flex;flex-direction:column;gap:14px" hidden>
     <section class="card" id="card-busca">
       <form id="form-busca" class="busca-linha" role="search">
         <input type="search" id="q" placeholder="Ex.: segurança viária, deverá, lei específica, IPPUC…" aria-label="Termo ou expressão" autocomplete="off">
@@ -57,15 +56,6 @@
         </div>
       </div>
 
-      <div>
-        <span class="rotulo">Buscas frequentes</span>
-        <div class="chips" id="chips-termos" style="margin-top:6px"></div>
-      </div>
-      <div>
-        <span class="rotulo">Tipo de comando normativo</span>
-        <div class="chips" id="chips-cmd" style="margin-top:6px"></div>
-        <p class="dica" style="margin-top:6px">Combine com um termo para ver, por exemplo, só as obrigações sobre drenagem. Sem termo, lista todos os artigos com aquele tipo de comando.</p>
-      </div>
     </section>
 
     <section class="card glossario-def" id="card-gloss" hidden>
@@ -94,7 +84,7 @@
   </div>
 
   <!-- ================= ÍNDICE ================= -->
-  <div id="aba-indice" class="aba" hidden>
+  <div id="aba-indice" class="aba">
     <section class="card">
       <h2>Estrutura da minuta</h2>
       <p class="dica">Abra um título ou capítulo e clique no número do artigo para ler o texto completo.</p>
@@ -114,16 +104,11 @@
   <!-- ================= PERGUNTE ================= -->
   <div id="aba-pergunte" class="aba" hidden>
     <section class="card">
-      <h2>Pergunte à minuta</h2>
+      <h2>Pergunte usando I.A.</h2>
       <p class="dica" style="font-size:14px">A cada pergunta, o sistema percorre os 355 artigos e o glossário, lista por programa tudo o que se relaciona com a pergunta e só então pede a análise à IA, que lê a minuta inteira. Coloque entre aspas os termos exatos e cite o artigo pelo número.</p>
       <div>
         <label for="pergunta">Sua pergunta</label>
         <textarea id="pergunta" rows="3" placeholder='Ex.: se trocarmos "poderá" por "deverá" no art. 62, o que muda no resto da minuta?'></textarea>
-      </div>
-      <div class="chips" id="chips-pergunta">
-        <button type="button" class="chip" data-p='Se trocarmos "poderá" por "deverá" no art. 63, o que muda no resto da minuta?'>Trocar “poderá” por “deverá”</button>
-        <button type="button" class="chip" data-p='Quais artigos dependem do art. 62 (FUMDUIS) e seriam afetados se ele fosse suprimido?'>Suprimir um artigo</button>
-        <button type="button" class="chip" data-p='O que a minuta determina sobre "segurança viária"? Liste todos os artigos.'>Tudo sobre um tema</button>
       </div>
       <button class="btn" type="button" id="btn-perguntar" style="align-self:flex-start">Perguntar</button>
       <div id="status-pergunta" hidden style="display:flex;gap:10px;align-items:center;color:var(--ink-soft)"><div class="spinner"></div><span>Lendo os 355 artigos e analisando. Pode levar até um minuto…</span></div>
@@ -163,6 +148,7 @@
   const $ = (id) => document.getElementById(id);
   const PAGINA = 40;
   let estado = B.lerURL();
+  estado.comandos = new Set();
   if (!location.search) estado.q = 'segurança viária';
   let ultimo = null; let mostrando = PAGINA;
 
@@ -179,27 +165,6 @@
     sel.disabled = !caps.length;
   }
 
-  // ---------- chips ----------
-  const TERMOS = ['segurança viária', 'deverá', 'lei específica', 'IPPUC', 'habitação de interesse social', 'mudanças climáticas', 'regularização fundiária', 'drenagem', 'patrimônio cultural', 'adensamento', 'CONCITIBA', 'metropolitana'];
-  TERMOS.forEach((t) => {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t;
-    b.addEventListener('click', () => { $('q').value = t; estado.modo = 'frase'; $('modo-frase').checked = true; executar(); });
-    $('chips-termos').appendChild(b);
-  });
-  const contagemCmd = {};
-  for (const k in B.COMANDOS) contagemCmd[k] = B.artigos.filter((a) => a.comandos[k]).length;
-  for (const k in B.COMANDOS) {
-    const c = B.COMANDOS[k];
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.cmd = k;
-    b.style.setProperty('--cor', c.cor); b.title = 'Ex.: ' + c.exemplo;
-    b.innerHTML = `<span class="ponto"></span>${B.esc(c.nome)} <span class="qt">${contagemCmd[k]}</span>`;
-    b.addEventListener('click', () => {
-      if (estado.comandos.has(k)) estado.comandos.delete(k); else estado.comandos.add(k);
-      executar();
-    });
-    $('chips-cmd').appendChild(b);
-  }
-
   // ---------- estado <-> formulário ----------
   function paraFormulario() {
     $('q').value = estado.q;
@@ -209,7 +174,6 @@
     const tid = no ? (no.tipo === 'titulo' ? no.id : no.pai) : '';
     $('f-titulo').value = tid || ''; preencherCapitulos(tid);
     $('f-capitulo').value = no && no.tipo === 'capitulo' ? no.id : '';
-    document.querySelectorAll('#chips-cmd .chip').forEach((b) => b.setAttribute('aria-pressed', estado.comandos.has(b.dataset.cmd)));
   }
   function doFormulario() {
     estado.q = $('q').value.trim();
@@ -222,11 +186,11 @@
   function executar(semLer) {
     if (!semLer) doFormulario();
     paraFormulario();
-    history.replaceState(null, '', B.urlDe(estado));
+    history.replaceState(null, '', B.urlDe(estado) + location.hash);
     $('link-grafo').href = B.urlDe(estado, 'grafo.html');
     if (!estado.q && !estado.comandos.size) {
       ultimo = null; $('card-resumo').hidden = true; $('card-gloss').hidden = true;
-      $('lista').innerHTML = `<div class="card vazio">Digite um termo ou escolha um tipo de comando. A minuta Rev.05 tem ${B.artigos.length} artigos em ${titulos.length} títulos.</div>`;
+      $('lista').innerHTML = `<div class="card vazio">Digite um termo ou expressão. A minuta Rev.05 tem ${B.artigos.length} artigos em ${titulos.length} títulos.</div>`;
       $('mais-wrap').hidden = true; return;
     }
     ultimo = B.buscar(estado); mostrando = PAGINA;
@@ -283,7 +247,7 @@
       <div class="art-cab"><span class="art-num">${a.rotulo}</span><span class="art-qt">${qt}</span></div>
       ${B.htmlCaminho(a)}
       <div>${html}</div>
-      <div class="art-rodape"><button class="link" type="button" data-ler="${a.n}">Ler artigo completo</button>${B.htmlTags(a)}${B.htmlRefs(a)}</div>
+      <div class="art-rodape"><button class="link" type="button" data-ler="${a.n}">Ler artigo completo</button>${B.htmlRefs(a)}</div>
     </article>`;
   }
   function renderLista() {
@@ -347,7 +311,10 @@
   });
 
   // ---------- abas ----------
+  const ABAS = ['indice', 'glossario', 'busca', 'pergunte'];
   function mostrarAba(aba) {
+    if (!ABAS.includes(aba)) aba = 'indice';
+    history.replaceState(null, '', location.pathname + location.search + '#' + aba);
     document.querySelectorAll('.aba').forEach((el) => { el.hidden = el.id !== 'aba-' + aba; });
     document.querySelectorAll('nav.abas button[data-aba]').forEach((b) => b.classList.toggle('ativa', b.dataset.aba === aba));
     if (aba === 'indice' && !$('indice').childElementCount) renderIndice();
@@ -390,8 +357,12 @@
     $('erro-ia').hidden = true; $('resposta-ia').hidden = true; $('resposta-impactos-card').hidden = true; $('resposta-varredura-card').hidden = true; $('status-pergunta').hidden = false; $('btn-perguntar').disabled = true;
     try {
       const res = await fetch(ASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta, versao: 'rev05' }) });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
+      const bruto = await res.text();
+      if (!res.ok) throw new Error('o servidor respondeu HTTP ' + res.status + (res.status === 524 ? ' (tempo esgotado no Cloudflare)' : ''));
+      if (!bruto.trim()) throw new Error('o fluxo do n8n terminou sem resposta; veja a última execução no n8n');
+      let data;
+      try { data = JSON.parse(bruto); } catch (e) { throw new Error('resposta inválida do n8n: ' + bruto.slice(0, 160)); }
+      if (data.erro) throw new Error('falha no passo "' + (data.no || '?') + '": ' + data.erro + (data.detalhe ? ' (' + data.detalhe + ')' : ''));
       $('resposta-pergunta').textContent = 'Pergunta: ' + pergunta;
       $('resposta-texto').textContent = data.resposta || '(sem resposta)';
       const fontes = (data.fontes || []).map((f) => Number(f.artigo || f)).filter((n) => B.porNumero.has(n));
@@ -400,7 +371,7 @@
       renderImpactos(data.impactos || []);
       renderVarredura(data.varredura);
     } catch (err) {
-      $('erro-ia-texto').textContent = 'Não foi possível obter a resposta (' + err.message + '). Tente de novo em instantes.';
+      $('erro-ia-texto').textContent = 'Não foi possível obter a resposta: ' + err.message + '.';
       $('erro-ia').hidden = false;
     } finally { $('status-pergunta').hidden = true; $('btn-perguntar').disabled = false; }
   });
@@ -421,19 +392,20 @@
     const partes = [`<p style="margin:0">Percorridos <b>${v.total_artigos_percorridos}</b> artigos. ${v.checklist.length} entraram na lista obrigatória de avaliação.</p>`];
     (v.termos || []).forEach((t) => {
       const no = (t.no_alvo || []).map((x) => `${B.rotuloArt(x.artigo)}: ${x.ocorrencias}×`).join(', ');
-      partes.push(`<p style="margin:0">“${B.esc(t.termo)}” aparece ${t.total} vez${t.total !== 1 ? 'es' : ''} em ${t.artigos.length} artigo${t.artigos.length !== 1 ? 's' : ''}${no ? ` (no artigo citado: ${no})` : ''}${t.papel === 'alteração' ? ' · termo da alteração, não usado como tema' : ''}.</p>`);
+      partes.push(`<p style="margin:0">“${B.esc(t.termo)}” aparece ${t.total} vez${t.total !== 1 ? 'es' : ''} em ${t.artigos.length} artigo${t.artigos.length !== 1 ? 's' : ''}${no ? ` (no artigo citado: ${no})` : ''}${({ original: ' · termo que seria substituído', novo: ' · termo novo, só contado', edicao: ' · texto da alteração, não usado como tema', 'alteração': ' · texto da alteração, não usado como tema' })[t.papel] || ''}.</p>`);
     });
     if (v.checklist.length) partes.push(`<details><summary>Ver a lista e o motivo de cada artigo</summary><ul style="margin:6px 0 0;padding-left:18px">${v.checklist.map((c) => `<li>${lnk(c.artigo)}: ${B.esc(c.motivos.join('; '))}</li>`).join('')}</ul></details>`);
     if (v.nao_avaliados_pela_ia && v.nao_avaliados_pela_ia.length) partes.push(`<p style="margin:0;color:var(--danger)">A IA não comentou ${v.nao_avaliados_pela_ia.length} artigo(s) da lista: ${v.nao_avaliados_pela_ia.map(lnk).join(', ')}. Confira manualmente.</p>`);
     $('resposta-varredura').innerHTML = partes.join('');
     $('resposta-varredura-card').hidden = false;
   }
-  $('chips-pergunta').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b) { $('pergunta').value = b.dataset.p; $('pergunta').focus(); } });
 
   $('rodape').textContent = `Fonte: ${M.documento.arquivo} · ${B.artigos.length} artigos · ${M.glossario.length} termos de glossário · dados extraídos em ${M.documento.gerado_em.split('-').reverse().join('/')}`;
 
   paraFormulario();
   executar(true);
+  // abre a aba do endereço (#indice, #glossario, #busca, #pergunte); sem marcação, começa pelo Índice
+  mostrarAba((location.hash || '#indice').slice(1));
 </script>
 </body>
 </html>
