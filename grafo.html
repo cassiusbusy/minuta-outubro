@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Grafo de Impactos da Minuta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+<style>
+  .grade { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; align-items: start; }
+  @media (max-width: 960px) { .grade { grid-template-columns: minmax(0, 1fr); } }
+  .palco { position: relative; padding: 0; overflow: hidden; }
+  .palco-cab { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 14px 18px 0; }
+  #svg { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; max-height: 860px; cursor: grab; touch-action: none; }
+  #svg:active { cursor: grabbing; }
+  .lk { fill: none; stroke: var(--g-link); stroke-width: 1; }
+  .lk.on { stroke: var(--g-hit); stroke-opacity: .55; stroke-width: 1.3; }
+  .rem { fill: none; stroke: var(--g-remissao); stroke-width: 1.4; stroke-opacity: .55; }
+  .rem.forte { stroke-opacity: .95; stroke-width: 2; }
+  .co { fill: none; stroke: var(--g-hit); stroke-width: 1; }
+  .nd-est { fill: var(--g-estrutura); stroke: var(--surface); stroke-width: 1.5; cursor: pointer; }
+  .nd-est.on { fill: var(--g-hit); }
+  .nd-est.apagado { opacity: .35; }
+  .nd-art { fill: var(--g-folha); stroke: var(--surface); stroke-width: .6; cursor: pointer; }
+  .nd-art.hit { fill: var(--g-hit); stroke-width: 1; }
+  .nd-art.ligado { fill: var(--g-ligado); stroke-width: 1; }
+  .nd-anexo { fill: var(--surface); stroke: var(--g-remissao); stroke-width: 1.4; cursor: pointer; }
+  .nd-anexo.ligado { fill: var(--g-remissao); }
+  .rot-est { font: 700 10px var(--f-ui); fill: #fff; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .rot-art { font: 500 9px var(--f-mono); fill: var(--ink-soft); pointer-events: none; }
+  .rot-art.hit { fill: var(--ink); font-weight: 600; }
+  .rot-anexo { font: 600 9px var(--f-ui); fill: var(--g-remissao); pointer-events: none; }
+  .dica-flut {
+    position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 13px; max-width: 300px; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 3;
+  }
+  .dica-flut b { color: var(--title); }
+  .legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0 18px 14px; font-size: 12.5px; color: var(--ink-soft); }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .legenda i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legenda i.linha { width: 18px; height: 0; border-radius: 0; border-top: 2px solid; }
+  .lateral .distrib-linha { grid-template-columns: minmax(0, 1fr) 3.2em; }
+  .lateral .distrib-nome { white-space: normal; grid-column: 1 / -1; }
+  .lateral .distrib-barra { grid-column: 1; }
+  .lateral { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .arts-bts { display: flex; flex-wrap: wrap; gap: 4px; }
+  .arts-bts button {
+    font: 500 12px/1 var(--f-mono); border: 1px solid var(--border); background: var(--surface-2); color: var(--ink);
+    border-radius: 6px; padding: 5px 7px; cursor: pointer;
+  }
+  .arts-bts button.hit { border-color: var(--g-hit); color: var(--g-hit); }
+  .arts-bts button.ligado { border-color: var(--g-ligado); color: var(--c-prazo); }
+  .arts-bts button:hover { background: var(--primary-soft); }
+  ul.rem-lista { margin: 0; padding-left: 18px; font-size: 13.5px; display: flex; flex-direction: column; gap: 3px; }
+  .zoom-bts { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page wide">
+  <header class="topo">
+    <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
+    <p class="eyebrow">Revisão do Plano Diretor · Projeto de Lei Rev.05</p>
+    <h1>Grafo de Impactos da Minuta</h1>
+    <p class="subtitulo">Mostra onde um tema aparece na estrutura da lei e quais artigos ficam ligados a ele por remissão. Use para avaliar o alcance de uma emenda: mudar um termo afeta todos os pontos acesos.</p>
+  </header>
+
+  <nav class="abas" aria-label="Seções da ferramenta">
+    <a href="index.html" id="link-consulta">← Consulta</a>
+    <a href="#" class="ativa" aria-current="page">Grafo de impactos</a>
+  </nav>
+
+  <section class="card" id="card-busca">
+    <form id="form-busca" class="busca-linha" role="search">
+      <input type="search" id="q" placeholder="Ex.: segurança viária, deverá, drenagem…" aria-label="Termo ou expressão" autocomplete="off">
+      <button class="btn" type="submit">Mostrar no grafo</button>
+    </form>
+    <div class="opcoes">
+      <span class="grupo" role="radiogroup" aria-label="Como combinar as palavras">
+        <input type="radio" name="modo" id="modo-frase" value="frase" checked><label for="modo-frase">Expressão exata</label>
+        <input type="radio" name="modo" id="modo-todas" value="todas"><label for="modo-todas">Todas as palavras</label>
+        <input type="radio" name="modo" id="modo-qualquer" value="qualquer"><label for="modo-qualquer">Qualquer palavra</label>
+      </span>
+      <label class="check"><input type="checkbox" id="inteira" checked> Palavra inteira</label>
+      <label class="check"><input type="checkbox" id="exato"> Diferenciar acentos e maiúsculas</label>
+    </div>
+    <div class="chips" id="chips-cmd"></div>
+    <div class="opcoes">
+      <label class="check"><input type="checkbox" id="ver-co" checked> Ligar os artigos encontrados entre si</label>
+      <label class="check"><input type="checkbox" id="ver-rem" checked> Mostrar remissões entre artigos</label>
+      <label class="check"><input type="checkbox" id="ver-rot" checked> Número dos artigos encontrados</label>
+    </div>
+  </section>
+
+  <div class="numeros" id="numeros"></div>
+
+  <div class="grade">
+    <section class="card palco">
+      <div class="palco-cab">
+        <h2>Rede radial da minuta</h2>
+        <div class="zoom-bts">
+          <button class="btn-sec" type="button" id="zoom-mais" aria-label="Aproximar">+</button>
+          <button class="btn-sec" type="button" id="zoom-menos" aria-label="Afastar">−</button>
+          <button class="btn-sec" type="button" id="zoom-reset">Reenquadrar</button>
+        </div>
+      </div>
+      <svg id="svg" role="img" aria-label="Rede radial: raiz ao centro, títulos, capítulos e seções em anéis, artigos na borda"></svg>
+      <div class="dica-flut" id="dica" hidden></div>
+      <div class="legenda">
+        <span><i style="background:var(--g-estrutura)"></i>Título, capítulo, seção</span>
+        <span><i style="background:var(--g-hit)"></i>Artigo com o termo</span>
+        <span><i style="background:var(--g-ligado)"></i>Ligado por remissão</span>
+        <span><i style="background:var(--g-folha)"></i>Demais artigos</span>
+        <span><i style="background:var(--surface);border:1.5px solid var(--g-remissao)"></i>Anexo</span>
+        <span><i class="linha" style="border-color:var(--g-remissao)"></i>Remissão no texto</span>
+        <span><i class="linha" style="border-color:var(--g-hit)"></i>Mesmo termo</span>
+      </div>
+    </section>
+
+    <aside class="lateral">
+      <section class="card" id="card-detalhe">
+        <h2 id="det-titulo">Como ler</h2>
+        <div id="det-corpo" style="font-size:14px;color:var(--ink-soft);display:flex;flex-direction:column;gap:8px">
+          <p style="margin:0">Raiz ao centro; títulos, capítulos e seções em anéis; os 355 artigos ficam na borda, na ordem da lei. Passe o mouse para ver o artigo e clique para ler o texto completo.</p>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Alcance por título</h2>
+        <div class="distrib" id="distrib"></div>
+      </section>
+      <section class="card">
+        <h2>Artigos encontrados</h2>
+        <div class="arts-bts" id="lista-hits"></div>
+      </section>
+      <section class="card" id="card-rem">
+        <h2>Remissões envolvidas</h2>
+        <ul class="rem-lista" id="lista-rem"></ul>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="rodape" id="rodape"></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="dados/minuta_rev05.js"></script>
+<script src="assets/busca.js"></script>
+<script>
+  const B = window.Busca, M = B.M;
+  const $ = (id) => document.getElementById(id);
+  const MAX_CO = 80;
+  let estado = B.lerURL();
+  if (!location.search) estado.q = 'segurança viária';
+
+  // ---------- hierarquia ----------
+  const filhos = new Map();
+  M.estrutura.forEach((e) => { if (e.pai) { if (!filhos.has(e.pai)) filhos.set(e.pai, []); filhos.get(e.pai).push({ tipo: 'est', d: e }); } });
+  B.artigos.forEach((a) => { if (!filhos.has(a.pai)) filhos.set(a.pai, []); filhos.get(a.pai).push({ tipo: 'art', d: a }); });
+  // artigos antes das subdivisões, na ordem da lei
+  for (const [, l] of filhos) l.sort((x, y) => primeiroArt(x) - primeiroArt(y));
+  function primeiroArt(x) {
+    if (x.tipo === 'art') return x.d.n;
+    const f = filhos.get(x.d.id) || []; return f.length ? Math.min(...f.map(primeiroArt)) : 1e9;
+  }
+  function montar(x) {
+    if (x.tipo === 'art') return { id: 'art-' + x.d.n, tipo: 'art', d: x.d };
+    if (x.tipo === 'anexo') return { id: x.d.id, tipo: 'anexo', d: x.d };
+    const f = (filhos.get(x.d.id) || []).map(montar);
+    if (x.d.id === 'raiz' && M.anexos && M.anexos.length) {
+      f.push({ id: 'anexos', tipo: 'est', d: { id: 'anexos', tipo: 'grupo-anexos', rotulo: 'Anexos', nome: 'Mapas e quadros', n_artigos: 0 }, children: M.anexos.map((a) => ({ id: a.id, tipo: 'anexo', d: a })) });
+    }
+    return { id: x.d.id, tipo: 'est', d: x.d, children: f };
+  }
+  const raizDados = montar({ tipo: 'est', d: M.estrutura.find((e) => e.id === 'raiz') });
+  const raiz = d3.hierarchy(raizDados);
+  const porId = new Map(); raiz.each((n) => porId.set(n.data.id, n));
+
+  // ---------- desenho ----------
+  const W = 1000, R = W / 2 - 64;
+  d3.cluster().size([2 * Math.PI, R]).separation((a, b) => (a.parent === b.parent ? 1 : 1.6) / Math.max(1, a.depth))(raiz);
+  // anéis fixos por nível, folhas na borda
+  const raioNivel = [0, R * 0.22, R * 0.45, R * 0.66, R * 0.83];
+  raiz.each((n) => { if (n.children) n.y = raioNivel[Math.min(n.depth, 4)]; });
+  const pt = (n) => [n.y * Math.cos(n.x - Math.PI / 2), n.y * Math.sin(n.x - Math.PI / 2)];
+
+  const svg = d3.select('#svg').attr('viewBox', [-W / 2, -W / 2, W, W]);
+  const g = svg.append('g');
+  const gLinks = g.append('g'), gCo = g.append('g'), gRem = g.append('g'), gNos = g.append('g'), gRot = g.append('g');
+
+  const linkRadial = d3.linkRadial().angle((d) => d.x).radius((d) => d.y);
+  const linhas = gLinks.selectAll('path').data(raiz.links()).join('path').attr('class', 'lk').attr('d', linkRadial);
+
+  const bundle = d3.lineRadial().curve(d3.curveBundle.beta(0.82)).radius((d) => d.y).angle((d) => d.x);
+  const caminho = (a, b) => a.path(b);
+
+  const estNos = raiz.descendants().filter((n) => n.data.tipo === 'est');
+  const artNos = raiz.leaves().filter((n) => n.data.tipo === 'art');
+  const anexoNos = raiz.leaves().filter((n) => n.data.tipo === 'anexo');
+  const raioEst = (n) => n.depth === 0 ? 16 : n.data.d.tipo === 'titulo' ? 12 : n.data.d.tipo === 'grupo-anexos' ? 9 : Math.max(3, Math.min(8, 2 + Math.sqrt(n.data.d.n_artigos || 1) * 1.1));
+
+  const cEst = gNos.selectAll('circle.nd-est').data(estNos).join('circle').attr('class', 'nd-est')
+    .attr('r', raioEst).attr('cx', (n) => pt(n)[0]).attr('cy', (n) => pt(n)[1]);
+  gNos.selectAll('text.rot-est').data(estNos.filter((n) => n.depth === 0 || n.data.d.tipo === 'titulo' || n.data.d.tipo === 'grupo-anexos')).join('text')
+    .attr('class', 'rot-est').attr('x', (n) => pt(n)[0]).attr('y', (n) => pt(n)[1])
+    .text((n) => n.depth === 0 ? 'PD' : n.data.d.tipo === 'grupo-anexos' ? 'A' : n.data.d.rotulo.split(' ')[1]);
+  const cArt = gNos.selectAll('circle.nd-art').data(artNos).join('circle').attr('class', 'nd-art')
+    .attr('r', 2.6).attr('cx', (n) => pt(n)[0]).attr('cy', (n) => pt(n)[1]);
+  const cAnexo = gNos.selectAll('rect.nd-anexo').data(anexoNos).join('rect').attr('class', 'nd-anexo')
+    .attr('width', 8).attr('height', 8).attr('rx', 1.5)
+    .attr('transform', (n) => `translate(${pt(n)[0]},${pt(n)[1]}) rotate(45) translate(-4,-4)`);
+  gRot.selectAll('text.rot-anexo').data(anexoNos).join('text').attr('class', 'rot-anexo')
+    .attr('transform', (n) => rotRadial(n, 10)).attr('text-anchor', (n) => n.x < Math.PI ? 'start' : 'end')
+    .attr('dy', '0.32em').text((n) => n.data.d.rotulo.replace('Anexo ', 'Anx. '));
+  const rotArt = gRot.append('g');
+
+  function rotRadial(n, off) {
+    const ang = n.x * 180 / Math.PI - 90; const r = n.y + off;
+    return `rotate(${ang}) translate(${r},0)${n.x >= Math.PI ? ' rotate(180)' : ''}`;
+  }
+
+  // zoom
+  const zoom = d3.zoom().scaleExtent([0.6, 8]).on('zoom', (e) => g.attr('transform', e.transform));
+  svg.call(zoom);
+  $('zoom-mais').onclick = () => svg.transition().duration(250).call(zoom.scaleBy, 1.5);
+  $('zoom-menos').onclick = () => svg.transition().duration(250).call(zoom.scaleBy, 1 / 1.5);
+  $('zoom-reset').onclick = () => svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+
+  // ---------- dica flutuante ----------
+  const dica = $('dica');
+  function mostrarDica(ev, html) {
+    dica.innerHTML = html; dica.hidden = false;
+    const box = dica.parentElement.getBoundingClientRect();
+    let x = ev.clientX - box.left + 14, y = ev.clientY - box.top + 14;
+    if (x + 300 > box.width) x = Math.max(8, x - 320);
+    dica.style.left = x + 'px'; dica.style.top = y + 'px';
+  }
+  let resultado = null; let hitsPorArt = new Map(); let ligados = new Set();
+  cArt.on('mousemove', (ev, n) => {
+    const a = n.data.d; const h = hitsPorArt.get(a.n);
+    mostrarDica(ev, `<b>${a.rotulo}</b>${h ? ` · ${h} ocorrência${h > 1 ? 's' : ''}` : ''}<br><span style="color:var(--ink-soft)">${B.esc(a.caminho.map((c) => c.rotulo).join(' › '))}</span><br>${B.esc(a.dispositivos[0].texto.slice(0, 170))}${a.dispositivos[0].texto.length > 170 ? '…' : ''}`);
+  }).on('mouseleave', () => { dica.hidden = true; })
+    .on('click', (ev, n) => B.abrirArtigo(n.data.d.n, temBusca() ? estado : null));
+  cEst.on('mousemove', (ev, n) => {
+    const d = n.data.d; const qt = contarHits(n);
+    mostrarDica(ev, `<b>${B.esc(d.rotulo)}</b>${d.nome ? ' · ' + B.esc(B.tituloCaso(d.nome)) : ''}<br>${d.n_artigos ? d.n_artigos + ' artigos' : ''}${temBusca() ? ` · ${qt} com o termo` : ''}`);
+  }).on('mouseleave', () => { dica.hidden = true; }).on('click', (ev, n) => detalharNo(n));
+  cAnexo.on('mousemove', (ev, n) => {
+    const quem = B.artigos.filter((a) => a.anexos.includes(n.data.d.id.replace('anexo-', '')));
+    mostrarDica(ev, `<b>${B.esc(n.data.d.rotulo)}</b> · ${B.esc(n.data.d.nome)}<br>Citado em: ${quem.map((a) => a.rotulo).join(', ')}`);
+  }).on('mouseleave', () => { dica.hidden = true; });
+
+  function contarHits(n) { return n.leaves().filter((l) => l.data.tipo === 'art' && hitsPorArt.has(l.data.d.n)).length; }
+  function temBusca() { return !!(estado.q || estado.comandos.size); }
+
+  // ---------- remissões (todas, fixas) ----------
+  const remissoes = M.remissoes.map((r) => {
+    const s = porId.get('art-' + r.de);
+    const t = r.tipo === 'artigo' ? porId.get('art-' + r.para) : porId.get(r.para);
+    return s && t ? { ...r, s, t } : null;
+  }).filter(Boolean);
+  const pRem = gRem.selectAll('path').data(remissoes).join('path').attr('class', 'rem')
+    .attr('d', (r) => bundle(caminho(r.s, r.t)));
+
+  // ---------- aplicar busca ----------
+  function aplicar() {
+    resultado = temBusca() ? B.buscar(estado) : { artigos: [], termos: [], total: 0, temTermo: false };
+    hitsPorArt = new Map(resultado.artigos.map((x) => [x.a.n, x.hits || Object.values(x.cmd).reduce((s, v) => s + v, 0) || 1]));
+    ligados = new Set();
+    const remEnv = [];
+    for (const r of remissoes) {
+      const sHit = hitsPorArt.has(r.de); const tHit = r.tipo === 'artigo' && hitsPorArt.has(r.para);
+      if (sHit || tHit) {
+        remEnv.push(r);
+        if (sHit && r.tipo === 'artigo' && !tHit) ligados.add('art-' + r.para);
+        if (sHit && r.tipo !== 'artigo') ligados.add(r.para);
+        if (tHit && !sHit) ligados.add('art-' + r.de);
+      }
+    }
+    // remissão para um título/capítulo: os artigos encontrados dentro dele também são impacto
+    const ancestrais = new Set();
+    artNos.forEach((n) => { if (hitsPorArt.has(n.data.d.n)) n.ancestors().forEach((a) => ancestrais.add(a)); });
+
+    const tem = temBusca();
+    cArt.attr('class', (n) => 'nd-art' + (hitsPorArt.has(n.data.d.n) ? ' hit' : ligados.has(n.data.id) ? ' ligado' : ''))
+      .attr('r', (n) => { const h = hitsPorArt.get(n.data.d.n); return h ? Math.min(9, 3.2 + Math.sqrt(h) * 1.6) : ligados.has(n.data.id) ? 4 : 2.6; })
+      .attr('opacity', (n) => !tem || hitsPorArt.has(n.data.d.n) || ligados.has(n.data.id) ? 1 : 0.55);
+    cEst.attr('class', (n) => 'nd-est' + (tem && ancestrais.has(n) ? ' on' : '') + (tem && !ancestrais.has(n) && !ligados.has(n.data.id) && n.depth > 0 ? ' apagado' : ''));
+    cAnexo.attr('class', (n) => 'nd-anexo' + (ligados.has(n.data.id) ? ' ligado' : ''));
+    linhas.attr('class', (l) => 'lk' + (tem && ancestrais.has(l.target) ? ' on' : ''));
+    linhas.filter('.on').raise();
+
+    const verRem = $('ver-rem').checked;
+    pRem.attr('display', verRem ? null : 'none')
+      .attr('class', (r) => 'rem' + (remEnv.includes(r) ? ' forte' : ''))
+      .style('stroke-opacity', (r) => !tem || remEnv.includes(r) ? null : 0.12);
+
+    // co-ocorrência
+    const hitsNos = artNos.filter((n) => hitsPorArt.has(n.data.d.n));
+    let pares = [];
+    if ($('ver-co').checked && hitsNos.length > 1 && hitsNos.length <= MAX_CO) {
+      for (let i = 0; i < hitsNos.length; i++) for (let j = i + 1; j < hitsNos.length; j++) pares.push([hitsNos[i], hitsNos[j]]);
+    }
+    const op = pares.length ? Math.max(0.05, Math.min(0.4, 6 / pares.length + 0.04)) : 0;
+    gCo.selectAll('path').data(pares).join('path').attr('class', 'co').attr('stroke-opacity', op)
+      .attr('d', ([a, b]) => bundle(caminho(a, b)));
+
+    // rótulos dos artigos
+    const rotular = $('ver-rot').checked ? artNos.filter((n) => hitsPorArt.has(n.data.d.n) || ligados.has(n.data.id)) : [];
+    rotArt.selectAll('text').data(rotular.length <= 140 ? rotular : [], (n) => n.data.id).join('text')
+      .attr('class', (n) => 'rot-art' + (hitsPorArt.has(n.data.d.n) ? ' hit' : ''))
+      .attr('transform', (n) => rotRadial(n, 11)).attr('text-anchor', (n) => n.x < Math.PI ? 'start' : 'end')
+      .attr('dy', '0.32em').text((n) => n.data.d.n);
+    cArt.filter('.hit, .ligado').raise();
+
+    renderLateral(remEnv, hitsNos, pares.length === 0 && hitsNos.length > MAX_CO);
+  }
+
+  // ---------- painel lateral ----------
+  function renderLateral(remEnv, hitsNos, coDesligado) {
+    const n = hitsNos.length; const tem = temBusca();
+    const titulosAlc = new Set(), capsAlc = new Set(), anexosAlc = new Set();
+    resultado.artigos.forEach((x) => {
+      x.a.caminho.forEach((c) => { if (c.tipo === 'titulo') titulosAlc.add(c.id); if (c.tipo === 'capitulo') capsAlc.add(c.id); });
+      x.a.anexos.forEach((k) => anexosAlc.add(k));
+    });
+    const nLig = [...ligados].filter((id) => id.startsWith('art-')).length;
+    const totTit = M.estrutura.filter((e) => e.tipo === 'titulo').length;
+    const totCap = M.estrutura.filter((e) => e.tipo === 'capitulo').length;
+    $('numeros').innerHTML = `
+      <div class="numero verde"><b>${n}</b><span>artigos com ${resultado.temTermo ? 'o termo' : 'o comando'}${resultado.total ? ` · ${resultado.total} ocorrências` : ''}</span></div>
+      <div class="numero"><b>${titulosAlc.size}/${totTit}</b><span>títulos alcançados</span></div>
+      <div class="numero"><b>${capsAlc.size}/${totCap}</b><span>capítulos alcançados</span></div>
+      <div class="numero ouro"><b>${nLig}</b><span>artigos ligados por remissão</span></div>
+      <div class="numero azul"><b>${anexosAlc.size}</b><span>anexos citados nesses artigos</span></div>`;
+    if (!tem) $('numeros').innerHTML = `<div class="numero"><b>${B.artigos.length}</b><span>artigos</span></div><div class="numero azul"><b>${M.remissoes.length}</b><span>remissões explícitas no texto</span></div><div class="numero"><b>${M.anexos.length}</b><span>anexos citados</span></div>`;
+
+    const titulos = M.estrutura.filter((e) => e.tipo === 'titulo');
+    const cont = new Map(); resultado.artigos.forEach((x) => { const t = x.a.caminho[0]; if (t) cont.set(t.id, (cont.get(t.id) || 0) + 1); });
+    const max = Math.max(1, ...cont.values());
+    $('distrib').innerHTML = titulos.map((t) => {
+      const v = cont.get(t.id) || 0;
+      return `<button type="button" class="distrib-linha" data-no="${t.id}" title="${B.esc(B.tituloCaso(t.nome))}"><span class="distrib-nome"><b>${B.esc(t.rotulo)}</b> · ${B.esc(B.tituloCaso(t.nome))}</span><span class="distrib-barra"><i style="width:${(v / max) * 100}%"></i></span><span class="distrib-num">${v}/${t.n_artigos}</span></button>`;
+    }).join('');
+
+    $('lista-hits').innerHTML = tem
+      ? (resultado.artigos.map((x) => `<button type="button" class="hit" data-art="${x.a.n}" title="${x.hits} ocorrência(s)">${x.a.n}</button>`).join('') +
+         [...ligados].filter((id) => id.startsWith('art-')).map((id) => `<button type="button" class="ligado" data-art="${id.slice(4)}" title="Ligado por remissão">${id.slice(4)}</button>`).join('')) || '<span class="dica">Nenhum artigo.</span>'
+      : '<span class="dica">Busque um termo para listar os artigos.</span>';
+    if (coDesligado) $('lista-hits').insertAdjacentHTML('beforeend', `<p class="dica" style="margin-top:6px">São mais de ${MAX_CO} artigos; as ligações entre eles foram omitidas para manter o grafo legível.</p>`);
+
+    const lista = tem ? remEnv : remissoes;
+    $('lista-rem').innerHTML = lista.length ? lista.map((r) => `<li><button class="link" type="button" data-art="${r.de}">${B.rotuloArt(r.de)}</button> → ${r.tipo === 'artigo' ? `<button class="link" type="button" data-art="${r.para}">${B.rotuloArt(r.para)}</button>` : B.esc(B.nomeNo(r.para))}</li>`).join('')
+      : '<li class="dica" style="list-style:none;margin-left:-18px">Nenhum artigo encontrado remete a outro dispositivo da minuta, nem é citado por um.</li>';
+  }
+
+  function detalharNo(n) {
+    const d = n.data.d;
+    const arts = n.leaves().filter((l) => l.data.tipo === 'art').map((l) => l.data.d);
+    const comHit = arts.filter((a) => hitsPorArt.has(a.n));
+    $('det-titulo').textContent = n.depth === 0 ? 'Plano Diretor' : `${d.rotulo}`;
+    $('det-corpo').innerHTML = `<p style="margin:0;color:var(--ink)">${B.esc(B.tituloCaso(d.nome || ''))}</p>
+      <p style="margin:0">${arts.length} artigos${arts.length ? ` (${B.rotuloArt(arts[0].n)} a ${B.rotuloArt(arts[arts.length - 1].n)})` : ''}${temBusca() ? ` · ${comHit.length} com o termo` : ''}</p>
+      <div class="arts-bts">${arts.map((a) => `<button type="button" class="${hitsPorArt.has(a.n) ? 'hit' : ligados.has('art-' + a.n) ? 'ligado' : ''}" data-art="${a.n}">${a.n}</button>`).join('')}</div>`;
+  }
+
+  // ---------- controles ----------
+  for (const k in B.COMANDOS) {
+    const c = B.COMANDOS[k];
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.cmd = k;
+    b.style.setProperty('--cor', c.cor); b.title = 'Ex.: ' + c.exemplo;
+    b.innerHTML = `<span class="ponto"></span>${B.esc(c.nome)}`;
+    b.addEventListener('click', () => { if (estado.comandos.has(k)) estado.comandos.delete(k); else estado.comandos.add(k); executar(); });
+    $('chips-cmd').appendChild(b);
+  }
+  function paraFormulario() {
+    $('q').value = estado.q; $('modo-' + estado.modo).checked = true;
+    $('inteira').checked = estado.inteira; $('exato').checked = estado.exato;
+    document.querySelectorAll('#chips-cmd .chip').forEach((b) => b.setAttribute('aria-pressed', estado.comandos.has(b.dataset.cmd)));
+  }
+  function executar(semLer) {
+    if (!semLer) {
+      estado.q = $('q').value.trim(); estado.modo = document.querySelector('input[name="modo"]:checked').value;
+      estado.inteira = $('inteira').checked; estado.exato = $('exato').checked;
+    }
+    estado.escopo = '';
+    paraFormulario();
+    history.replaceState(null, '', B.urlDe(estado));
+    $('link-consulta').href = B.urlDe(estado, 'index.html');
+    aplicar();
+  }
+  $('form-busca').addEventListener('submit', (e) => { e.preventDefault(); executar(); });
+  document.querySelectorAll('input[name="modo"], #inteira, #exato').forEach((el) => el.addEventListener('change', () => executar()));
+  ['ver-co', 'ver-rem', 'ver-rot'].forEach((id) => $(id).addEventListener('change', aplicar));
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('.lateral [data-art], .rem-lista [data-art]'); if (a) { B.abrirArtigo(Number(a.dataset.art), temBusca() ? estado : null); return; }
+    const no = e.target.closest('[data-no]'); if (no) detalharNo(porId.get(no.dataset.no));
+  });
+
+  $('rodape').textContent = `Fonte: ${M.documento.arquivo} · remissões detectadas automaticamente no texto (“art. 45”, “Título VI desta Lei”, “Anexo 3”); citações a leis federais ficam de fora.`;
+  paraFormulario();
+  executar(true);
+</script>
+</body>
+</html>

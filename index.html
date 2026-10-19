@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Consulta à Minuta do Plano Diretor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page">
+  <header class="topo">
+    <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
+    <p class="eyebrow">Revisão do Plano Diretor · Projeto de Lei Rev.05</p>
+    <h1>Consulta à Minuta do Plano Diretor</h1>
+    <p class="subtitulo" id="subtitulo">Encontre todos os artigos da nova minuta que tratam de um tema, uma expressão ou um tipo de comando. A busca percorre o texto integral dos artigos, parágrafos, incisos e alíneas.</p>
+  </header>
+
+  <nav class="abas" aria-label="Seções da ferramenta">
+    <button type="button" class="ativa" data-aba="busca">Buscar na minuta</button>
+    <button type="button" data-aba="indice">Índice</button>
+    <button type="button" data-aba="glossario">Glossário</button>
+    <button type="button" data-aba="pergunte">Pergunte à minuta</button>
+    <span class="sep"></span>
+    <a href="grafo.html" id="link-grafo">Grafo de impactos →</a>
+  </nav>
+
+  <!-- ================= BUSCA ================= -->
+  <div id="aba-busca" class="aba" style="display:flex;flex-direction:column;gap:14px">
+    <section class="card" id="card-busca">
+      <form id="form-busca" class="busca-linha" role="search">
+        <input type="search" id="q" placeholder="Ex.: segurança viária, deverá, lei específica, IPPUC…" aria-label="Termo ou expressão" autocomplete="off">
+        <button class="btn" type="submit">Buscar</button>
+      </form>
+      <div class="opcoes">
+        <span class="grupo" role="radiogroup" aria-label="Como combinar as palavras">
+          <input type="radio" name="modo" id="modo-frase" value="frase" checked><label for="modo-frase">Expressão exata</label>
+          <input type="radio" name="modo" id="modo-todas" value="todas"><label for="modo-todas">Todas as palavras</label>
+          <input type="radio" name="modo" id="modo-qualquer" value="qualquer"><label for="modo-qualquer">Qualquer palavra</label>
+        </span>
+        <label class="check"><input type="checkbox" id="inteira" checked> Palavra inteira</label>
+        <label class="check"><input type="checkbox" id="exato"> Diferenciar acentos e maiúsculas</label>
+      </div>
+      <p class="dica">Acentos e maiúsculas são ignorados: <code>seguranca viaria</code> acha “Segurança Viária”. Use <code>*</code> como curinga: <code>dever*</code> acha deverá, deverão e deveres. Em “Todas as palavras”, aspas mantêm uma expressão junta: <code>"lei específica" prazo</code>.</p>
+
+      <div class="filtros">
+        <div>
+          <label for="f-titulo">Título</label>
+          <select id="f-titulo"><option value="">Todos os títulos</option></select>
+        </div>
+        <div>
+          <label for="f-capitulo">Capítulo</label>
+          <select id="f-capitulo" disabled><option value="">Todos os capítulos</option></select>
+        </div>
+      </div>
+
+      <div>
+        <span class="rotulo">Buscas frequentes</span>
+        <div class="chips" id="chips-termos" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <span class="rotulo">Tipo de comando normativo</span>
+        <div class="chips" id="chips-cmd" style="margin-top:6px"></div>
+        <p class="dica" style="margin-top:6px">Combine com um termo para ver, por exemplo, só as obrigações sobre drenagem. Sem termo, lista todos os artigos com aquele tipo de comando.</p>
+      </div>
+    </section>
+
+    <section class="card glossario-def" id="card-gloss" hidden>
+      <h2>No glossário da minuta</h2>
+      <dl id="gloss-defs" style="margin:0"></dl>
+    </section>
+
+    <section class="card" id="card-resumo" hidden>
+      <div class="resumo">
+        <p id="resumo-texto"></p>
+        <div class="acoes nao-imprime">
+          <button class="btn-sec" type="button" id="btn-grafo">Ver no grafo</button>
+          <button class="btn-sec" type="button" id="btn-link">Copiar link desta busca</button>
+          <button class="btn-sec" type="button" id="btn-csv">Baixar planilha (CSV)</button>
+          <button class="btn-sec" type="button" id="btn-imprimir">Imprimir / PDF</button>
+        </div>
+      </div>
+      <div>
+        <span class="rotulo">Onde aparece · artigos por título</span>
+        <div class="distrib" id="distrib" style="margin-top:6px"></div>
+      </div>
+    </section>
+
+    <div class="lista-artigos" id="lista"></div>
+    <div id="mais-wrap" class="nao-imprime" style="text-align:center" hidden><button class="btn-sec" type="button" id="btn-mais">Mostrar mais artigos</button></div>
+  </div>
+
+  <!-- ================= ÍNDICE ================= -->
+  <div id="aba-indice" class="aba" hidden>
+    <section class="card">
+      <h2>Estrutura da minuta</h2>
+      <p class="dica">Abra um título ou capítulo e clique no número do artigo para ler o texto completo.</p>
+      <div class="indice" id="indice"></div>
+    </section>
+  </div>
+
+  <!-- ================= GLOSSÁRIO ================= -->
+  <div id="aba-glossario" class="aba" hidden>
+    <section class="card">
+      <h2>Glossário da minuta</h2>
+      <input type="search" id="g-filtro" placeholder="Filtrar termos…" aria-label="Filtrar glossário">
+      <dl id="glossario" style="margin:0"></dl>
+    </section>
+  </div>
+
+  <!-- ================= PERGUNTE ================= -->
+  <div id="aba-pergunte" class="aba" hidden>
+    <section class="card">
+      <h2>Pergunte à minuta</h2>
+      <p class="dica" style="font-size:14px">Pergunta em linguagem natural, respondida por IA com base nos artigos da Rev.05 e com a citação dos artigos usados.</p>
+      <div>
+        <label for="pergunta">Sua pergunta</label>
+        <textarea id="pergunta" rows="3" placeholder="Ex.: o que a minuta prevê sobre calçadas e acessibilidade?"></textarea>
+      </div>
+      <button class="btn" type="button" id="btn-perguntar" style="align-self:flex-start">Perguntar</button>
+      <div id="status-pergunta" hidden style="display:flex;gap:10px;align-items:center;color:var(--ink-soft)"><div class="spinner"></div><span>Consultando a minuta…</span></div>
+    </section>
+    <section class="card aviso" id="aviso-ia" hidden>
+      <p>Esta função entra no ar quando a Rev.05 for carregada na base de busca semântica. Enquanto isso, use a aba <button class="link" type="button" data-ir="busca">Buscar na minuta</button>, que já cobre o texto integral.</p>
+    </section>
+    <section class="card" id="resposta-ia" hidden>
+      <p class="dica" id="resposta-pergunta"></p>
+      <p id="resposta-texto" style="margin:0;white-space:pre-wrap;font-family:var(--f-lei);font-size:16px"></p>
+      <div id="resposta-fontes" class="art-rodape"></div>
+    </section>
+    <section class="card erro" id="erro-ia" hidden><p id="erro-ia-texto" style="margin:0"></p></section>
+  </div>
+
+  <footer class="rodape" id="rodape"></footer>
+</div>
+
+<script src="dados/minuta_rev05.js"></script>
+<script src="assets/busca.js"></script>
+<script>
+  /* Endpoint do n8n para perguntas em linguagem natural (RAG sobre a Rev.05).
+     Deixe vazio até a coleção existir no Qdrant. Contrato esperado:
+       POST { pergunta, versao: "rev05" }
+       → { resposta: "texto", fontes: [{ artigo: 123 }, ...] } */
+  const ASK_URL = '';
+
+  const B = window.Busca, M = B.M;
+  const $ = (id) => document.getElementById(id);
+  const PAGINA = 40;
+  let estado = B.lerURL();
+  if (!location.search) estado.q = 'segurança viária';
+  let ultimo = null; let mostrando = PAGINA;
+
+  // ---------- títulos e capítulos ----------
+  const titulos = M.estrutura.filter((e) => e.tipo === 'titulo');
+  titulos.forEach((t) => {
+    const o = document.createElement('option'); o.value = t.id;
+    o.textContent = `${t.rotulo} – ${B.tituloCaso(t.nome)}`; $('f-titulo').appendChild(o);
+  });
+  function preencherCapitulos(tid) {
+    const sel = $('f-capitulo'); sel.innerHTML = '<option value="">Todos os capítulos</option>';
+    const caps = M.estrutura.filter((e) => e.tipo === 'capitulo' && e.pai === tid);
+    caps.forEach((c) => { const o = document.createElement('option'); o.value = c.id; o.textContent = `${c.rotulo} – ${B.tituloCaso(c.nome)}`; sel.appendChild(o); });
+    sel.disabled = !caps.length;
+  }
+
+  // ---------- chips ----------
+  const TERMOS = ['segurança viária', 'deverá', 'lei específica', 'IPPUC', 'habitação de interesse social', 'mudanças climáticas', 'regularização fundiária', 'drenagem', 'patrimônio cultural', 'adensamento', 'CONCITIBA', 'metropolitana'];
+  TERMOS.forEach((t) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t;
+    b.addEventListener('click', () => { $('q').value = t; estado.modo = 'frase'; $('modo-frase').checked = true; executar(); });
+    $('chips-termos').appendChild(b);
+  });
+  const contagemCmd = {};
+  for (const k in B.COMANDOS) contagemCmd[k] = B.artigos.filter((a) => a.comandos[k]).length;
+  for (const k in B.COMANDOS) {
+    const c = B.COMANDOS[k];
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.cmd = k;
+    b.style.setProperty('--cor', c.cor); b.title = 'Ex.: ' + c.exemplo;
+    b.innerHTML = `<span class="ponto"></span>${B.esc(c.nome)} <span class="qt">${contagemCmd[k]}</span>`;
+    b.addEventListener('click', () => {
+      if (estado.comandos.has(k)) estado.comandos.delete(k); else estado.comandos.add(k);
+      executar();
+    });
+    $('chips-cmd').appendChild(b);
+  }
+
+  // ---------- estado <-> formulário ----------
+  function paraFormulario() {
+    $('q').value = estado.q;
+    $('modo-' + estado.modo).checked = true;
+    $('inteira').checked = estado.inteira; $('exato').checked = estado.exato;
+    const no = estado.escopo ? B.nos.get(estado.escopo) : null;
+    const tid = no ? (no.tipo === 'titulo' ? no.id : no.pai) : '';
+    $('f-titulo').value = tid || ''; preencherCapitulos(tid);
+    $('f-capitulo').value = no && no.tipo === 'capitulo' ? no.id : '';
+    document.querySelectorAll('#chips-cmd .chip').forEach((b) => b.setAttribute('aria-pressed', estado.comandos.has(b.dataset.cmd)));
+  }
+  function doFormulario() {
+    estado.q = $('q').value.trim();
+    estado.modo = document.querySelector('input[name="modo"]:checked').value;
+    estado.inteira = $('inteira').checked; estado.exato = $('exato').checked;
+    estado.escopo = $('f-capitulo').value || $('f-titulo').value || '';
+  }
+
+  // ---------- execução ----------
+  function executar(semLer) {
+    if (!semLer) doFormulario();
+    paraFormulario();
+    history.replaceState(null, '', B.urlDe(estado));
+    $('link-grafo').href = B.urlDe(estado, 'grafo.html');
+    if (!estado.q && !estado.comandos.size) {
+      ultimo = null; $('card-resumo').hidden = true; $('card-gloss').hidden = true;
+      $('lista').innerHTML = `<div class="card vazio">Digite um termo ou escolha um tipo de comando. A minuta Rev.05 tem ${B.artigos.length} artigos em ${titulos.length} títulos.</div>`;
+      $('mais-wrap').hidden = true; return;
+    }
+    ultimo = B.buscar(estado); mostrando = PAGINA;
+    renderGlossario(); renderResumo(); renderLista();
+  }
+
+  function renderResumo() {
+    const r = ultimo; const n = r.artigos.length;
+    const nt = new Set(r.artigos.map((x) => x.a.caminho[0] && x.a.caminho[0].id)).size;
+    const cmds = [...estado.comandos].map((k) => B.COMANDOS[k].nome.toLowerCase());
+    let txt;
+    if (!n) txt = 'Nenhum artigo encontrado.';
+    else if (r.temTermo) txt = `<b>${r.total}</b> ocorrência${r.total !== 1 ? 's' : ''} de <b>${r.termos.map((t) => '“' + B.esc(t) + '”').join(estado.modo === 'todas' ? ' e ' : ' ou ')}</b> em <b>${n}</b> artigo${n !== 1 ? 's' : ''}, distribuídos em ${nt} título${nt !== 1 ? 's' : ''}`;
+    else txt = `<b>${n}</b> artigo${n !== 1 ? 's' : ''} com ${B.esc(cmds.join(' e '))}`;
+    if (n && r.temTermo && cmds.length) txt += ` · filtrado por ${B.esc(cmds.join(' e '))}`;
+    if (estado.escopo) txt += ` · dentro de ${B.esc(B.nomeNo(estado.escopo))}`;
+    $('resumo-texto').innerHTML = txt + (n && r.temTermo ? '.' : '');
+    // distribuição por título (ignora escopo para mostrar o todo)
+    const base = estado.escopo ? B.buscar({ ...estado, escopo: '' }) : r;
+    const cont = new Map();
+    base.artigos.forEach((x) => { const t = x.a.caminho[0]; if (t) cont.set(t.id, (cont.get(t.id) || 0) + 1); });
+    const max = Math.max(1, ...cont.values());
+    $('distrib').innerHTML = titulos.map((t) => {
+      const v = cont.get(t.id) || 0;
+      const sel = estado.escopo && (estado.escopo === t.id || estado.escopo.startsWith(t.id + '/'));
+      return `<button type="button" class="distrib-linha${sel ? ' sel' : ''}" data-tit="${t.id}" title="Filtrar por ${B.esc(t.rotulo)}">
+        <span class="distrib-nome"><b>${B.esc(t.rotulo)}</b> · ${B.esc(B.tituloCaso(t.nome))}</span>
+        <span class="distrib-barra"><i style="width:${(v / max) * 100}%"></i></span>
+        <span class="distrib-num">${v}/${t.n_artigos}</span></button>`;
+    }).join('');
+    $('card-resumo').hidden = false;
+  }
+
+  function cardArtigo(x) {
+    const a = x.a; const idx = [...x.porDisp.keys()].sort((p, q) => p - q);
+    // mostra o caput como contexto quando o achado está num inciso/parágrafo
+    const mostrar = new Set(idx);
+    idx.forEach((i) => {
+      const d = a.dispositivos[i];
+      if (d.tipo === 'inciso' || d.tipo === 'alinea' || d.tipo === 'item') {
+        for (let j = i - 1; j >= 0; j--) { const t = a.dispositivos[j].tipo; if (t === 'caput' || t === 'paragrafo') { mostrar.add(j); break; } if (d.tipo !== 'inciso' && t === 'inciso') mostrar.add(j); }
+      }
+    });
+    if (!mostrar.size) mostrar.add(0);
+    const ord = [...mostrar].sort((p, q) => p - q);
+    let html = ''; let prev = -1;
+    ord.forEach((i) => {
+      if (i - prev > 1) html += '<p class="reticencias">…</p>';
+      html += B.htmlDisp(a.dispositivos[i], x.porDisp.get(i)); prev = i;
+    });
+    if (prev < a.dispositivos.length - 1) html += '<p class="reticencias">…</p>';
+    const qt = x.hits ? `${x.hits} ocorrência${x.hits > 1 ? 's' : ''}` : '';
+    return `<article class="art" id="art-${a.n}">
+      <div class="art-cab"><span class="art-num">${a.rotulo}</span><span class="art-qt">${qt}</span></div>
+      ${B.htmlCaminho(a)}
+      <div>${html}</div>
+      <div class="art-rodape"><button class="link" type="button" data-ler="${a.n}">Ler artigo completo</button>${B.htmlTags(a)}${B.htmlRefs(a)}</div>
+    </article>`;
+  }
+  function renderLista() {
+    const r = ultimo;
+    if (!r.artigos.length) {
+      $('lista').innerHTML = `<div class="card vazio">Nada encontrado. Tente desmarcar “Palavra inteira”, usar o curinga <code>*</code> ou trocar para “Qualquer palavra”.</div>`;
+      $('mais-wrap').hidden = true; return;
+    }
+    $('lista').innerHTML = r.artigos.slice(0, mostrando).map(cardArtigo).join('');
+    $('mais-wrap').hidden = r.artigos.length <= mostrando;
+    $('btn-mais').textContent = `Mostrar mais artigos (${r.artigos.length - mostrando} restantes)`;
+  }
+  function renderGlossario() {
+    const card = $('card-gloss');
+    if (!ultimo || !ultimo.temTermo) { card.hidden = true; return; }
+    const termos = ultimo.termos.map(B.norm);
+    const achados = M.glossario.filter((g) => { const t = B.norm(g.termo); return termos.some((q) => q.length > 2 && (t.includes(q.replace(/\*/g, '')) || q.includes(t))); }).slice(0, 4);
+    card.hidden = !achados.length;
+    $('gloss-defs').innerHTML = achados.map((g) => `<dt>${B.esc(g.termo)}</dt><dd>${B.esc(g.definicao)}</dd>`).join('');
+  }
+
+  // ---------- eventos ----------
+  $('form-busca').addEventListener('submit', (e) => { e.preventDefault(); executar(); });
+  document.querySelectorAll('input[name="modo"], #inteira, #exato').forEach((el) => el.addEventListener('change', () => { if ($('q').value.trim() || estado.comandos.size) executar(); }));
+  $('f-titulo').addEventListener('change', () => { preencherCapitulos($('f-titulo').value); $('f-capitulo').value = ''; executar(); });
+  $('f-capitulo').addEventListener('change', () => executar());
+  $('distrib').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tit]'); if (!b) return;
+    const ja = estado.escopo && (estado.escopo === b.dataset.tit || estado.escopo.startsWith(b.dataset.tit + '/'));
+    $('f-titulo').value = ja ? '' : b.dataset.tit; preencherCapitulos($('f-titulo').value); $('f-capitulo').value = ''; executar();
+  });
+  $('btn-mais').addEventListener('click', () => { mostrando += PAGINA; renderLista(); });
+  document.addEventListener('click', (e) => {
+    const l = e.target.closest('[data-ler]'); if (l) { B.abrirArtigo(Number(l.dataset.ler), estado); return; }
+    const r = e.target.closest('.lista-artigos [data-art], #indice [data-art], #resposta-fontes [data-art]'); if (r) { B.abrirArtigo(Number(r.dataset.art), estado.q || estado.comandos.size ? estado : null); return; }
+    const ir = e.target.closest('[data-ir]'); if (ir) mostrarAba(ir.dataset.ir);
+  });
+  $('btn-grafo').addEventListener('click', () => { location.href = B.urlDe(estado, 'grafo.html'); });
+  $('btn-imprimir').addEventListener('click', () => { mostrando = ultimo ? ultimo.artigos.length : PAGINA; if (ultimo) renderLista(); setTimeout(() => window.print(), 50); });
+  $('btn-link').addEventListener('click', async () => {
+    const url = location.href; const b = $('btn-link');
+    try { await navigator.clipboard.writeText(url); b.textContent = 'Link copiado'; }
+    catch (e) { prompt('Copie o link:', url); }
+    setTimeout(() => { b.textContent = 'Copiar link desta busca'; }, 2000);
+  });
+  $('btn-csv').addEventListener('click', () => {
+    if (!ultimo) return;
+    const linhas = [['artigo', 'titulo', 'capitulo', 'secao', 'dispositivo', 'texto', 'ocorrencias_no_artigo']];
+    ultimo.artigos.forEach((x) => {
+      const cam = (t) => { const c = x.a.caminho.find((c) => c.tipo === t); return c ? `${c.rotulo} ${B.tituloCaso(c.nome)}` : ''; };
+      [...x.porDisp.keys()].sort((p, q) => p - q).forEach((i) => {
+        const d = x.a.dispositivos[i];
+        linhas.push([x.a.rotulo, cam('titulo'), cam('capitulo'), cam('secao'), d.tipo === 'caput' ? 'caput' : (d.tipo === 'inciso' ? 'inciso ' : '') + d.rotulo, d.texto, x.hits]);
+      });
+    });
+    const csv = '﻿' + linhas.map((l) => l.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'minuta_rev05_busca_' + (estado.q || [...estado.comandos].join('-')).replace(/[^\p{L}\p{N}]+/gu, '_').slice(0, 40) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // ---------- abas ----------
+  function mostrarAba(aba) {
+    document.querySelectorAll('.aba').forEach((el) => { el.hidden = el.id !== 'aba-' + aba; });
+    document.querySelectorAll('nav.abas button[data-aba]').forEach((b) => b.classList.toggle('ativa', b.dataset.aba === aba));
+    if (aba === 'indice' && !$('indice').childElementCount) renderIndice();
+    if (aba === 'glossario' && !$('glossario').childElementCount) renderGlossarioLista('');
+    if (aba === 'pergunte') $('aviso-ia').hidden = !!ASK_URL;
+  }
+  document.querySelectorAll('nav.abas button[data-aba]').forEach((b) => b.addEventListener('click', () => mostrarAba(b.dataset.aba)));
+
+  // ---------- índice ----------
+  function renderIndice() {
+    const filhos = new Map();
+    M.estrutura.forEach((e) => { if (e.pai) { if (!filhos.has(e.pai)) filhos.set(e.pai, []); filhos.get(e.pai).push(e); } });
+    const artsDe = new Map();
+    B.artigos.forEach((a) => { if (!artsDe.has(a.pai)) artsDe.set(a.pai, []); artsDe.get(a.pai).push(a); });
+    // artigos que vêm antes das seções ficam primeiro; os demais depois
+    function no(e) {
+      const subs = filhos.get(e.id) || []; const arts = artsDe.get(e.id) || [];
+      const botoes = arts.length ? `<div class="indice-arts">${arts.map((a) => `<button type="button" data-art="${a.n}" title="${B.esc(a.dispositivos[0].texto.slice(0, 140))}">${a.n}</button>`).join('')}</div>` : '';
+      return `<details class="no"><summary><b>${B.esc(e.rotulo)}</b> · ${B.esc(B.tituloCaso(e.nome))}<span class="qt">${e.n_artigos} art.</span></summary>${botoes}${subs.map(no).join('')}</details>`;
+    }
+    $('indice').innerHTML = (filhos.get('raiz') || []).map(no).join('');
+  }
+
+  // ---------- glossário ----------
+  function renderGlossarioLista(f) {
+    const q = B.norm(f.trim());
+    $('glossario').innerHTML = M.glossario.filter((g) => !q || B.norm(g.termo + ' ' + g.definicao).includes(q))
+      .map((g) => `<dt style="font-weight:700;color:var(--title);margin-top:10px">${B.esc(g.termo)} <button class="link" type="button" data-buscar="${B.esc(g.termo.replace(/\s*\(.*\)$/, ''))}" style="font-weight:400;font-size:13px">buscar na minuta</button></dt><dd style="margin:2px 0 0;font-family:var(--f-lei)">${B.esc(g.definicao)}</dd>`).join('');
+  }
+  $('g-filtro').addEventListener('input', (e) => renderGlossarioLista(e.target.value));
+  $('glossario').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-buscar]'); if (!b) return;
+    $('q').value = b.dataset.buscar; $('modo-frase').checked = true; mostrarAba('busca'); executar();
+  });
+
+  // ---------- pergunte ----------
+  $('btn-perguntar').addEventListener('click', async () => {
+    const pergunta = $('pergunta').value.trim(); if (!pergunta) return;
+    if (!ASK_URL) { $('aviso-ia').hidden = false; return; }
+    $('erro-ia').hidden = true; $('resposta-ia').hidden = true; $('status-pergunta').hidden = false; $('btn-perguntar').disabled = true;
+    try {
+      const res = await fetch(ASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta, versao: 'rev05' }) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      $('resposta-pergunta').textContent = 'Pergunta: ' + pergunta;
+      $('resposta-texto').textContent = data.resposta || '(sem resposta)';
+      const fontes = (data.fontes || []).map((f) => Number(f.artigo || f)).filter((n) => B.porNumero.has(n));
+      $('resposta-fontes').innerHTML = fontes.length ? 'Artigos usados: ' + fontes.map((n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`).join(', ') : '';
+      $('resposta-ia').hidden = false;
+    } catch (err) {
+      $('erro-ia-texto').textContent = 'Não foi possível obter a resposta (' + err.message + '). Tente de novo em instantes.';
+      $('erro-ia').hidden = false;
+    } finally { $('status-pergunta').hidden = true; $('btn-perguntar').disabled = false; }
+  });
+
+  $('rodape').textContent = `Fonte: ${M.documento.arquivo} · ${B.artigos.length} artigos · ${M.glossario.length} termos de glossário · dados extraídos em ${M.documento.gerado_em.split('-').reverse().join('/')}`;
+
+  paraFormulario();
+  executar(true);
+</script>
+</body>
+</html>
