@@ -61,7 +61,7 @@ BEGIN
 END $$;
 
 -- Acompanhamento de custo por dia e por rota.
-CREATE OR REPLACE VIEW vw_minuta_custo_diario WITH (security_invoker = true) AS
+CREATE OR REPLACE VIEW vw_minuta_custo_diario AS
 SELECT date_trunc('day', criado_em AT TIME ZONE 'America/Sao_Paulo')::date AS dia,
        count(*)                                   AS perguntas,
        count(*) FILTER (WHERE rota = 'programa')  AS sem_ia,
@@ -72,16 +72,3 @@ SELECT date_trunc('day', criado_em AT TIME ZONE 'America/Sao_Paulo')::date AS di
 FROM minuta_consulta
 GROUP BY 1
 ORDER BY 1 DESC;
-
--- Segurança: as tabelas novas não ficam expostas pela chave pública (anon) do Supabase.
--- O n8n grava pela conexão Postgres direta (dono das tabelas), que não é afetada.
-ALTER TABLE minuta_consulta  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE minuta_avaliacao ENABLE ROW LEVEL SECURITY;
-
--- As funções também não ficam disponíveis pela API pública do Supabase (só para a conexão do n8n).
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-    REVOKE EXECUTE ON FUNCTION fn_minuta_cache_buscar(TEXT, TEXT) FROM PUBLIC, anon, authenticated;
-    REVOKE EXECUTE ON FUNCTION fn_minuta_registrar(JSONB) FROM PUBLIC, anon, authenticated;
-  END IF;
-END $$;

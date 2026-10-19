@@ -147,7 +147,7 @@
      Workflow: n8n/minuta_n8n_perguntar.json. Deixe vazio para desligar a aba. Contrato:
        POST { pergunta, versao: "rev05" }
        → { resposta, fontes: [{ artigo }], impactos: [{ artigo, nivel, origem, motivo }], varredura: {...} } */
-  const ASK_URL = 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar-orq';   // orquestrador (C). Varredura pura (A): /webhook/minuta-perguntar
+  const ASK_URL = 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar';
 
   const B = window.Busca, M = B.M;
   const $ = (id) => document.getElementById(id);
