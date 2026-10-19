@@ -262,3 +262,7 @@ table.tabela { border-collapse: collapse; width: 100%; font-size: 14px; }
 table.tabela th, table.tabela td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
 table.tabela th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); }
 table.tabela td:first-child { white-space: nowrap; }
+
+.selo-rota { margin: 0; align-self: flex-start; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); }
+.selo-rota[data-rota="programa"], .selo-rota[data-rota="cache"] { background: var(--primary-soft); color: var(--primary); }
+table.tabela td.num { text-align: right; font-variant-numeric: tabular-nums; }

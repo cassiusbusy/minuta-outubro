@@ -206,6 +206,11 @@ function contexto() {
   const add = (n) => { if (porNum.has(n) && !escolhidos.includes(n)) escolhidos.push(n); };
   for (const n of alvos) add(n);
   for (const c of checklist) add(c.artigo);
+  // artigo citado: inclui o capítulo dele inteiro (contexto para analisar a alteração)
+  for (const n of alvos) {
+    const cap = String(porNum.get(n).breadcrumb || '').split(' > ').slice(0, 2).join(' > ');
+    if (cap) arts.filter((a) => String(a.breadcrumb || '').startsWith(cap)).slice(0, 40).forEach((a) => add(a.numero));
+  }
   if (!escolhidos.length) {
     const PARE = new Set(['sobre', 'quais', 'qual', 'minuta', 'artigo', 'artigos', 'plano', 'diretor', 'como', 'onde', 'quando', 'existe', 'falam', 'trata', 'tratam', 'dispoe', 'preve']);
     const palavras = [...new Set(semAc(q).match(/[\p{L}]{5,}/gu) || [])].filter((w) => !PARE.has(w));

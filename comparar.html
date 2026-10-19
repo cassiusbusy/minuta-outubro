@@ -9,8 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/estilo.css">
 <style>
-  .duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
-  @media (max-width: 860px) { .duas { grid-template-columns: minmax(0, 1fr); } }
+  .duas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  @media (max-width: 1100px) { .duas { grid-template-columns: minmax(0, 1fr); } }
+  .metricas b { font-size: 17px; }
   .modo-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   .modo-cab h2 { font-size: 13px; }
   .modo-desc { margin: 0; font-size: 13px; color: var(--ink-soft); }
@@ -32,7 +33,7 @@
     <span class="selo">Página de teste · uso interno</span>
     <p class="eyebrow">Revisão do Plano Diretor · Projeto de Lei Rev.05</p>
     <h1>Comparar modos de I.A.</h1>
-    <p class="subtitulo">A mesma pergunta vai ao mesmo tempo para os dois fluxos do n8n. Compare a resposta, os artigos citados, o tempo e o custo de cada um.</p>
+    <p class="subtitulo">A mesma pergunta vai ao mesmo tempo para os três fluxos do n8n. Compare a resposta, os artigos citados, o tempo e o custo de cada um.</p>
   </header>
 
   <nav class="abas" aria-label="Navegação">
@@ -44,7 +45,7 @@
       <label for="pergunta">Pergunta</label>
       <textarea id="pergunta" rows="3" placeholder='Ex.: qual o impacto de trocar "poderá" por "deverá" no art. 63?'></textarea>
     </div>
-    <button class="btn" type="button" id="btn-comparar" style="align-self:flex-start">Perguntar aos dois</button>
+    <button class="btn" type="button" id="btn-comparar" style="align-self:flex-start">Perguntar aos três</button>
     <p class="dica">Custos estimados pela tabela pública da Anthropic (Haiku 5.5: US$ 0,10 / 0,50 por milhão de tokens até 100 mil tokens de entrada; US$ 0,50 / 2,50 acima) e US$ 0,02 por milhão para o embedding da OpenAI. O valor exato fica no painel de cobrança.</p>
   </section>
 
@@ -57,6 +58,11 @@
     <section class="card" id="col-rag">
       <div class="modo-cab"><h2>B · Busca semântica simples</h2><span class="dica">/webhook/minuta-perguntar-rag</span></div>
       <p class="modo-desc">Pega só os 8 artigos mais parecidos com a pergunta e manda esses à IA.</p>
+      <div class="corpo"></div>
+    </section>
+    <section class="card" id="col-orq">
+      <div class="modo-cab"><h2>C · Orquestrador</h2><span class="dica">/webhook/minuta-perguntar-orq</span></div>
+      <p class="modo-desc">Classifica a pergunta: localizar, ler artigo e definição saem por programa; impacto e tema vão à IA; perguntas repetidas voltam do cache.</p>
       <div class="corpo"></div>
     </section>
   </div>
@@ -80,7 +86,9 @@
   const URLS = {
     var: 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar',
     rag: 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar-rag',
+    orq: 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar-orq',
   };
+  const NOMES = { var: 'A (varredura)', rag: 'B (busca simples)', orq: 'C (orquestrador)' };
   const B = window.Busca;
   const $ = (id) => document.getElementById(id);
   const historico = [];
@@ -100,7 +108,7 @@
   const lnk = (n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`;
 
   async function chamar(chave, pergunta) {
-    const col = $(chave === 'var' ? 'col-var' : 'col-rag').querySelector('.corpo');
+    const col = $('col-' + chave).querySelector('.corpo');
     const t0 = performance.now();
     let seg = 0;
     col.innerHTML = `<div class="estado"><div class="spinner"></div><span>Consultando… <b class="cron">0</b> s</span></div>`;
@@ -113,19 +121,21 @@
       const d = JSON.parse(bruto);
       if (d.erro) throw new Error('falha no passo "' + (d.no || '?') + '": ' + d.erro);
       const segundos = (performance.now() - t0) / 1000;
-      const c = custo(d.uso, d.modelo, d.uso_embedding);
+      const c = d.rota === 'programa' || d.rota === 'cache' ? { usd: 0, entrada: 0, saida: 0 } : custo(d.uso, d.modelo, d.uso_embedding);
       const fontes = (d.fontes || []).map((f) => Number(f.artigo)).filter((n) => B.porNumero.has(n));
-      const enviados = chave === 'var' ? (d.varredura && d.varredura.artigos_enviados_a_ia) : (d.recuperados || []).length;
+      const enviados = chave === 'rag' ? (d.recuperados || []).length : (d.rota === 'programa' || d.rota === 'cache' ? 0 : (d.varredura && d.varredura.artigos_enviados_a_ia));
       let extra = '';
-      if (chave === 'var' && d.varredura) {
+      if (d.aviso_rota) extra += `<p class="selo-rota" data-rota="${B.esc(d.rota || '')}">${B.esc(d.aviso_rota)}${d.tipo ? ' · tipo: ' + B.esc(d.tipo) : ''}</p>`;
+      if ((d.lista || []).length) extra += `<p class="detalhe" style="margin:0">Lista por programa: ${d.lista.length} artigo(s) com o termo.</p>`;
+      if (chave !== 'rag' && d.varredura && d.rota !== 'programa') {
         const v = d.varredura;
-        extra = `<p class="detalhe" style="margin:0">Varredura: ${v.checklist.length} artigos na lista obrigatória · ${v.artigos_enviados_a_ia ?? '?'} enviados à IA${(v.nao_avaliados_pela_ia || []).length ? ` · <span style="color:var(--danger)">${v.nao_avaliados_pela_ia.length} sem comentário da IA</span>` : ''}.</p>`;
+        extra += `<p class="detalhe" style="margin:0">Varredura: ${v.checklist.length} artigos na lista obrigatória · ${v.artigos_enviados_a_ia ?? '?'} enviados à IA${(v.nao_avaliados_pela_ia || []).length ? ` · <span style="color:var(--danger)">${v.nao_avaliados_pela_ia.length} sem comentário da IA</span>` : ''}.</p>`;
         if ((d.impactos || []).length) {
           const dir = d.impactos.filter((i) => i.nivel === 'direto').length, ind = d.impactos.filter((i) => i.nivel === 'indireto').length;
           extra += `<p class="detalhe" style="margin:0">Avaliação: ${dir} com impacto direto, ${ind} indireto, ${d.impactos.length - dir - ind} sem impacto.</p>`;
         }
       } else if (d.recuperados) {
-        extra = `<p class="detalhe" style="margin:0">Artigos recuperados: ${d.recuperados.map((r) => `${lnk(r.artigo)} <span class="dica">(${r.score})</span>`).join(', ')}</p>`;
+        extra += `<p class="detalhe" style="margin:0">Artigos recuperados: ${d.recuperados.map((r) => `${lnk(r.artigo)} <span class="dica">(${r.score})</span>`).join(', ')}</p>`;
       }
       col.innerHTML = `
         <div class="metricas">
@@ -147,25 +157,29 @@
   $('btn-comparar').addEventListener('click', async () => {
     const pergunta = $('pergunta').value.trim(); if (pergunta.length < 4) return;
     $('btn-comparar').disabled = true; $('card-dif').hidden = true;
-    const [a, b] = await Promise.all([chamar('var', pergunta), chamar('rag', pergunta)]);
+    const chaves = ['var', 'rag', 'orq'];
+    const res = await Promise.all(chaves.map((k) => chamar(k, pergunta)));
     $('btn-comparar').disabled = false;
-    if (a.ok && b.ok) {
-      const sa = new Set(a.fontes), sb = new Set(b.fontes);
-      const soA = a.fontes.filter((n) => !sb.has(n)), soB = b.fontes.filter((n) => !sa.has(n)), ambos = a.fontes.filter((n) => sb.has(n));
-      $('dif').innerHTML = `<p style="margin:0"><b>Só A (varredura):</b> ${soA.map(lnk).join(', ') || '—'}</p>
-        <p style="margin:0"><b>Só B (busca simples):</b> ${soB.map(lnk).join(', ') || '—'}</p>
-        <p style="margin:0"><b>Nos dois:</b> ${ambos.map(lnk).join(', ') || '—'}</p>`;
+    const ok = chaves.map((k, i) => [k, res[i]]).filter(([, r]) => r.ok);
+    if (ok.length >= 2) {
+      const conj = Object.fromEntries(ok.map(([k, r]) => [k, new Set(r.fontes)]));
+      const linhas = ok.map(([k, r]) => {
+        const so = r.fontes.filter((n) => ok.every(([k2]) => k2 === k || !conj[k2].has(n)));
+        return `<p style="margin:0"><b>Só ${NOMES[k]}:</b> ${so.map(lnk).join(', ') || '—'}</p>`;
+      });
+      const todos = ok[0][1].fontes.filter((n) => ok.every(([k]) => conj[k].has(n)));
+      $('dif').innerHTML = linhas.join('') + `<p style="margin:0"><b>Em todos:</b> ${todos.map(lnk).join(', ') || '—'}</p>`;
       $('card-dif').hidden = false;
     }
-    historico.unshift({ pergunta, a, b });
-    $('hist').innerHTML = '<thead><tr><th>Pergunta</th><th>A · tempo</th><th>A · custo</th><th>A · artigos citados</th><th>B · tempo</th><th>B · custo</th><th>B · artigos citados</th></tr></thead><tbody>' +
-      historico.map((h) => `<tr><td>${B.esc(h.pergunta.slice(0, 90))}</td>${[h.a, h.b].map((x) => x.ok
+    historico.unshift({ pergunta, r: res });
+    $('hist').innerHTML = '<thead><tr><th>Pergunta</th>' + chaves.map((k) => `<th>${k === 'var' ? 'A' : k === 'rag' ? 'B' : 'C'} · tempo</th><th>custo</th><th>artigos</th>`).join('') + '</tr></thead><tbody>' +
+      historico.map((h) => `<tr><td>${B.esc(h.pergunta.slice(0, 90))}</td>${h.r.map((x) => x.ok
         ? `<td class="num">${x.segundos.toFixed(1)} s</td><td class="num">${fmtUsd(x.usd)}</td><td class="num">${x.fontes.length}</td>`
         : '<td colspan="3" style="color:var(--danger)">erro</td>').join('')}</tr>`).join('') + '</tbody>';
     $('card-hist').hidden = false;
   });
 
-  document.addEventListener('click', (e) => { const b = e.target.closest('[data-art]'); if (b) B.abrirArtigo(Number(b.dataset.art), null); });
+  document.addEventListener('click', (e) => { const b = e.target.closest('main [data-art], .duas [data-art], #dif [data-art]'); if (b) B.abrirArtigo(Number(b.dataset.art), null); });
 </script>
 </body>
 </html>

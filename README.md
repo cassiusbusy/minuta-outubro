@@ -24,20 +24,23 @@ python3 scripts/parse_minuta.py "nova_minuta.docx" dados
 
 O script reconstrói a numeração automática do Word (artigos a partir do 10, incisos em romano, alíneas) e imprime avisos se a sequência digitada divergir da automática.
 
-## Ligar a aba "Pergunte à minuta" (n8n)
+## Aba "Pergunte usando I.A." (n8n)
 
-A ingestão no Qdrant é feita pelo notebook `IPPUC_INGESTAO_MINUTA_OUTUBRO_2026.ipynb` (coleções `minuta_outubro_2026` e `glossario_outubro_2026`, com os aliases `minuta_ultima_versao` e `glossario_ultima_versao`).
+Workflow: `n8n/minuta_n8n_orquestrador.json` (endereço `/webhook/minuta-perguntar-orq`, ativo junto com os outros dois; a página `comparar.html` testa os três lado a lado). Ele classifica a pergunta e só chama a IA quando precisa:
 
-O workflow `n8n/minuta_n8n_perguntar.json` (importe em *Import from File*) responde às perguntas:
+| Tipo | Exemplo | Como responde | Custo |
+|---|---|---|---|
+| localizar/contar | quais artigos têm "poderá"? | lista exata por programa | zero |
+| ler artigo | o que diz o art. 62? | texto integral | zero |
+| definição | o que é DOTS? | glossário + onde o termo aparece | zero |
+| alteração/impacto | trocar "poderá" por "deverá" no art. 63 | varredura + Claude Haiku | ~US$ 0,002–0,006 |
+| tema | o que a minuta prevê sobre calçadas? | varredura por palavras + Claude Haiku | ~US$ 0,002–0,004 |
 
-1. Lê pelo alias os 355 artigos e o glossário, a cada pergunta.
-2. Varre todos os artigos por programa: artigos citados pelo número, termos entre aspas, remissões, mesma seção e conceitos compartilhados (siglas, nomes próprios, termos do glossário).
-3. Manda ao Claude Haiku 5.5 só os artigos que a varredura achou (modo `economico`, abaixo de 100 mil tokens, menos de 1 centavo de dólar por pergunta) e a lista da varredura, que ele é obrigado a avaliar artigo por artigo. Com `MODO = 'completo'` no node Configurar e Validar, manda a minuta inteira (mais caro).
-4. Devolve a resposta, a avaliação de cada artigo (impacto direto, indireto ou sem impacto) e a varredura. O site aponta os artigos da lista que a IA não comentou.
+Pergunta igual a uma já respondida pela IA (mesma versão da minuta) volta do cache, sem custo.
 
-Credenciais: Qdrant (Header Auth `api-key`) nos dois nodes de leitura; Anthropic (Header Auth `x-api-key`) no node Claude.
+Banco: rode `n8n/minuta_banco.sql` no Supabase do MultipleBrains (cria só `minuta_consulta`, `minuta_avaliacao`, duas funções e a view `vw_minuta_custo_diario`). Credenciais: Postgres (a do MultipleBrains), Qdrant e Anthropic. Se o banco estiver fora do ar, o fluxo responde normalmente, só sem cache e sem registro.
 
-O `index.html` já aponta `ASK_URL` para `https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar`. Se `ASK_URL` ficar vazio, a aba mostra um aviso e manda o usuário para a busca literal.
+Quando ingerir uma minuta nova, troque `VERSAO` no node Configurar e Validar: o cache é separado por versão.
 
 ## Limites conhecidos
 

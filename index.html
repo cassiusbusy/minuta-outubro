@@ -105,7 +105,7 @@
   <div id="aba-pergunte" class="aba" hidden>
     <section class="card">
       <h2>Pergunte usando I.A.</h2>
-      <p class="dica" style="font-size:14px">A cada pergunta, o sistema percorre os 355 artigos e o glossário, lista por programa tudo o que se relaciona com a pergunta e só então pede a análise à IA, que lê a minuta inteira. Coloque entre aspas os termos exatos e cite o artigo pelo número.</p>
+      <p class="dica" style="font-size:14px">Perguntas de localizar ou contar termos, ler um artigo ou consultar uma definição são respondidas por programa, na hora e sem custo. Perguntas de impacto e de tema passam por uma varredura dos 355 artigos e depois pela análise da IA. Coloque entre aspas os termos exatos e cite o artigo pelo número.</p>
       <div>
         <label for="pergunta">Sua pergunta</label>
         <textarea id="pergunta" rows="3" placeholder='Ex.: se trocarmos "poderá" por "deverá" no art. 62, o que muda no resto da minuta?'></textarea>
@@ -118,8 +118,13 @@
     </section>
     <section class="card" id="resposta-ia" hidden>
       <p class="dica" id="resposta-pergunta"></p>
+      <p class="selo-rota" id="resposta-rota" hidden></p>
       <p id="resposta-texto" style="margin:0;white-space:pre-wrap;font-family:var(--f-lei);font-size:16px"></p>
       <div id="resposta-fontes" class="art-rodape"></div>
+    </section>
+    <section class="card" id="resposta-lista-card" hidden>
+      <h2>Onde aparece</h2>
+      <div style="overflow-x:auto"><table class="tabela" id="resposta-lista"></table></div>
     </section>
     <section class="card" id="resposta-impactos-card" hidden>
       <h2>Artigos avaliados</h2>
@@ -282,7 +287,7 @@
   $('btn-mais').addEventListener('click', () => { mostrando += PAGINA; renderLista(); });
   document.addEventListener('click', (e) => {
     const l = e.target.closest('[data-ler]'); if (l) { B.abrirArtigo(Number(l.dataset.ler), estado); return; }
-    const r = e.target.closest('.lista-artigos [data-art], #indice [data-art], #resposta-fontes [data-art], #resposta-impactos [data-art], #resposta-varredura [data-art]'); if (r) { B.abrirArtigo(Number(r.dataset.art), estado.q || estado.comandos.size ? estado : null); return; }
+    const r = e.target.closest('.lista-artigos [data-art], #indice [data-art], #resposta-fontes [data-art], #resposta-impactos [data-art], #resposta-varredura [data-art], #resposta-lista [data-art]'); if (r) { B.abrirArtigo(Number(r.dataset.art), estado.q || estado.comandos.size ? estado : null); return; }
     const ir = e.target.closest('[data-ir]'); if (ir) mostrarAba(ir.dataset.ir);
   });
   $('btn-grafo').addEventListener('click', () => { location.href = B.urlDe(estado, 'grafo.html'); });
@@ -354,7 +359,7 @@
   $('btn-perguntar').addEventListener('click', async () => {
     const pergunta = $('pergunta').value.trim(); if (!pergunta) return;
     if (!ASK_URL) { $('aviso-ia').hidden = false; return; }
-    $('erro-ia').hidden = true; $('resposta-ia').hidden = true; $('resposta-impactos-card').hidden = true; $('resposta-varredura-card').hidden = true; $('status-pergunta').hidden = false; $('btn-perguntar').disabled = true;
+    $('erro-ia').hidden = true; $('resposta-ia').hidden = true; $('resposta-lista-card').hidden = true; $('resposta-impactos-card').hidden = true; $('resposta-varredura-card').hidden = true; $('status-pergunta').hidden = false; $('btn-perguntar').disabled = true;
     try {
       const res = await fetch(ASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta, versao: 'rev05' }) });
       const bruto = await res.text();
@@ -366,10 +371,14 @@
       $('resposta-pergunta').textContent = 'Pergunta: ' + pergunta;
       $('resposta-texto').textContent = data.resposta || '(sem resposta)';
       const fontes = (data.fontes || []).map((f) => Number(f.artigo || f)).filter((n) => B.porNumero.has(n));
-      $('resposta-fontes').innerHTML = fontes.length ? `<span class="refs">Artigos usados: ${fontes.map((n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`).join(', ')}</span>` : '';
+      $('resposta-fontes').innerHTML = fontes.length && !(data.lista || []).length ? `<span class="refs">Artigos usados: ${fontes.map((n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`).join(', ')}</span>` : '';
+      const rota = $('resposta-rota');
+      rota.hidden = !data.aviso_rota; rota.textContent = data.aviso_rota || '';
+      rota.dataset.rota = data.rota || '';
       $('resposta-ia').hidden = false;
+      renderOcorrencias(data.lista || []);
       renderImpactos(data.impactos || []);
-      renderVarredura(data.varredura);
+      renderVarredura(data.rota === 'programa' ? null : data.varredura);
     } catch (err) {
       $('erro-ia-texto').textContent = 'Não foi possível obter a resposta: ' + err.message + '.';
       $('erro-ia').hidden = false;
@@ -386,6 +395,13 @@
       lista.map((i) => { const [nome, cor] = NIVEL[i.nivel] || [i.nivel || '—', 'var(--ink-faint)'];
         return `<tr><td>${lnk(i.artigo)}</td><td><span class="tag" style="--cor:${cor}">${B.esc(nome)}</span>${i.origem === 'leitura' ? '<div class="dica">achado pela IA na leitura</div>' : ''}</td><td>${B.esc(i.motivo || '')}</td></tr>`; }).join('') + '</tbody>';
     $('resposta-impactos-card').hidden = false;
+  }
+  function renderOcorrencias(lista) {
+    if (!lista.length) { $('resposta-lista-card').hidden = true; return; }
+    const variosTermos = new Set(lista.map((x) => x.termo)).size > 1;
+    $('resposta-lista').innerHTML = '<thead><tr><th>Artigo</th>' + (variosTermos ? '<th>Termo</th>' : '') + '<th>Vezes</th><th>Trecho</th></tr></thead><tbody>' +
+      lista.map((x) => `<tr><td>${lnk(x.artigo)}</td>${variosTermos ? `<td>${B.esc(x.termo)}</td>` : ''}<td class="num">${x.ocorrencias}</td><td style="font-family:var(--f-lei);font-size:14px">${B.esc(x.trecho || '')}</td></tr>`).join('') + '</tbody>';
+    $('resposta-lista-card').hidden = false;
   }
   function renderVarredura(v) {
     if (!v) { $('resposta-varredura-card').hidden = true; return; }
