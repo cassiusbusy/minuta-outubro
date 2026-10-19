@@ -257,3 +257,8 @@ footer.rodape { color: var(--ink-faint); font-size: 12.5px; text-align: center; 
   .faixa, nav.abas, .nao-imprime, #card-busca, footer.rodape { display: none !important; }
   .card, .art { break-inside: avoid; border-color: #ccc; }
 }
+
+table.tabela { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.tabela th, table.tabela td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+table.tabela th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); }
+table.tabela td:first-child { white-space: nowrap; }

@@ -1,0 +1,291 @@
+{
+  "name": "Minuta PD — Pergunte à Minuta (v2)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "minuta-perguntar",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "ca0fcb01-648f-481c-83cd-b1d12ecd12ee",
+      "name": "Webhook Pergunta",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        230,
+        300
+      ],
+      "webhookId": "85b87585-7de2-4c5d-8ac8-6cf221263a6b"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==== CONFIGURE AQUI ====\nconst QDRANT_URL = 'https://01232c5c-728d-4190-a9ad-5e2cb71dad5d.europe-west3-0.gcp.cloud.qdrant.io';\nconst COLECAO_MINUTA = 'minuta_ultima_versao';      // alias criado pelo notebook de ingestão\nconst COLECAO_GLOSSARIO = 'glossario_ultima_versao';\nconst MODELO = 'claude-sonnet-5-5';\nconst MAX_TOKENS_RESPOSTA = 6000;\n// ========================\n\nconst corpo = $input.first().json.body || {};\nconst pergunta = String(corpo.pergunta || '').trim();\nif (pergunta.length < 4) throw new Error('Pergunta vazia ou curta demais.');\nif (pergunta.length > 2000) throw new Error('Pergunta longa demais (máx. 2000 caracteres).');\n\nreturn [{ json: {\n  qdrant_url: QDRANT_URL.replace(/\\/+$/, ''), colecao_minuta: COLECAO_MINUTA, colecao_glossario: COLECAO_GLOSSARIO,\n  modelo: MODELO, max_tokens: MAX_TOKENS_RESPOSTA, pergunta,\n} }];\n"
+      },
+      "id": "5323bd48-e850-4e4b-931e-14b874071103",
+      "name": "Configurar e Validar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ],
+      "notes": "QDRANT_URL, alias e modelo ficam aqui",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configurar e Validar').first().json.qdrant_url }}/collections/{{ $('Configurar e Validar').first().json.colecao_minuta }}/points/scroll",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ limit: 2000, with_payload: [\"numero\", \"codigo\", \"breadcrumb\", \"texto_artigo\"], with_vector: false }) }}",
+        "options": {}
+      },
+      "id": "f5ad49f7-800b-4b21-a62c-35ab6e582845",
+      "name": "Ler Minuta Completa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        690,
+        300
+      ],
+      "notes": "Credencial: Qdrant. Traz os 355 artigos, sempre.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configurar e Validar').first().json.qdrant_url }}/collections/{{ $('Configurar e Validar').first().json.colecao_glossario }}/points/scroll",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ limit: 500, with_payload: [\"termo\", \"definicao\"], with_vector: false }) }}",
+        "options": {}
+      },
+      "id": "33c3d986-96b9-4a12-b624-fdb840b6119f",
+      "name": "Ler Glossário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        300
+      ],
+      "notes": "Credencial: Qdrant",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Configurar e Validar').first().json;\nconst pontos = ($('Ler Minuta Completa').first().json.result || {}).points || [];\nconst glossPts = ($('Ler Glossário').first().json.result || {}).points || [];\nif (pontos.length < 50) throw new Error('A coleção da minuta voltou com ' + pontos.length + ' artigos. Confira o alias no Qdrant.');\n\nconst arts = pontos.map((p) => p.payload).filter((p) => p && p.numero != null)\n  .sort((a, b) => a.numero - b.numero);\nconst porNum = new Map(arts.map((a) => [Number(a.numero), a]));\nconst gloss = glossPts.map((p) => p.payload).filter((g) => g && g.termo);\n\n// ---------- normalização (sem acento, minúsculas) ----------\nconst semAc = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();\nconst L = '[\\\\p{L}\\\\p{N}]';\nconst esc = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nfunction contar(termo, texto) {\n  const t = semAc(termo).trim().replace(/\\s+/g, ' ');\n  if (t.length < 2) return 0;\n  const re = new RegExp('(?<!' + L + ')' + esc(t).replace(/ /g, '\\\\s+') + '(?!' + L + ')', 'gu');\n  return (semAc(texto).match(re) || []).length;\n}\nconst textoN = new Map(arts.map((a) => [a.numero, semAc(a.texto_artigo)]));\nfunction varrer(termo) {\n  const achados = [];\n  for (const a of arts) { const c = contar(termo, a.texto_artigo); if (c) achados.push({ artigo: a.numero, ocorrencias: c }); }\n  return achados;\n}\n\nconst q = cfg.pergunta;\n// 1) artigos citados pelo número: \"art. 45\", \"artigo 45\", \"arts. 10 e 12\"\nconst alvos = new Set();\nfor (const m of q.matchAll(/\\b(?:arts?\\.?|artigos?)\\s*((?:\\d+\\s*[º°o]?\\s*(?:,|e|a|ou)?\\s*)+)/gi)) {\n  for (const n of m[1].match(/\\d+/g) || []) if (porNum.has(Number(n))) alvos.add(Number(n));\n}\n// 2) termos entre aspas: \"poderá\", “deverá”, 'segurança viária', «...»\nconst termos = new Set();\nfor (const m of q.matchAll(/[\"“”'‘’«»]([^\"“”'‘’«»]{2,80})[\"“”'‘’«»]/g)) termos.add(m[1].trim());\n\n// 3) para cada artigo-alvo: quem remete a ele, mesma seção e conceitos que ele usa\nconst remissoes = [];\nconst mesmaSecao = [];\nconst conceitos = new Map();\nconst MINUSC = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'para', 'em', 'a', 'o']);\nconst GENERICOS = new Set(['plano diretor', 'lei federal', 'lei municipal', 'lei complementar', 'poder publico', 'municipio', 'poder executivo', 'curitiba', 'estatuto da cidade', 'constituicao federal']);\nfor (const n of alvos) {\n  const a = porNum.get(n);\n  // remissões internas: \"art. 45\" sem \"da Lei/do Decreto...\" logo depois\n  const reRem = new RegExp('\\\\b(?:arts?\\\\.?|artigos?)\\\\s*(?:\\\\d+\\\\s*[º°o]?\\\\s*(?:,|e|a|ou)\\\\s*)*' + n + '(?!\\\\d)(?:\\\\s*[º°o])?(?![^.;]{0,40}\\\\b(?:da|do)\\\\s+(?:Lei|Decreto|Constitui|Estatuto|C[óo]digo))', 'i');\n  for (const b of arts) if (b.numero !== n && reRem.test(b.texto_artigo)) remissoes.push({ alvo: n, artigo: b.numero });\n  for (const b of arts) if (b.numero !== n && b.breadcrumb && b.breadcrumb === a.breadcrumb) mesmaSecao.push({ alvo: n, artigo: b.numero });\n  // conceitos do alvo: termos do glossário presentes nele, siglas e nomes próprios compostos\n  const cand = new Set();\n  for (const g of gloss) { const base = String(g.termo).replace(/\\s*\\(.*?\\)\\s*$/, '').trim(); if (contar(base, a.texto_artigo)) cand.add(base); }\n  for (const m of a.texto_artigo.matchAll(/\\b[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{3,}s?\\b/g)) cand.add(m[0]);\n  const palavras = a.texto_artigo.replace(/^Art\\.\\s*\\d+\\S*\\s*/, '').split(/(\\s+|[,;:.()])/);\n  let atual = [];\n  const fechar = () => {\n    while (atual.length && MINUSC.has(atual[atual.length - 1].toLowerCase())) atual.pop();\n    const maius = atual.filter((w) => /^[A-ZÁÉÍÓÚÂÊÔÃÕÇ]/.test(w)).length;\n    if (maius >= 2) cand.add(atual.join(' '));\n    atual = [];\n  };\n  for (const w of palavras) {\n    if (!w.trim()) continue;\n    if (/^[A-ZÁÉÍÓÚÂÊÔÃÕÇ][\\p{L}-]+$/u.test(w)) atual.push(w);\n    else if (atual.length && MINUSC.has(w.toLowerCase())) atual.push(w);\n    else fechar();\n  }\n  fechar();\n  for (const c of cand) {\n    if (/^(Art|Lei|Inciso|Parágrafo|Este|Esta|Os|As)$/i.test(c)) continue;\n    if (GENERICOS.has(semAc(c))) continue;\n    const ach = varrer(c).filter((x) => x.artigo !== n);\n    // conceito presente em muitos artigos é genérico demais para indicar impacto\n    if (ach.length && ach.length <= 25) conceitos.set(c, { conceito: c, alvo: n, artigos: ach });\n  }\n}\n\n// Pergunta de alteração (\"trocar 'poderá' por 'deverá' no art. 63\"): os termos entre aspas são a edição,\n// não o tema. Eles são contados (para mostrar o uso no resto da minuta), mas não entram no checklist.\nconst ehAlteracao = alvos.size > 0 && /\\b(troc|mud|substitu|alter|modific|passa[rn]?\\b|reda[çc][ãa]o|emenda)/i.test(q);\nconst listaTermos = [...termos].map((t) => {\n  const ach = varrer(t);\n  return { termo: t, total: ach.reduce((s, x) => s + x.ocorrencias, 0), artigos: ach, edicao: ehAlteracao,\n           no_alvo: [...alvos].map((n) => ({ artigo: n, ocorrencias: contar(t, porNum.get(n).texto_artigo) })) };\n});\n\n// 4) conjunto completo a ser avaliado (checklist)\nconst motivos = new Map();\nconst marcar = (n, m) => { if (!motivos.has(n)) motivos.set(n, new Set()); motivos.get(n).add(m); };\nfor (const n of alvos) marcar(n, 'artigo citado na pergunta');\nfor (const r of remissoes) marcar(r.artigo, 'remete ao Art. ' + r.alvo);\nfor (const s of mesmaSecao) marcar(s.artigo, 'mesma seção do Art. ' + s.alvo);\nfor (const c of conceitos.values()) for (const x of c.artigos) marcar(x.artigo, 'usa \"' + c.conceito + '\"');\nfor (const t of listaTermos) if (!t.edicao) for (const x of t.artigos) marcar(x.artigo, 'contém \"' + t.termo + '\"');\nconst checklist = [...motivos.entries()].sort((a, b) => a[0] - b[0]).map(([n, m]) => ({ artigo: n, motivos: [...m] }));\n\nreturn [{ json: {\n  pergunta: q,\n  alvos: [...alvos],\n  eh_alteracao: ehAlteracao,\n  termos: listaTermos,\n  remissoes, mesma_secao: mesmaSecao,\n  conceitos: [...conceitos.values()].map((c) => ({ conceito: c.conceito, alvo: c.alvo, artigos: c.artigos.map((x) => x.artigo) })),\n  checklist,\n  total_artigos_minuta: arts.length,\n  // texto completo, em ordem fixa (a ordem estável é o que permite o cache do prompt)\n  minuta_texto: arts.map((a) => (a.breadcrumb ? '[' + a.breadcrumb + ']\\n' : '') + a.texto_artigo).join('\\n\\n'),\n  glossario_texto: gloss.map((g) => g.termo + ': ' + g.definicao).join('\\n'),\n} }];\n"
+      },
+      "id": "53ec6ca9-2eb3-4928-911c-f5ef5257fdcc",
+      "name": "Varredura Completa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1150,
+        300
+      ],
+      "notes": "Varre todos os artigos, sem IA",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Configurar e Validar').first().json;\nconst v = $input.first().json;\n\nconst instrucoes = [\n  'Você apoia a Comissão da Câmara Municipal de Curitiba na análise do Projeto de Lei de revisão do Plano Diretor.',\n  'Você recebe a MINUTA COMPLETA e o GLOSSÁRIO. Responda em português, com base SOMENTE nesse texto.',\n  'Cite sempre o artigo (e inciso/parágrafo) no formato \"Art. 45, § 2º, III\".',\n  'Não emita opinião sobre o mérito político das propostas; descreva efeitos jurídicos e de redação.',\n  'Quando a pergunta for sobre ALTERAR um texto (ex.: trocar \"poderá\" por \"deverá\"), explique: o que muda no próprio artigo',\n  '(faculdade vira obrigação, quem passa a ser obrigado, se surge prazo ou necessidade de regulamentação/orçamento),',\n  'e quais outros artigos são afetados: os que remetem a ele, os que tratam do mesmo instrumento/conceito,',\n  'os que ficariam contraditórios ou redundantes, e os que dependem dele.',\n  'Você recebe também uma VARREDURA feita por programa em todos os artigos. Avalie TODOS os artigos da lista \"checklist\",',\n  'sem pular nenhum, e acrescente outros que você identificar lendo a minuta (marque origem \"leitura\").',\n  'Se a varredura indicar que um termo da alteração não aparece no artigo citado, avise o usuário antes de analisar.',\n  'Se nada for afetado, diga isso explicitamente.',\n  'Responda APENAS com um JSON válido, sem texto antes ou depois, neste formato:',\n  '{\"resposta\": \"texto corrido, objetivo\", \"impactos\": [{\"artigo\": 45, \"nivel\": \"direto|indireto|sem impacto\", \"origem\": \"varredura|leitura\", \"motivo\": \"uma frase\"}], \"artigos\": [45, 46]}',\n].join('\\n');\n\nconst varredura = {\n  artigos_citados: v.alvos,\n  pergunta_de_alteracao: v.eh_alteracao,\n  termos_entre_aspas: v.termos.map((t) => ({ termo: t.termo, papel: t.edicao ? 'texto da alteração proposta' : 'tema buscado',\n    ocorrencias_no_artigo_citado: t.no_alvo, total_na_minuta: t.total, artigos: t.artigos.map((x) => x.artigo) })),\n  remissoes_aos_artigos_citados: v.remissoes,\n  mesma_secao: v.mesma_secao,\n  conceitos_compartilhados: v.conceitos,\n  checklist: v.checklist,\n};\n\nconst body = {\n  model: cfg.modelo,\n  max_tokens: cfg.max_tokens,\n  temperature: 0,\n  system: [\n    { type: 'text', text: instrucoes },\n    // Bloco grande e estável: fica em cache por 1 hora; as perguntas seguintes leem a minuta do cache.\n    { type: 'text', text: 'MINUTA COMPLETA (' + v.total_artigos_minuta + ' artigos):\\n\\n' + v.minuta_texto + '\\n\\nGLOSSÁRIO:\\n' + v.glossario_texto,\n      cache_control: { type: 'ephemeral', ttl: '1h' } },\n  ],\n  messages: [{ role: 'user', content:\n    'PERGUNTA:\\n' + v.pergunta + '\\n\\nVARREDURA AUTOMÁTICA (todos os artigos foram percorridos):\\n' + JSON.stringify(varredura) },\n  ],\n};\nreturn [{ json: { body } }];\n"
+      },
+      "id": "5156435b-c38f-4d7f-9b97-859edf7e25b8",
+      "name": "Montar Pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 180000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        }
+      },
+      "id": "cc172020-a220-4955-b5d8-c995b9f58228",
+      "name": "Claude",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1610,
+        300
+      ],
+      "notes": "Credencial: Anthropic (Header Auth x-api-key)",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const v = $('Varredura Completa').first().json;\nconst r = $input.first().json;\nconst bruto = (r.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('');\nlet saida;\ntry {\n  const ini = bruto.indexOf('{'), fim = bruto.lastIndexOf('}');\n  saida = JSON.parse(bruto.slice(ini, fim + 1));\n} catch (e) { saida = { resposta: bruto, impactos: [], artigos: [] }; }\n\nconst existe = new Set(v.checklist.map((c) => c.artigo));\nconst total = v.total_artigos_minuta;\nconst valido = (n) => Number.isInteger(n) && n >= 1 && n <= total;\n// um artigo por linha: se a IA repetiu, fica a avaliação mais grave\nconst peso = { 'direto': 0, 'indireto': 1, 'sem impacto': 2 };\nconst porArt = new Map();\nfor (const i of (saida.impactos || []).map((i) => ({ ...i, artigo: Number(i.artigo) })).filter((i) => valido(i.artigo))) {\n  const ant = porArt.get(i.artigo);\n  if (!ant || (peso[i.nivel] ?? 3) < (peso[ant.nivel] ?? 3)) porArt.set(i.artigo, i);\n}\nconst impactos = [...porArt.values()];\nconst avaliados = new Set(impactos.map((i) => i.artigo));\nconst naoAvaliados = [...existe].filter((n) => !avaliados.has(n));\nlet usados = [...new Set([...(saida.artigos || []).map(Number), ...impactos.filter((i) => i.nivel !== 'sem impacto').map((i) => i.artigo)])].filter(valido).sort((a, b) => a - b);\n\nreturn [{ json: {\n  pergunta: v.pergunta,\n  resposta: String(saida.resposta || '').trim() || 'Não consegui formular uma resposta.',\n  impactos: impactos.sort((a, b) => a.artigo - b.artigo),\n  fontes: usados.map((n) => ({ artigo: n })),\n  varredura: {\n    total_artigos_percorridos: total,\n    artigos_citados: v.alvos,\n    termos: v.termos.map((t) => ({ termo: t.termo, papel: t.edicao ? 'alteração' : 'tema', total: t.total, artigos: t.artigos.map((x) => x.artigo), no_alvo: t.no_alvo })),\n    checklist: v.checklist,\n    nao_avaliados_pela_ia: naoAvaliados,\n  },\n  uso: r.usage || null,\n} }];\n"
+      },
+      "id": "dd227bbd-b731-4d3f-a45d-ee1ba56a6308",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "815344bb-8883-4129-9d74-435316149acd",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2070,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pergunte à Minuta (v2: varredura completa + Claude)\n\n**Fonte:** o alias `minuta_ultima_versao` do notebook de ingestão. Quando você ingerir uma minuta nova e o alias mudar, este fluxo passa a usá-la sem edição.\n\n**Antes de ativar**\n1. Credencial **Qdrant** (Header Auth, `api-key`) em **Ler Minuta Completa** e **Ler Glossário**.\n2. Credencial **Anthropic** (Header Auth, Name `x-api-key`, Value = chave da Anthropic) em **Claude**. O header `anthropic-version` já está no node.\n3. Confira `QDRANT_URL` e `MODELO` em **Configurar e Validar**.\n4. Ative. URL: `https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar`.\n\n**Como responde**\nA cada pergunta, lê os 355 artigos e o glossário, varre tudo por programa (artigos citados, termos entre aspas, remissões, mesma seção, conceitos compartilhados) e manda ao Claude a minuta inteira + a lista da varredura. A minuta fica em cache por 1 h.\n",
+        "height": 460,
+        "width": 600
+      },
+      "id": "2c2a59ce-29f1-4bac-bfd6-4836e99b69b9",
+      "name": "Leia-me",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Pergunta": {
+      "main": [
+        [
+          {
+            "node": "Configurar e Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configurar e Validar": {
+      "main": [
+        [
+          {
+            "node": "Ler Minuta Completa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Minuta Completa": {
+      "main": [
+        [
+          {
+            "node": "Ler Glossário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Glossário": {
+      "main": [
+        [
+          {
+            "node": "Varredura Completa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Varredura Completa": {
+      "main": [
+        [
+          {
+            "node": "Montar Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Pedido": {
+      "main": [
+        [
+          {
+            "node": "Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

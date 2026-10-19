@@ -115,13 +115,18 @@
   <div id="aba-pergunte" class="aba" hidden>
     <section class="card">
       <h2>Pergunte à minuta</h2>
-      <p class="dica" style="font-size:14px">Pergunta em linguagem natural, respondida por IA com base nos artigos da Rev.05 e com a citação dos artigos usados.</p>
+      <p class="dica" style="font-size:14px">A cada pergunta, o sistema percorre os 355 artigos e o glossário, lista por programa tudo o que se relaciona com a pergunta e só então pede a análise à IA, que lê a minuta inteira. Coloque entre aspas os termos exatos e cite o artigo pelo número.</p>
       <div>
         <label for="pergunta">Sua pergunta</label>
-        <textarea id="pergunta" rows="3" placeholder="Ex.: o que a minuta prevê sobre calçadas e acessibilidade?"></textarea>
+        <textarea id="pergunta" rows="3" placeholder='Ex.: se trocarmos "poderá" por "deverá" no art. 62, o que muda no resto da minuta?'></textarea>
+      </div>
+      <div class="chips" id="chips-pergunta">
+        <button type="button" class="chip" data-p='Se trocarmos "poderá" por "deverá" no art. 63, o que muda no resto da minuta?'>Trocar “poderá” por “deverá”</button>
+        <button type="button" class="chip" data-p='Quais artigos dependem do art. 62 (FUMDUIS) e seriam afetados se ele fosse suprimido?'>Suprimir um artigo</button>
+        <button type="button" class="chip" data-p='O que a minuta determina sobre "segurança viária"? Liste todos os artigos.'>Tudo sobre um tema</button>
       </div>
       <button class="btn" type="button" id="btn-perguntar" style="align-self:flex-start">Perguntar</button>
-      <div id="status-pergunta" hidden style="display:flex;gap:10px;align-items:center;color:var(--ink-soft)"><div class="spinner"></div><span>Consultando a minuta…</span></div>
+      <div id="status-pergunta" hidden style="display:flex;gap:10px;align-items:center;color:var(--ink-soft)"><div class="spinner"></div><span>Lendo os 355 artigos e analisando. Pode levar até um minuto…</span></div>
     </section>
     <section class="card aviso" id="aviso-ia" hidden>
       <p>Esta função entra no ar quando a Rev.05 for carregada na base de busca semântica. Enquanto isso, use a aba <button class="link" type="button" data-ir="busca">Buscar na minuta</button>, que já cobre o texto integral.</p>
@@ -130,6 +135,14 @@
       <p class="dica" id="resposta-pergunta"></p>
       <p id="resposta-texto" style="margin:0;white-space:pre-wrap;font-family:var(--f-lei);font-size:16px"></p>
       <div id="resposta-fontes" class="art-rodape"></div>
+    </section>
+    <section class="card" id="resposta-impactos-card" hidden>
+      <h2>Artigos avaliados</h2>
+      <div style="overflow-x:auto"><table class="tabela" id="resposta-impactos"></table></div>
+    </section>
+    <section class="card suave" id="resposta-varredura-card" hidden>
+      <h2>Varredura automática</h2>
+      <div id="resposta-varredura" style="display:flex;flex-direction:column;gap:6px;font-size:14px"></div>
     </section>
     <section class="card erro" id="erro-ia" hidden><p id="erro-ia-texto" style="margin:0"></p></section>
   </div>
@@ -141,10 +154,10 @@
 <script src="assets/busca.js"></script>
 <script>
   /* Endpoint do n8n para perguntas em linguagem natural (RAG sobre a Rev.05).
-     Deixe vazio até a coleção existir no Qdrant. Contrato esperado:
+     Workflow: n8n/minuta_n8n_perguntar.json. Deixe vazio para desligar a aba. Contrato:
        POST { pergunta, versao: "rev05" }
-       → { resposta: "texto", fontes: [{ artigo: 123 }, ...] } */
-  const ASK_URL = '';
+       → { resposta, fontes: [{ artigo }], impactos: [{ artigo, nivel, origem, motivo }], varredura: {...} } */
+  const ASK_URL = 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar';
 
   const B = window.Busca, M = B.M;
   const $ = (id) => document.getElementById(id);
@@ -305,7 +318,7 @@
   $('btn-mais').addEventListener('click', () => { mostrando += PAGINA; renderLista(); });
   document.addEventListener('click', (e) => {
     const l = e.target.closest('[data-ler]'); if (l) { B.abrirArtigo(Number(l.dataset.ler), estado); return; }
-    const r = e.target.closest('.lista-artigos [data-art], #indice [data-art], #resposta-fontes [data-art]'); if (r) { B.abrirArtigo(Number(r.dataset.art), estado.q || estado.comandos.size ? estado : null); return; }
+    const r = e.target.closest('.lista-artigos [data-art], #indice [data-art], #resposta-fontes [data-art], #resposta-impactos [data-art], #resposta-varredura [data-art]'); if (r) { B.abrirArtigo(Number(r.dataset.art), estado.q || estado.comandos.size ? estado : null); return; }
     const ir = e.target.closest('[data-ir]'); if (ir) mostrarAba(ir.dataset.ir);
   });
   $('btn-grafo').addEventListener('click', () => { location.href = B.urlDe(estado, 'grafo.html'); });
@@ -374,7 +387,7 @@
   $('btn-perguntar').addEventListener('click', async () => {
     const pergunta = $('pergunta').value.trim(); if (!pergunta) return;
     if (!ASK_URL) { $('aviso-ia').hidden = false; return; }
-    $('erro-ia').hidden = true; $('resposta-ia').hidden = true; $('status-pergunta').hidden = false; $('btn-perguntar').disabled = true;
+    $('erro-ia').hidden = true; $('resposta-ia').hidden = true; $('resposta-impactos-card').hidden = true; $('resposta-varredura-card').hidden = true; $('status-pergunta').hidden = false; $('btn-perguntar').disabled = true;
     try {
       const res = await fetch(ASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta, versao: 'rev05' }) });
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -382,13 +395,40 @@
       $('resposta-pergunta').textContent = 'Pergunta: ' + pergunta;
       $('resposta-texto').textContent = data.resposta || '(sem resposta)';
       const fontes = (data.fontes || []).map((f) => Number(f.artigo || f)).filter((n) => B.porNumero.has(n));
-      $('resposta-fontes').innerHTML = fontes.length ? 'Artigos usados: ' + fontes.map((n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`).join(', ') : '';
+      $('resposta-fontes').innerHTML = fontes.length ? `<span class="refs">Artigos usados: ${fontes.map((n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`).join(', ')}</span>` : '';
       $('resposta-ia').hidden = false;
+      renderImpactos(data.impactos || []);
+      renderVarredura(data.varredura);
     } catch (err) {
       $('erro-ia-texto').textContent = 'Não foi possível obter a resposta (' + err.message + '). Tente de novo em instantes.';
       $('erro-ia').hidden = false;
     } finally { $('status-pergunta').hidden = true; $('btn-perguntar').disabled = false; }
   });
+
+  const lnk = (n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`;
+  const NIVEL = { 'direto': ['Impacto direto', 'var(--c-proibicao)'], 'indireto': ['Impacto indireto', 'var(--c-obrigacao)'], 'sem impacto': ['Sem impacto', 'var(--ink-faint)'] };
+  function renderImpactos(lista) {
+    if (!lista.length) { $('resposta-impactos-card').hidden = true; return; }
+    const ordem = { 'direto': 0, 'indireto': 1, 'sem impacto': 2 };
+    lista = lista.slice().sort((a, b) => (ordem[a.nivel] ?? 3) - (ordem[b.nivel] ?? 3) || a.artigo - b.artigo);
+    $('resposta-impactos').innerHTML = '<thead><tr><th>Artigo</th><th>Avaliação</th><th>Motivo</th></tr></thead><tbody>' +
+      lista.map((i) => { const [nome, cor] = NIVEL[i.nivel] || [i.nivel || '—', 'var(--ink-faint)'];
+        return `<tr><td>${lnk(i.artigo)}</td><td><span class="tag" style="--cor:${cor}">${B.esc(nome)}</span>${i.origem === 'leitura' ? '<div class="dica">achado pela IA na leitura</div>' : ''}</td><td>${B.esc(i.motivo || '')}</td></tr>`; }).join('') + '</tbody>';
+    $('resposta-impactos-card').hidden = false;
+  }
+  function renderVarredura(v) {
+    if (!v) { $('resposta-varredura-card').hidden = true; return; }
+    const partes = [`<p style="margin:0">Percorridos <b>${v.total_artigos_percorridos}</b> artigos. ${v.checklist.length} entraram na lista obrigatória de avaliação.</p>`];
+    (v.termos || []).forEach((t) => {
+      const no = (t.no_alvo || []).map((x) => `${B.rotuloArt(x.artigo)}: ${x.ocorrencias}×`).join(', ');
+      partes.push(`<p style="margin:0">“${B.esc(t.termo)}” aparece ${t.total} vez${t.total !== 1 ? 'es' : ''} em ${t.artigos.length} artigo${t.artigos.length !== 1 ? 's' : ''}${no ? ` (no artigo citado: ${no})` : ''}${t.papel === 'alteração' ? ' · termo da alteração, não usado como tema' : ''}.</p>`);
+    });
+    if (v.checklist.length) partes.push(`<details><summary>Ver a lista e o motivo de cada artigo</summary><ul style="margin:6px 0 0;padding-left:18px">${v.checklist.map((c) => `<li>${lnk(c.artigo)}: ${B.esc(c.motivos.join('; '))}</li>`).join('')}</ul></details>`);
+    if (v.nao_avaliados_pela_ia && v.nao_avaliados_pela_ia.length) partes.push(`<p style="margin:0;color:var(--danger)">A IA não comentou ${v.nao_avaliados_pela_ia.length} artigo(s) da lista: ${v.nao_avaliados_pela_ia.map(lnk).join(', ')}. Confira manualmente.</p>`);
+    $('resposta-varredura').innerHTML = partes.join('');
+    $('resposta-varredura-card').hidden = false;
+  }
+  $('chips-pergunta').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b) { $('pergunta').value = b.dataset.p; $('pergunta').focus(); } });
 
   $('rodape').textContent = `Fonte: ${M.documento.arquivo} · ${B.artigos.length} artigos · ${M.glossario.length} termos de glossário · dados extraídos em ${M.documento.gerado_em.split('-').reverse().join('/')}`;
 
