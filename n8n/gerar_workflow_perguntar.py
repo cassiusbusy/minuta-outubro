@@ -63,7 +63,11 @@ JS_CFG = r"""
 const QDRANT_URL = '%s';
 const COLECAO_MINUTA = 'minuta_ultima_versao';      // alias criado pelo notebook de ingestão
 const COLECAO_GLOSSARIO = 'glossario_ultima_versao';
-const MODELO = 'claude-sonnet-5-5';
+const MODELO = 'claude-haiku-5-5';
+// 'economico': manda à IA só os artigos que a varredura achou (+ seções deles), abaixo de 100 mil tokens,
+//   faixa em que o Haiku custa 5x menos. 'completo': manda a minuta inteira (mais caro).
+const MODO = 'economico';
+const LIMITE_CARACTERES = 240000;   // ~65 mil tokens de artigos no modo econômico
 const MAX_TOKENS_RESPOSTA = 16000;   // trocas na minuta toda podem listar dezenas de artigos
 // ========================
 
@@ -74,7 +78,7 @@ if (pergunta.length > 2000) throw new Error('Pergunta longa demais (máx. 2000 c
 
 return [{ json: {
   qdrant_url: QDRANT_URL.replace(/\/+$/, ''), colecao_minuta: COLECAO_MINUTA, colecao_glossario: COLECAO_GLOSSARIO,
-  modelo: MODELO, max_tokens: MAX_TOKENS_RESPOSTA, pergunta,
+  modelo: MODELO, max_tokens: MAX_TOKENS_RESPOSTA, pergunta, modo: MODO, limite_caracteres: LIMITE_CARACTERES,
 } }];
 """ % QDRANT_URL
 
@@ -188,6 +192,36 @@ for (const t of listaTermos) {
 }
 const checklist = [...motivos.entries()].sort((a, b) => a[0] - b[0]).map(([n, m]) => ({ artigo: n, motivos: [...m] }));
 
+// ---------- contexto enviado à IA ----------
+function bloco(a) { return (a.breadcrumb ? '[' + a.breadcrumb + ']\n' : '') + a.texto_artigo; }
+function contexto() {
+  if (cfg.modo === 'completo') {
+    return { modo: 'completo', artigos_no_contexto: arts.length,
+      minuta_texto: arts.map(bloco).join('\n\n'),
+      glossario_texto: gloss.map((g) => g.termo + ': ' + g.definicao).join('\n') };
+  }
+  // econômico: checklist primeiro; depois a seção de cada artigo citado; se nada foi achado,
+  // os artigos com mais palavras da pergunta (busca literal, sem IA)
+  const escolhidos = [];
+  const add = (n) => { if (porNum.has(n) && !escolhidos.includes(n)) escolhidos.push(n); };
+  for (const n of alvos) add(n);
+  for (const c of checklist) add(c.artigo);
+  if (!escolhidos.length) {
+    const PARE = new Set(['sobre', 'quais', 'qual', 'minuta', 'artigo', 'artigos', 'plano', 'diretor', 'como', 'onde', 'quando', 'existe', 'falam', 'trata', 'tratam', 'dispoe', 'preve']);
+    const palavras = [...new Set(semAc(q).match(/[\p{L}]{5,}/gu) || [])].filter((w) => !PARE.has(w));
+    const nota = arts.map((a) => ({ n: a.numero, s: palavras.reduce((t, w) => t + (textoN.get(a.numero).includes(w) ? 1 : 0), 0) }))
+      .filter((x) => x.s > 0).sort((a, b) => b.s - a.s || a.n - b.n).slice(0, 40);
+    for (const x of nota) add(x.n);
+  }
+  let tam = 0; const dentro = [];
+  for (const n of escolhidos) { const t = bloco(porNum.get(n)); if (tam + t.length > cfg.limite_caracteres) break; tam += t.length; dentro.push(n); }
+  const cortados = escolhidos.filter((n) => !dentro.includes(n));
+  const textoSel = dentro.sort((a, b) => a - b).map((n) => bloco(porNum.get(n))).join('\n\n');
+  const glossSel = gloss.filter((g) => { const base = String(g.termo).replace(/\s*\(.*?\)\s*$/, ''); return contar(base, q) || contar(base, textoSel); });
+  return { modo: 'economico', artigos_no_contexto: dentro.length, artigos_fora_por_limite: cortados,
+    minuta_texto: textoSel, glossario_texto: glossSel.map((g) => g.termo + ': ' + g.definicao).join('\n') };
+}
+
 return [{ json: {
   pergunta: q,
   alvos: [...alvos],
@@ -199,8 +233,7 @@ return [{ json: {
   checklist,
   total_artigos_minuta: arts.length,
   // texto completo, em ordem fixa (a ordem estável é o que permite o cache do prompt)
-  minuta_texto: arts.map((a) => (a.breadcrumb ? '[' + a.breadcrumb + ']\n' : '') + a.texto_artigo).join('\n\n'),
-  glossario_texto: gloss.map((g) => g.termo + ': ' + g.definicao).join('\n'),
+  ...contexto(),
 } }];
 """ % (N_CFG, N_MIN, N_GLO)
 
@@ -210,7 +243,9 @@ const v = $input.first().json;
 
 const instrucoes = [
   'Você apoia a Comissão da Câmara Municipal de Curitiba na análise do Projeto de Lei de revisão do Plano Diretor.',
-  'Você recebe a MINUTA COMPLETA e o GLOSSÁRIO. Responda em português, com base SOMENTE nesse texto.',
+  (v.modo === 'completo'
+    ? 'Você recebe a MINUTA COMPLETA e o GLOSSÁRIO. Responda em português, com base SOMENTE nesse texto.'
+    : 'Você recebe os ARTIGOS DA MINUTA selecionados por uma varredura literal de todos os 355 artigos, e os termos de glossário citados. Responda em português, com base SOMENTE nesse texto; se precisar de um artigo que não veio, diga qual.'),
   'Cite sempre o artigo (e inciso/parágrafo) no formato "Art. 45, § 2º, III".',
   'Não emita opinião sobre o mérito político das propostas; descreva efeitos jurídicos e de redação.',
   'Quando a pergunta for sobre ALTERAR um texto (ex.: trocar "poderá" por "deverá"), explique: o que muda no próprio artigo',
@@ -247,8 +282,10 @@ const body = {
   system: [
     { type: 'text', text: instrucoes },
     // Bloco grande e estável: fica em cache por 1 hora; as perguntas seguintes leem a minuta do cache.
-    { type: 'text', text: 'MINUTA COMPLETA (' + v.total_artigos_minuta + ' artigos):\n\n' + v.minuta_texto + '\n\nGLOSSÁRIO:\n' + v.glossario_texto,
-      cache_control: { type: 'ephemeral', ttl: '1h' } },
+    // No modo completo o bloco é igual em toda pergunta e fica em cache; no econômico ele muda a cada pergunta,
+    // então cache só encareceria (a gravação custa mais que a leitura normal).
+    Object.assign({ type: 'text', text: (v.modo === 'completo' ? 'MINUTA COMPLETA (' + v.total_artigos_minuta + ' artigos)' : 'ARTIGOS SELECIONADOS (' + v.artigos_no_contexto + ' de ' + v.total_artigos_minuta + ')') + ':\n\n' + v.minuta_texto + '\n\nGLOSSÁRIO:\n' + (v.glossario_texto || '(nenhum termo citado)') },
+      v.modo === 'completo' ? { cache_control: { type: 'ephemeral', ttl: '1h' } } : {}),
   ],
   messages: [{ role: 'user', content:
     'PERGUNTA:\n' + v.pergunta + '\n\nVARREDURA AUTOMÁTICA (todos os artigos foram percorridos):\n' + JSON.stringify(varredura) },
@@ -306,8 +343,12 @@ return [{ json: {
     termos: v.termos.map((t) => ({ termo: t.termo, papel: t.papel, total: t.total, artigos: t.artigos.map((x) => x.artigo), no_alvo: t.no_alvo })),
     checklist: v.checklist,
     nao_avaliados_pela_ia: naoAvaliados,
+    modo: v.modo,
+    artigos_enviados_a_ia: v.artigos_no_contexto,
+    artigos_fora_por_limite: v.artigos_fora_por_limite || [],
   },
   uso: r.usage || null,
+  modelo: r.model || null,
 } }];
 """ % N_VAR
 

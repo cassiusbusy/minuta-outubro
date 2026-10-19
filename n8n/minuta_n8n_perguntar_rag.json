@@ -1,0 +1,337 @@
+{
+  "name": "Minuta PD — Pergunte (RAG simples)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "minuta-perguntar-rag",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "d025dd4a-09d3-405d-bc38-b3d50c56d837",
+      "name": "Webhook Pergunta RAG",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        230,
+        300
+      ],
+      "webhookId": "d5713eac-6f79-48e0-9cf3-fb28b14bc76f"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==== CONFIGURE AQUI ====\nconst QDRANT_URL = 'https://01232c5c-728d-4190-a9ad-5e2cb71dad5d.europe-west3-0.gcp.cloud.qdrant.io';\nconst COLECAO_MINUTA = 'minuta_ultima_versao';   // alias do notebook de ingestão\nconst MODELO = 'claude-haiku-5-5';\nconst TOP_K = 8;                                 // artigos enviados à IA\nconst MAX_TOKENS_RESPOSTA = 4000;\n// ========================\nconst corpo = $input.first().json.body || {};\nconst pergunta = String(corpo.pergunta || '').trim();\nif (pergunta.length < 4) throw new Error('Pergunta vazia ou curta demais.');\nif (pergunta.length > 2000) throw new Error('Pergunta longa demais (máx. 2000 caracteres).');\nreturn [{ json: { qdrant_url: QDRANT_URL.replace(/\\/+$/, ''), colecao: COLECAO_MINUTA, modelo: MODELO,\n  top_k: TOP_K, max_tokens: MAX_TOKENS_RESPOSTA, pergunta } }];\n"
+      },
+      "id": "b68149d0-255c-4f03-b3ca-26099a480c2c",
+      "name": "Configurar e Validar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ],
+      "notes": "QDRANT_URL, alias, modelo e TOP_K",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"text-embedding-3-small\", input: $('Configurar e Validar').first().json.pergunta }) }}",
+        "options": {}
+      },
+      "id": "7bf2e7d6-5d07-4b06-9238-d1faaa34506c",
+      "name": "Embedding da Pergunta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        690,
+        300
+      ],
+      "notes": "Credencial: OpenAI (mesmo modelo do notebook)",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configurar e Validar').first().json.qdrant_url }}/collections/{{ $('Configurar e Validar').first().json.colecao }}/points/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ vector: $json.data[0].embedding, limit: $('Configurar e Validar').first().json.top_k, with_payload: [\"numero\", \"breadcrumb\", \"texto_artigo\"] }) }}",
+        "options": {}
+      },
+      "id": "d25f303a-27e0-4d13-888d-b0074f2b7140",
+      "name": "Buscar Artigos Parecidos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        300
+      ],
+      "notes": "Credencial: Qdrant",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Configurar e Validar').first().json;\nconst pontos = ($input.first().json.result || []);\nconst lista = (Array.isArray(pontos) ? pontos : (pontos.points || [])).map((p) => ({ ...p.payload, score: p.score }))\n  .filter((p) => p.numero != null).sort((a, b) => a.numero - b.numero);\nconst contexto = lista.map((a) => (a.breadcrumb ? '[' + a.breadcrumb + ']\\n' : '') + a.texto_artigo).join('\\n\\n');\nconst instrucoes = [\n  'Você apoia a Comissão da Câmara Municipal de Curitiba na análise do Projeto de Lei de revisão do Plano Diretor.',\n  'Você recebe alguns artigos da minuta escolhidos por semelhança com a pergunta (não a minuta inteira).',\n  'Responda em português, com base SOMENTE nesses artigos, citando \"Art. N\". Se eles não bastarem, diga isso.',\n  'Não emita opinião sobre o mérito político; descreva o que o texto diz.',\n  'Responda APENAS com JSON válido: {\"resposta\": \"texto\", \"artigos\": [números usados]}.',\n].join('\\n');\nreturn [{ json: {\n  recuperados: lista.map((a) => ({ artigo: a.numero, score: Math.round(a.score * 1000) / 1000 })),\n  body: { model: cfg.modelo, max_tokens: cfg.max_tokens,\n    system: [{ type: 'text', text: instrucoes }],\n    messages: [{ role: 'user', content: 'ARTIGOS:\\n\\n' + (contexto || '(nenhum)') + '\\n\\nPERGUNTA: ' + cfg.pergunta }] },\n} }];\n"
+      },
+      "id": "dd616c01-8e50-4117-ac74-2fc9f62e7c2c",
+      "name": "Montar Pedido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1150,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 120000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        }
+      },
+      "id": "37fb7b50-2a10-40c4-847d-89577f621064",
+      "name": "Claude",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1380,
+        300
+      ],
+      "notes": "Credencial: Anthropic (Header Auth x-api-key)",
+      "notesInFlow": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Configurar e Validar').first().json;\nconst ped = $('Montar Pedido').first().json;\nconst emb = $('Embedding da Pergunta').first().json;\nconst r = $input.first().json;\nconst bruto = (r.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('');\nlet saida;\ntry { saida = JSON.parse(bruto.slice(bruto.indexOf('{'), bruto.lastIndexOf('}') + 1)); }\ncatch (e) { saida = { resposta: bruto, artigos: [] }; }\nconst disponiveis = new Set(ped.recuperados.map((x) => x.artigo));\nconst usados = [...new Set((saida.artigos || []).map(Number))].filter((n) => disponiveis.has(n)).sort((a, b) => a - b);\nreturn [{ json: {\n  pergunta: cfg.pergunta,\n  resposta: String(saida.resposta || '').trim() || 'Não consegui formular uma resposta.',\n  fontes: usados.map((n) => ({ artigo: n })),\n  impactos: [],\n  recuperados: ped.recuperados,\n  modo: 'rag',\n  parada: r.stop_reason || null,\n  uso: r.usage || null,\n  modelo: r.model || null,\n  uso_embedding: emb.usage || null,\n} }];\n"
+      },
+      "id": "e9cafdcf-fc83-4a83-a684-6537ad1bf8b6",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1610,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a815e9d5-95dd-4d61-8e2c-93c219529b28",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ erro: (($json.error && ($json.error.message || $json.error)) || 'Falha no fluxo'), no: $prevNode.name, detalhe: ($json.error && $json.error.description) || null }) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c907ccbf-b53a-46da-a911-cc5448bb60a8",
+      "name": "Responder Erro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1150,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pergunte à Minuta — RAG simples (para comparação)\n\nBusca os 8 artigos mais parecidos com a pergunta e manda só eles ao Claude Haiku. Não faz varredura completa.\n\n**Antes de ativar**\n1. Webhook: confira **Respond = Using 'Respond to Webhook' Node**.\n2. Credenciais: **OpenAI** em **Embedding da Pergunta** (Header Auth `Authorization: Bearer ...`), **Qdrant** em **Buscar Artigos Parecidos**, **Anthropic** em **Claude**.\n3. Ative. URL: `https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar-rag`.\n",
+        "height": 340,
+        "width": 560
+      },
+      "id": "3de3b959-e20e-4f5a-95d2-81e759d36a2e",
+      "name": "Leia-me",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -160
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Pergunta RAG": {
+      "main": [
+        [
+          {
+            "node": "Configurar e Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configurar e Validar": {
+      "main": [
+        [
+          {
+            "node": "Embedding da Pergunta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embedding da Pergunta": {
+      "main": [
+        [
+          {
+            "node": "Buscar Artigos Parecidos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Artigos Parecidos": {
+      "main": [
+        [
+          {
+            "node": "Montar Pedido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Pedido": {
+      "main": [
+        [
+          {
+            "node": "Claude",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

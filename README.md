@@ -32,7 +32,7 @@ O workflow `n8n/minuta_n8n_perguntar.json` (importe em *Import from File*) respo
 
 1. Lê pelo alias os 355 artigos e o glossário, a cada pergunta.
 2. Varre todos os artigos por programa: artigos citados pelo número, termos entre aspas, remissões, mesma seção e conceitos compartilhados (siglas, nomes próprios, termos do glossário).
-3. Manda ao Claude a minuta inteira (em cache por 1 hora) e a lista da varredura, que ele é obrigado a avaliar artigo por artigo.
+3. Manda ao Claude Haiku 5.5 só os artigos que a varredura achou (modo `economico`, abaixo de 100 mil tokens, menos de 1 centavo de dólar por pergunta) e a lista da varredura, que ele é obrigado a avaliar artigo por artigo. Com `MODO = 'completo'` no node Configurar e Validar, manda a minuta inteira (mais caro).
 4. Devolve a resposta, a avaliação de cada artigo (impacto direto, indireto ou sem impacto) e a varredura. O site aponta os artigos da lista que a IA não comentou.
 
 Credenciais: Qdrant (Header Auth `api-key`) nos dois nodes de leitura; Anthropic (Header Auth `x-api-key`) no node Claude.

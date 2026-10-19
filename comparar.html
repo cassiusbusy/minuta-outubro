@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Comparar Modos de I.A.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+<style>
+  .duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .duas { grid-template-columns: minmax(0, 1fr); } }
+  .modo-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .modo-cab h2 { font-size: 13px; }
+  .modo-desc { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .metricas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .metricas div { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .metricas b { display: block; font-size: 19px; color: var(--title); font-variant-numeric: tabular-nums; }
+  .metricas span { font-size: 12px; color: var(--ink-soft); }
+  .resp { margin: 0; white-space: pre-wrap; font-family: var(--f-lei); font-size: 15.5px; line-height: 1.6; }
+  .estado { display: flex; gap: 10px; align-items: center; color: var(--ink-soft); font-size: 14px; }
+  .detalhe { font-size: 13px; color: var(--ink-soft); }
+  .so-um b { color: var(--title); }
+  table.tabela td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page wide">
+  <header class="topo">
+    <span class="selo">Página de teste · uso interno</span>
+    <p class="eyebrow">Revisão do Plano Diretor · Projeto de Lei Rev.05</p>
+    <h1>Comparar modos de I.A.</h1>
+    <p class="subtitulo">A mesma pergunta vai ao mesmo tempo para os dois fluxos do n8n. Compare a resposta, os artigos citados, o tempo e o custo de cada um.</p>
+  </header>
+
+  <nav class="abas" aria-label="Navegação">
+    <a href="index.html#pergunte">← Voltar à consulta</a>
+  </nav>
+
+  <section class="card">
+    <div>
+      <label for="pergunta">Pergunta</label>
+      <textarea id="pergunta" rows="3" placeholder='Ex.: qual o impacto de trocar "poderá" por "deverá" no art. 63?'></textarea>
+    </div>
+    <button class="btn" type="button" id="btn-comparar" style="align-self:flex-start">Perguntar aos dois</button>
+    <p class="dica">Custos estimados pela tabela pública da Anthropic (Haiku 5.5: US$ 0,10 / 0,50 por milhão de tokens até 100 mil tokens de entrada; US$ 0,50 / 2,50 acima) e US$ 0,02 por milhão para o embedding da OpenAI. O valor exato fica no painel de cobrança.</p>
+  </section>
+
+  <div class="duas">
+    <section class="card" id="col-var">
+      <div class="modo-cab"><h2>A · Varredura completa</h2><span class="dica">/webhook/minuta-perguntar</span></div>
+      <p class="modo-desc">Percorre os 355 artigos por programa e manda à IA tudo o que a varredura achou.</p>
+      <div class="corpo"></div>
+    </section>
+    <section class="card" id="col-rag">
+      <div class="modo-cab"><h2>B · Busca semântica simples</h2><span class="dica">/webhook/minuta-perguntar-rag</span></div>
+      <p class="modo-desc">Pega só os 8 artigos mais parecidos com a pergunta e manda esses à IA.</p>
+      <div class="corpo"></div>
+    </section>
+  </div>
+
+  <section class="card" id="card-dif" hidden>
+    <h2>Artigos citados por só um dos modos</h2>
+    <div id="dif" class="so-um" style="display:flex;flex-direction:column;gap:6px;font-size:14px"></div>
+  </section>
+
+  <section class="card" id="card-hist" hidden>
+    <h2>Histórico desta sessão</h2>
+    <div style="overflow-x:auto"><table class="tabela" id="hist"></table></div>
+  </section>
+
+  <footer class="rodape">Página de teste. Não aparece no menu da consulta.</footer>
+</div>
+
+<script src="dados/minuta_rev05.js"></script>
+<script src="assets/busca.js"></script>
+<script>
+  const URLS = {
+    var: 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar',
+    rag: 'https://n8n.planodiretorcuritiba.cloud/webhook/minuta-perguntar-rag',
+  };
+  const B = window.Busca;
+  const $ = (id) => document.getElementById(id);
+  const historico = [];
+
+  // preço por milhão de tokens; Haiku muda de faixa acima de 100 mil tokens de entrada
+  function custo(uso, modelo, usoEmb) {
+    if (!uso) return null;
+    const ent = (uso.input_tokens || 0), grava = (uso.cache_creation_input_tokens || 0), le = (uso.cache_read_input_tokens || 0), sai = (uso.output_tokens || 0);
+    const total = ent + grava + le;
+    let p;
+    if (/sonnet/.test(modelo || '')) p = { in: 2, w: 4, r: 0.10, out: 10 };
+    else p = total > 100000 ? { in: 0.5, w: 1, r: 0.05, out: 2.5 } : { in: 0.10, w: 0.20, r: 0.01, out: 0.50 };
+    const emb = usoEmb ? (usoEmb.total_tokens || usoEmb.prompt_tokens || 0) * 0.02 / 1e6 : 0;
+    return { usd: (ent * p.in + grava * p.w + le * p.r + sai * p.out) / 1e6 + emb, entrada: total, saida: sai };
+  }
+  const fmtUsd = (v) => v == null ? '—' : 'US$ ' + (v < 0.01 ? v.toFixed(4) : v.toFixed(3));
+  const lnk = (n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`;
+
+  async function chamar(chave, pergunta) {
+    const col = $(chave === 'var' ? 'col-var' : 'col-rag').querySelector('.corpo');
+    const t0 = performance.now();
+    let seg = 0;
+    col.innerHTML = `<div class="estado"><div class="spinner"></div><span>Consultando… <b class="cron">0</b> s</span></div>`;
+    const timer = setInterval(() => { seg++; const c = col.querySelector('.cron'); if (c) c.textContent = seg; }, 1000);
+    try {
+      const res = await fetch(URLS[chave], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pergunta }) });
+      const bruto = await res.text();
+      if (!res.ok) throw new Error('HTTP ' + res.status + (res.status === 524 ? ' (tempo esgotado no Cloudflare)' : ''));
+      if (!bruto.trim()) throw new Error('resposta vazia; confira se o webhook está em “Using Respond to Webhook Node” e ativo');
+      const d = JSON.parse(bruto);
+      if (d.erro) throw new Error('falha no passo "' + (d.no || '?') + '": ' + d.erro);
+      const segundos = (performance.now() - t0) / 1000;
+      const c = custo(d.uso, d.modelo, d.uso_embedding);
+      const fontes = (d.fontes || []).map((f) => Number(f.artigo)).filter((n) => B.porNumero.has(n));
+      const enviados = chave === 'var' ? (d.varredura && d.varredura.artigos_enviados_a_ia) : (d.recuperados || []).length;
+      let extra = '';
+      if (chave === 'var' && d.varredura) {
+        const v = d.varredura;
+        extra = `<p class="detalhe" style="margin:0">Varredura: ${v.checklist.length} artigos na lista obrigatória · ${v.artigos_enviados_a_ia ?? '?'} enviados à IA${(v.nao_avaliados_pela_ia || []).length ? ` · <span style="color:var(--danger)">${v.nao_avaliados_pela_ia.length} sem comentário da IA</span>` : ''}.</p>`;
+        if ((d.impactos || []).length) {
+          const dir = d.impactos.filter((i) => i.nivel === 'direto').length, ind = d.impactos.filter((i) => i.nivel === 'indireto').length;
+          extra += `<p class="detalhe" style="margin:0">Avaliação: ${dir} com impacto direto, ${ind} indireto, ${d.impactos.length - dir - ind} sem impacto.</p>`;
+        }
+      } else if (d.recuperados) {
+        extra = `<p class="detalhe" style="margin:0">Artigos recuperados: ${d.recuperados.map((r) => `${lnk(r.artigo)} <span class="dica">(${r.score})</span>`).join(', ')}</p>`;
+      }
+      col.innerHTML = `
+        <div class="metricas">
+          <div><b>${segundos.toFixed(1)} s</b><span>tempo</span></div>
+          <div><b>${fmtUsd(c && c.usd)}</b><span>custo estimado</span></div>
+          <div><b>${c ? (c.entrada / 1000).toFixed(1) + ' / ' + (c.saida / 1000).toFixed(1) + ' mil' : '—'}</b><span>tokens entrada / saída</span></div>
+        </div>
+        <p class="resp">${B.esc(d.resposta || '')}</p>
+        <p class="detalhe" style="margin:0">Artigos citados (${fontes.length}): ${fontes.map(lnk).join(', ') || '—'}</p>
+        <p class="detalhe" style="margin:0">Artigos enviados à IA: ${enviados ?? '—'}${d.modelo ? ' · modelo ' + B.esc(d.modelo) : ''}</p>
+        ${extra}`;
+      return { ok: true, segundos, usd: c && c.usd, fontes, enviados };
+    } catch (err) {
+      col.innerHTML = `<div class="card erro" style="padding:10px 12px"><p style="margin:0">Não foi possível obter a resposta: ${B.esc(err.message)}.</p></div>`;
+      return { ok: false, erro: err.message };
+    } finally { clearInterval(timer); }
+  }
+
+  $('btn-comparar').addEventListener('click', async () => {
+    const pergunta = $('pergunta').value.trim(); if (pergunta.length < 4) return;
+    $('btn-comparar').disabled = true; $('card-dif').hidden = true;
+    const [a, b] = await Promise.all([chamar('var', pergunta), chamar('rag', pergunta)]);
+    $('btn-comparar').disabled = false;
+    if (a.ok && b.ok) {
+      const sa = new Set(a.fontes), sb = new Set(b.fontes);
+      const soA = a.fontes.filter((n) => !sb.has(n)), soB = b.fontes.filter((n) => !sa.has(n)), ambos = a.fontes.filter((n) => sb.has(n));
+      $('dif').innerHTML = `<p style="margin:0"><b>Só A (varredura):</b> ${soA.map(lnk).join(', ') || '—'}</p>
+        <p style="margin:0"><b>Só B (busca simples):</b> ${soB.map(lnk).join(', ') || '—'}</p>
+        <p style="margin:0"><b>Nos dois:</b> ${ambos.map(lnk).join(', ') || '—'}</p>`;
+      $('card-dif').hidden = false;
+    }
+    historico.unshift({ pergunta, a, b });
+    $('hist').innerHTML = '<thead><tr><th>Pergunta</th><th>A · tempo</th><th>A · custo</th><th>A · artigos citados</th><th>B · tempo</th><th>B · custo</th><th>B · artigos citados</th></tr></thead><tbody>' +
+      historico.map((h) => `<tr><td>${B.esc(h.pergunta.slice(0, 90))}</td>${[h.a, h.b].map((x) => x.ok
+        ? `<td class="num">${x.segundos.toFixed(1)} s</td><td class="num">${fmtUsd(x.usd)}</td><td class="num">${x.fontes.length}</td>`
+        : '<td colspan="3" style="color:var(--danger)">erro</td>').join('')}</tr>`).join('') + '</tbody>';
+    $('card-hist').hidden = false;
+  });
+
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-art]'); if (b) B.abrirArtigo(Number(b.dataset.art), null); });
+</script>
+</body>
+</html>
