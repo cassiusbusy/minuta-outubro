@@ -38,7 +38,7 @@ Workflow: `n8n/minuta_n8n_orquestrador.json` (endereço `/webhook/minuta-pergunt
 
 Pergunta igual a uma já respondida pela IA (mesma versão da minuta) volta do cache, sem custo.
 
-Banco: rode `n8n/minuta_banco.sql` no Supabase do MultipleBrains (cria só `minuta_consulta`, `minuta_avaliacao`, duas funções e a view `vw_minuta_custo_diario`). Credenciais: Postgres (a do MultipleBrains), Qdrant e Anthropic. Se o banco estiver fora do ar, o fluxo responde normalmente, só sem cache e sem registro.
+Banco: rode `n8n/minuta_banco.sql` no Supabase do MultipleBrains (cria só `minuta_consulta`, `minuta_avaliacao`, duas funções e a view `vw_minuta_custo_diario`). Credenciais: Postgres (a do MultipleBrains), Qdrant e Anthropic. Versão com ChatGPT: `n8n/minuta_n8n_orquestrador_openai.json` (mesmo endereço, modelo gpt-6-luna, credencial OpenAI); deixe ativa só uma das duas. Se o banco estiver fora do ar, o fluxo responde normalmente, só sem cache e sem registro.
 
 Quando ingerir uma minuta nova, troque `VERSAO` no node Configurar e Validar: o cache é separado por versão.
 

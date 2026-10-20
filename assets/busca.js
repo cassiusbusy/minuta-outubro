@@ -2,6 +2,7 @@
    Roda no navegador sobre dados/minuta_rev05.js (window.MINUTA). Sem servidor.
 
    - Ignora acentos e maiúsculas por padrão ("seguranca viaria" acha "Segurança Viária").
+   - Com "Diferenciar acentos", só os acentos contam: "Habitação" acha "habitação", mas não "habitacao".
    - Palavra inteira por padrão ("deverá" não acha "deverão"); use * como curinga: dever*.
    - Modos: expressão exata | todas as palavras (no mesmo artigo) | qualquer palavra.
    - Tipos de comando normativo (obrigação, permissão...) funcionam como filtro adicional. */
@@ -56,7 +57,7 @@
     let base = opts.exato ? t : norm(t);
     base = base.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, `${LETRA}*`).replace(/\s+/g, '\\s+');
     const src = opts.inteira ? `(?<!${LETRA})${base}(?!${LETRA})` : base;
-    return new RegExp(src, opts.exato ? 'gu' : 'giu');
+    return new RegExp(src, 'giu');   // maiúsculas e minúsculas sempre iguais; "exato" só diferencia acentos
   }
 
   /* opts: { q, modo: 'frase'|'todas'|'qualquer', inteira, exato, comandos:Set, escopo: id de nó ou '' }

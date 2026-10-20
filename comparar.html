@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Google Analytics (fluxo 16165894488) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-242PY3YEGE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-242PY3YEGE');
+  </script>
 <title>Comparar Modos de I.A.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +54,7 @@
       <textarea id="pergunta" rows="3" placeholder='Ex.: qual o impacto de trocar "poderá" por "deverá" no art. 63?'></textarea>
     </div>
     <button class="btn" type="button" id="btn-comparar" style="align-self:flex-start">Perguntar aos três</button>
-    <p class="dica">Custos estimados pela tabela pública da Anthropic (Haiku 5.5: US$ 0,10 / 0,50 por milhão de tokens até 100 mil tokens de entrada; US$ 0,50 / 2,50 acima) e US$ 0,02 por milhão para o embedding da OpenAI. O valor exato fica no painel de cobrança.</p>
+    <p class="dica">Custos estimados pela tabela pública da Anthropic (Haiku 5.5: US$ 0,10 / 0,50 por milhão de tokens até 100 mil tokens de entrada; US$ 0,50 / 2,50 acima) OpenAI gpt-6-luna: US$ 0,10 / 0,50 (entrada repetida em cache: 0,01) e US$ 0,02 por milhão para o embedding. O valor exato fica no painel de cobrança.</p>
   </section>
 
   <div class="duas">
@@ -99,7 +107,9 @@
     const ent = (uso.input_tokens || 0), grava = (uso.cache_creation_input_tokens || 0), le = (uso.cache_read_input_tokens || 0), sai = (uso.output_tokens || 0);
     const total = ent + grava + le;
     let p;
-    if (/sonnet/.test(modelo || '')) p = { in: 2, w: 4, r: 0.10, out: 10 };
+    if (/luna/.test(modelo || '')) p = { in: 0.10, w: 0, r: 0.01, out: 0.50 };
+    else if (/sol/.test(modelo || '')) p = { in: 2, w: 0, r: 0.10, out: 10 };
+    else if (/sonnet/.test(modelo || '')) p = { in: 2, w: 4, r: 0.10, out: 10 };
     else p = total > 100000 ? { in: 0.5, w: 1, r: 0.05, out: 2.5 } : { in: 0.10, w: 0.20, r: 0.01, out: 0.50 };
     const emb = usoEmb ? (usoEmb.total_tokens || usoEmb.prompt_tokens || 0) * 0.02 / 1e6 : 0;
     return { usd: (ent * p.in + grava * p.w + le * p.r + sai * p.out) / 1e6 + emb, entrada: total, saida: sai };
