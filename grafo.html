@@ -121,7 +121,7 @@
       <div class="legenda">
         <span><i style="background:var(--g-estrutura)"></i>Título, capítulo, seção</span>
         <span><i style="background:var(--g-hit)"></i>Artigo com o termo</span>
-        <span><i style="background:var(--g-ligado)"></i>Ligado por remissão</span>
+        <span><i style="background:var(--g-ligado)"></i>Impacto indireto (por remissão)</span>
         <span><i style="background:var(--g-folha)"></i>Demais artigos</span>
         <span><i class="linha" style="border-color:var(--g-remissao)"></i>Remissão no texto</span>
         <span><i class="linha" style="border-color:var(--g-hit)"></i>Mesmo termo</span>
@@ -144,7 +144,8 @@
         <div class="arts-bts" id="lista-hits"></div>
       </section>
       <section class="card" id="card-rem">
-        <h2>Remissões envolvidas</h2>
+        <h2 id="rem-titulo">Remissões no texto</h2>
+        <p class="dica" id="rem-dica" style="margin:0 0 6px;font-size:13px"></p>
         <ul class="rem-lista" id="lista-rem"></ul>
       </section>
     </aside>
@@ -342,7 +343,7 @@
       <div class="numero verde"><b>${n}</b><span>artigos com ${resultado.temTermo ? 'o termo' : 'o comando'}${resultado.total ? ` · ${resultado.total} ocorrências` : ''}</span></div>
       <div class="numero"><b>${titulosAlc.size}/${totTit}</b><span>títulos alcançados</span></div>
       <div class="numero"><b>${capsAlc.size}/${totCap}</b><span>capítulos alcançados</span></div>
-      <div class="numero ouro"><b>${nLig}</b><span>artigos ligados por remissão</span></div>`;
+      <div class="numero ouro"><b>${nLig}</b><span>artigos de impacto indireto</span></div>`;
     if (!tem) $('numeros').innerHTML = `<div class="numero"><b>${B.artigos.length}</b><span>artigos</span></div><div class="numero azul"><b>${M.remissoes.filter((r) => r.tipo !== 'anexo').length}</b><span>remissões explícitas no texto</span></div>`;
 
     const titulos = M.estrutura.filter((e) => e.tipo === 'titulo');
@@ -355,11 +356,13 @@
 
     $('lista-hits').innerHTML = tem
       ? (resultado.artigos.map((x) => `<button type="button" class="hit" data-art="${x.a.n}" title="${x.hits} ocorrência(s)">${x.a.n}</button>`).join('') +
-         [...ligados].filter((id) => id.startsWith('art-')).map((id) => `<button type="button" class="ligado" data-art="${id.slice(4)}" title="Ligado por remissão">${id.slice(4)}</button>`).join('')) || '<span class="dica">Nenhum artigo.</span>'
+         [...ligados].filter((id) => id.startsWith('art-')).map((id) => `<button type="button" class="ligado" data-art="${id.slice(4)}" title="Impacto indireto (por remissão)">${id.slice(4)}</button>`).join('')) || '<span class="dica">Nenhum artigo.</span>'
       : '<span class="dica">Busque um termo para listar os artigos.</span>';
     if (coDesligado) $('lista-hits').insertAdjacentHTML('beforeend', `<p class="dica" style="margin-top:6px">São mais de ${MAX_CO} artigos; as ligações entre eles foram omitidas para manter o grafo legível.</p>`);
 
     const lista = tem ? remEnv : remissoes;
+    $('rem-titulo').textContent = tem ? 'Impacto indireto' : 'Remissões no texto';
+    $('rem-dica').textContent = tem ? 'Artigos que citam ou são citados pelos artigos encontrados: se o termo mudar, vale revisá-los também.' : '';
     $('lista-rem').innerHTML = lista.length ? lista.map((r) => `<li><button class="link" type="button" data-art="${r.de}">${B.rotuloArt(r.de)}</button> → ${r.tipo === 'artigo' ? `<button class="link" type="button" data-art="${r.para}">${B.rotuloArt(r.para)}</button>` : B.esc(B.nomeNo(r.para))}</li>`).join('')
       : '<li class="dica" style="list-style:none;margin-left:-18px">Nenhum artigo encontrado remete a outro dispositivo da minuta, nem é citado por um.</li>';
   }
