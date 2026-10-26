@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Google Analytics (fluxo 16165894488) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-242PY3YEGE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-242PY3YEGE');
+  </script>
+<title>Lei de 2015 e Nova Minuta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+<style>
+  .grade { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .grade > aside { position: sticky; top: 12px; display: flex; flex-direction: column; gap: 14px; }
+  @media (max-width: 900px) { .grade { grid-template-columns: minmax(0, 1fr); } .grade > aside { position: static; } }
+  :root { --s-igual: #00944F; --s-parcial: #B98A00; --s-novo: #447EC0; --s-contra: #C8323C; --s-sem: #8A94A3; }
+  .numero.vermelho b { color: var(--s-contra); } .numero.ouro b { color: var(--s-parcial); }
+  .sit { font: 700 11.5px/1 var(--f-ui); letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; color: #fff; background: var(--cor); }
+  .sub { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font: 600 12.5px/1.2 var(--f-ui); }
+  .sub .tag { padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); }
+  .sub .tag.imp { border-style: dashed; }
+  .sub .outros { color: var(--ink-faint); font-weight: 500; }
+  .filtros label.chk { display: flex; gap: 6px; align-items: center; font-weight: 500; text-transform: none; letter-spacing: 0; }
+  dl.defs { margin: 6px 0 0; font-size: 13px; line-height: 1.45; } dl.defs dt { font-weight: 700; margin-top: 6px; } dl.defs dd { margin: 0; color: var(--ink-soft); }
+  .art.contra { border-left: 4px solid var(--s-contra); }
+  .nota { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--surface-2); border-radius: 8px; padding: 8px 12px; border-left: 3px solid var(--cor, var(--ink-faint)); }
+  .texto { font: 16px/1.6 var(--f-lei); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .texto.recolhido { max-height: 9.6em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+  .texto del { color: var(--danger); background: var(--danger-soft); text-decoration: line-through; border-radius: 3px; }
+  .texto ins { color: var(--primary); background: var(--primary-soft); text-decoration: none; font-weight: 600; border-radius: 3px; }
+  .texto mark { background: var(--mark); color: var(--mark-ink); border-radius: 2px; }
+  details.antigo { border: 1px dashed var(--border); border-radius: 8px; padding: 8px 12px; background: var(--surface); }
+  details.antigo summary { cursor: pointer; font: 600 13.5px/1.3 var(--f-ui); color: var(--ink-soft); }
+  details.antigo .texto { font-size: 15px; color: var(--ink-soft); margin-top: 8px; }
+  .art-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .barra4 { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--surface-2); }
+  .barra4 i { display: block; height: 100%; }
+  aside .distrib-linha { grid-template-columns: minmax(0, 1fr) 3.2em; row-gap: 4px; }
+  aside .distrib-nome { grid-column: 1 / -1; white-space: normal; }
+  .vista-geral { display: inline-flex; gap: 2px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .vista-geral button { appearance: none; border: 0; background: none; font: 600 13.5px/1 var(--f-ui); color: var(--ink-soft); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+  .vista-geral button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .legenda4 { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+  .legenda4 b { color: var(--ink); }
+  .legenda4 span.p { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--cor); margin-right: 6px; vertical-align: middle; }
+  .mais { align-self: center; }
+</style>
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page wide">
+  <header class="topo">
+    <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
+    <p class="eyebrow">Revisão do Plano Diretor · Lei nº 14.771/2015 × Projeto de Lei Rev.05</p>
+    <h1>Lei de 2015 e nova minuta</h1>
+    <p class="subtitulo">Cada artigo da nova minuta comparado com o Plano Diretor em vigor (Lei nº 14.771/2015): o que é igual, o que muda em parte, o que é novo e o que vai na contramão da regra atual. Também lista o que a lei de 2015 tinha e a nova minuta não traz.</p>
+  </header>
+
+  <nav class="abas" aria-label="Seções da ferramenta">
+    <a href="index.html#indice">Índice</a>
+    <a href="index.html#glossario">Glossário</a>
+    <a href="index.html#busca">Buscar na minuta</a>
+    <a href="grafo.html">Grafo de impactos</a>
+    <a href="versoes.html">O que mudou</a>
+    <a href="lei2015.html" class="ativa" aria-current="page">Lei de 2015 × nova</a>
+    <a href="index.html#pergunte">Pergunte usando I.A.</a>
+  </nav>
+
+  <div class="numeros" id="numeros"></div>
+
+  <section class="card">
+    <div class="art-acoes" style="justify-content:space-between">
+      <h2>Filtrar</h2>
+      <span class="vista-geral" role="group" aria-label="O que listar">
+        <button type="button" data-g="novos" aria-pressed="true">Artigos da nova minuta</button>
+        <button type="button" data-g="antigos" aria-pressed="false">Artigos da lei de 2015</button>
+      </span>
+    </div>
+    <div class="busca-linha">
+      <input type="search" id="q" placeholder="Palavra ou expressão (ex.: CONCITIBA, SEHIS, outorga) ou número do artigo" aria-label="Buscar" autocomplete="off">
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Situação"></div>
+    <div class="filtros">
+      <div><label for="f-titulo">Título</label><select id="f-titulo"><option value="">Todos os títulos</option></select></div>
+      <div><label for="f-tipo">Tipo de mudança</label><select id="f-tipo"><option value="">Todos</option></select></div>
+      <div><label for="f-imp">Impacto</label><select id="f-imp"><option value="">Todos</option></select></div>
+      <div style="align-self:end"><label class="chk"><input type="checkbox" id="f-outros"> Incluir classificações secundárias</label></div>
+      <div id="ord-box"><label for="ordem">Ordenar por</label><select id="ordem"><option value="lei">Ordem da lei</option><option value="contra">Na contramão primeiro</option></select></div>
+    </div>
+  </section>
+
+  <div class="grade">
+    <aside>
+      <section class="card">
+        <h2 id="dist-tit">Por título da nova minuta</h2>
+        <div class="distrib" id="distrib"></div>
+      </section>
+      <section class="card suave">
+        <h2>Como ler</h2>
+        <div class="legenda4" id="legenda"></div>
+        <details><summary class="dica" style="cursor:pointer;font-weight:600">Subclassificação dos “parcialmente iguais”</summary>
+          <p class="dica" style="margin:6px 0 0">Cada artigo parcialmente igual recebe um tipo de mudança e um impacto principais e, quando cabe, outros secundários.</p>
+          <dl class="defs" id="defs"></dl></details>
+        <p class="dica">A classificação foi feita lendo os dois textos, artigo a artigo. Serve para orientar a análise e não substitui a leitura jurídica.</p>
+      </section>
+    </aside>
+    <main style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <div class="resumo"><p id="resumo"></p><div class="acoes"><button type="button" class="btn-sec" id="bt-csv">Baixar CSV</button></div></div>
+      <div class="lista-artigos" id="lista"></div>
+      <button type="button" class="btn-sec mais" id="bt-mais" hidden>Mostrar mais</button>
+    </main>
+  </div>
+
+  <footer class="rodape" id="rodape"></footer>
+</div>
+
+<script src="dados/lei2015_x_rev05.js"></script>
+<script>
+(() => {
+  const D = window.LEI2015, NOV = D.novos, ANT = D.antigos;
+  const V = new Map(ANT.map((a) => [a.n, a]));
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const semAc = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const LOTE = 40;
+  const COR = { 'Igual': 'var(--s-igual)', 'Parcialmente igual': 'var(--s-parcial)', 'Novo': 'var(--s-novo)', 'Na contramão': 'var(--s-contra)',
+    'Mantido igual': 'var(--s-igual)', 'Mantido com mudanças': 'var(--s-parcial)', 'Alterado na contramão': 'var(--s-contra)', 'Sem correspondente': 'var(--s-sem)' };
+  const SN = ['Na contramão', 'Parcialmente igual', 'Igual', 'Novo'];
+  const SA = ['Sem correspondente', 'Alterado na contramão', 'Mantido com mudanças', 'Mantido igual'];
+  const EXPL = {
+    'Igual': 'mesmo conteúdo normativo, só ajustes de redação.',
+    'Parcialmente igual': 'o tema já existia em 2015; mantém o núcleo e amplia, detalha ou muda parte da regra.',
+    'Novo': 'tema ou instrumento sem correspondente na lei de 2015.',
+    'Na contramão': 'inverte a regra de 2015: obrigação vira faculdade, garantia ou controle social é reduzido, proteção é estreitada ou matéria que exigia lei passa para ato do Executivo.',
+    'Sem correspondente': 'artigo de 2015 que a nova minuta não traz.',
+    'Alterado na contramão': 'artigo de 2015 cuja regra é invertida pela nova minuta.',
+    'Mantido com mudanças': 'o tema continua na nova minuta, com mudanças.',
+    'Mantido igual': 'reproduzido na nova minuta sem mudança de conteúdo.' };
+  const DEF_T = { 'Ampliado': 'acrescenta objetivos, diretrizes, hipóteses ou instrumentos ao que havia em 2015.', 'Reduzido': 'retira parte do conteúdo de 2015 (incisos, programas, exigências, prioridades).', 'Regra alterada': 'muda prazo, valor, percentual, critério, área de incidência ou procedimento.', 'Delegado a outra norma': 'o que estava escrito na lei passa a depender de lei específica, regulamento ou ato do Executivo.', 'Reorganizado/renomeado': 'mesmo tema com nova estrutura, nome ou enquadramento (ex.: PMDUS → PDUIS).' };
+  const DEF_I = { 'Mais restritivo': 'cria ou amplia obrigações, ônus ou controles.', 'Mais permissivo': 'flexibiliza parâmetros, amplia potencial construtivo ou retira proteção ou controle.', 'Mais detalhado': 'mais conteúdo normativo, sem inverter a direção da regra.', 'Menos detalhado': 'texto mais genérico; perde conteúdo operativo de 2015.', 'Só redação': 'muda a forma, não o efeito.' };
+  $('defs').innerHTML = '<dt style="margin-top:8px">Tipo de mudança</dt>' + Object.entries(DEF_T).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') + '<dt style="margin-top:10px">Impacto</dt>' + Object.entries(DEF_I).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  const contaSub = (campo, v) => NOV.filter((a) => a[campo] === v).length;
+  $('f-tipo').innerHTML += Object.keys(DEF_T).map((k) => `<option value="${k}">${k} (${contaSub('tipo', k)})</option>`).join('');
+  $('f-imp').innerHTML += Object.keys(DEF_I).map((k) => `<option value="${k}">${k} (${contaSub('impacto', k)})</option>`).join('');
+  const temTipo = (a, v, outros) => est.g === 'novos' ? (a.tipo === v || (outros && (a.tipo_outros || []).includes(v))) : (a.tipos || []).includes(v);
+  const temImp = (a, v, outros) => est.g === 'novos' ? (a.impacto === v || (outros && (a.impacto_outros || []).includes(v))) : (a.impactos || []).includes(v);
+  const subHtml = (a) => a.tipo ? `<div class="sub"><span class="tag" title="Tipo de mudança">${a.tipo}</span><span class="tag imp" title="Impacto">${a.impacto}</span>${(a.tipo_outros.length || a.impacto_outros.length) ? `<span class="outros">também: ${[...a.tipo_outros, ...a.impacto_outros].join(' · ')}</span>` : ''}</div>`
+    : (a.tipos && a.tipos.length) ? `<div class="sub"><span class="outros">Mudanças:</span>${a.tipos.map((t) => `<span class="tag">${t}</span>`).join('')}${a.impactos.map((t) => `<span class="tag imp">${t}</span>`).join('')}</div>` : '';
+  NOV.forEach((a) => { a.busca = semAc(a.texto + ' ' + a.nota + ' ' + a.refs.map((r) => V.get(r).texto).join(' ')); });
+  ANT.forEach((a) => { a.busca = semAc(a.texto + ' ' + a.nota); });
+  const est = { g: 'novos', q: '', sitN: new Set(SN), sitA: new Set(['Sem correspondente', 'Alterado na contramão']), titulo: '', tipo: '', imp: '', outros: false, ordem: 'lei', mostrar: LOTE, abertos: new Set() };
+
+  const cont = (L, s) => L.filter((a) => a.sit === s).length;
+  $('numeros').innerHTML = [
+    ['194 → 355', 'artigos (2015 → nova minuta)', ''],
+    [cont(NOV, 'Na contramão'), 'na contramão de 2015', 'vermelho'],
+    [cont(NOV, 'Parcialmente igual'), 'parcialmente iguais', 'ouro'],
+    [cont(NOV, 'Igual'), 'iguais', 'verde'],
+    [cont(NOV, 'Novo'), 'novos', 'azul'],
+    [cont(ANT, 'Sem correspondente'), 'artigos de 2015 sem correspondente', ''],
+  ].map(([b, s, c]) => `<div class="numero ${c}"><b>${b}</b><span>${s}</span></div>`).join('');
+
+  const tituloCurto = (t) => { const m = (t || '').match(/^(T[ÍI]TULO\s+[IVXLC]+)\s+–\s+(.*)$/i); return m ? [m[1].replace(/T[ÍI]TULO/i, 'Título'), m[2].toLowerCase().replace(/^./, (c) => c.toUpperCase())] : [t, '']; };
+  function fillTitulos() {
+    const L = est.g === 'novos' ? NOV : ANT;
+    const ts = [...new Set(L.map((a) => a.titulo))];
+    $('f-titulo').innerHTML = '<option value="">Todos os títulos</option>' + ts.map((t) => `<option value="${esc(t)}">${esc(tituloCurto(t).join(' – '))}</option>`).join('');
+    $('f-titulo').value = est.titulo;
+    $('dist-tit').textContent = est.g === 'novos' ? 'Por título da nova minuta' : 'Por título da lei de 2015';
+    const S = est.g === 'novos' ? SN : SA;
+    $('distrib').innerHTML = ts.map((t) => {
+      const doT = L.filter((a) => a.titulo === t); const [r, n] = tituloCurto(t);
+      const seg = S.map((s) => { const k = doT.filter((a) => a.sit === s).length; return k ? `<i style="width:${(k / doT.length) * 100}%;background:${COR[s]}" title="${s}: ${k}"></i>` : ''; }).join('');
+      return `<button type="button" class="distrib-linha${est.titulo === t ? ' sel' : ''}" data-t="${esc(t)}"><span class="distrib-nome"><b>${esc(r)}</b> · ${esc(n)}</span><span class="barra4">${seg}</span><span class="distrib-num">${doT.length}</span></button>`;
+    }).join('');
+    $('legenda').innerHTML = S.map((s) => `<div><span class="p" style="--cor:${COR[s]}"></span><b>${s}:</b> ${EXPL[s]}</div>`).join('');
+  }
+  $('distrib').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; est.titulo = est.titulo === b.dataset.t ? '' : b.dataset.t; atualizar(); };
+  function chips() {
+    const L = est.g === 'novos' ? NOV : ANT; const S = est.g === 'novos' ? SN : SA; const sel = est.g === 'novos' ? est.sitN : est.sitA;
+    $('chips').innerHTML = '<span class="rotulo" style="align-self:center">Situação</span>' + S.map((s) =>
+      `<button type="button" class="chip" data-s="${s}" aria-pressed="${sel.has(s)}" style="--cor:${COR[s]}"><span class="ponto"></span>${s} <span class="qt">${cont(L, s)}</span></button>`).join('');
+  }
+  $('chips').onclick = (e) => { const b = e.target.closest('[data-s]'); if (!b) return; const sel = est.g === 'novos' ? est.sitN : est.sitA; sel.has(b.dataset.s) ? sel.delete(b.dataset.s) : sel.add(b.dataset.s); atualizar(); };
+
+  function filtrados() {
+    const q = est.q.trim(); const qn = semAc(q.replace(/^art\.?\s*/i, ''));
+    const num = /^\d+$/.test(qn) ? Number(qn) : null;
+    const L = est.g === 'novos' ? NOV : ANT; const sel = est.g === 'novos' ? est.sitN : est.sitA;
+    let R = L.filter((a) => {
+      if (num !== null) return a.n === num;
+      if (!sel.has(a.sit)) return false;
+      if (est.titulo && a.titulo !== est.titulo) return false;
+      if (est.tipo && !temTipo(a, est.tipo, est.outros)) return false;
+      if (est.imp && !temImp(a, est.imp, est.outros)) return false;
+      if (qn && !a.busca.includes(qn)) return false;
+      return true;
+    });
+    if (est.ordem === 'contra') R = [...R].sort((x, y) => (SN.indexOf(x.sit) - SN.indexOf(y.sit)) || x.n - y.n);
+    return R;
+  }
+  function marcar(html) {
+    const q = est.q.trim(); if (!q || /^\s*(art\.?\s*)?\d+\s*$/i.test(q)) return html;
+    const t = semAc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return html.replace(/(<[^>]+>)|([^<]+)/g, (m, tag, txt) => {
+      if (tag) return tag;
+      const n = semAc(txt); let out = '', i = 0; const re = new RegExp(t, 'g'); let r;
+      while ((r = re.exec(n))) { out += txt.slice(i, r.index) + '<mark>' + txt.slice(r.index, r.index + r[0].length) + '</mark>'; i = r.index + r[0].length; if (!r[0].length) break; }
+      return out + txt.slice(i);
+    });
+  }
+  const cam = (a) => [a.titulo, a.capitulo, a.secao, a.subsecao].filter(Boolean).map((x) => x.split(' – ')[0]).join(' · ');
+  function cartaoNovo(a) {
+    const id = 'n' + a.n; const aberto = est.abertos.has(id); const longo = a.texto.length > 600;
+    const corpo = a.diff ? a.diff.map(([op, t]) => op === '-' ? `<del>${esc(t)}</del>` : op === '+' ? `<ins>${esc(t)}</ins>` : esc(t)).join('') : esc(a.texto);
+    const antigos = a.refs.map((r) => { const v = V.get(r); return `<details class="antigo"><summary>Lei de 2015 · Art. ${r} <span class="dica">(${esc(cam(v))})</span></summary><p class="texto">${marcar(esc(v.texto))}</p></details>`; }).join('');
+    return `<article class="art${a.sit === 'Na contramão' ? ' contra' : ''}" data-id="${id}" style="--cor:${COR[a.sit]}">
+      <div class="art-cab"><span class="art-num">Art. ${a.n}</span><span class="sit" style="--cor:${COR[a.sit]}">${a.sit}</span>${a.refs.length ? `<span class="era" style="font:500 13px var(--f-mono);color:var(--ink-faint)">em 2015: art. ${a.refs.join(', ')}</span>` : ''}</div>
+      ${subHtml(a)}
+      <div class="caminho"><span>${esc(cam(a))}</span></div>
+      ${a.nota ? `<p class="nota" style="--cor:${COR[a.sit]}">${marcar(esc(a.nota))}</p>` : ''}
+      ${a.diff ? '<p class="dica">Diferenças em relação a 2015: <del style="color:var(--danger)">saiu</del> · <ins style="color:var(--primary);text-decoration:none;font-weight:600">entrou</ins></p>' : ''}
+      <p class="texto${longo && !aberto ? ' recolhido' : ''}">${marcar(corpo)}</p>
+      ${longo ? `<div class="art-acoes"><button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button></div>` : ''}
+      ${antigos}
+    </article>`;
+  }
+  function cartaoAntigo(a) {
+    const id = 'a' + a.n; const aberto = est.abertos.has(id); const longo = a.texto.length > 600;
+    return `<article class="art${a.sit === 'Alterado na contramão' ? ' contra' : ''}" data-id="${id}">
+      <div class="art-cab"><span class="art-num">Art. ${a.n} (2015)</span><span class="sit" style="--cor:${COR[a.sit]}">${a.sit}</span>${a.em.length ? `<span style="font:500 13px var(--f-mono);color:var(--ink-faint)">na nova: art. ${a.em.join(', ')}</span>` : ''}</div>
+      ${subHtml(a)}
+      <div class="caminho"><span>${esc(cam(a))}</span></div>
+      ${a.nota ? `<p class="nota" style="--cor:${COR[a.sit]}">${marcar(esc(a.nota))}</p>` : ''}
+      <p class="texto${longo && !aberto ? ' recolhido' : ''}">${marcar(esc(a.texto))}</p>
+      ${longo ? `<div class="art-acoes"><button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button></div>` : ''}
+    </article>`;
+  }
+  let lista = [];
+  function atualizar(manter) {
+    if (!manter) est.mostrar = LOTE;
+    chips(); fillTitulos();
+    lista = filtrados();
+    const q = est.q.trim();
+    $('resumo').innerHTML = lista.length ? `<b>${lista.length}</b> artigo${lista.length > 1 ? 's' : ''} ${est.g === 'novos' ? 'da nova minuta' : 'da lei de 2015'}${q ? ` com “${esc(q)}”` : ''}` : 'Nenhum artigo com esses filtros.';
+    const f = est.g === 'novos' ? cartaoNovo : cartaoAntigo;
+    $('lista').innerHTML = lista.slice(0, est.mostrar).map(f).join('') || '<div class="vazio">Tente outro termo ou marque mais situações.</div>';
+    $('bt-mais').hidden = lista.length <= est.mostrar; $('bt-mais').textContent = `Mostrar mais (${lista.length - est.mostrar} restantes)`;
+    $('ord-box').hidden = est.g !== 'novos'; $('f-outros').parentElement.parentElement.hidden = est.g !== 'novos';
+    salvar();
+  }
+  $('lista').onclick = (e) => {
+    const art = e.target.closest('.art'); if (!art || !e.target.closest('[data-exp]')) return;
+    const id = art.dataset.id; est.abertos.has(id) ? est.abertos.delete(id) : est.abertos.add(id);
+    const a = id[0] === 'n' ? NOV.find((x) => x.n === +id.slice(1)) : V.get(+id.slice(1));
+    art.outerHTML = id[0] === 'n' ? cartaoNovo(a) : cartaoAntigo(a);
+  };
+  document.querySelector('.vista-geral').onclick = (e) => {
+    const b = e.target.closest('[data-g]'); if (!b) return; est.g = b.dataset.g; est.titulo = ''; garantirSit();
+    document.querySelectorAll('.vista-geral button').forEach((x) => x.setAttribute('aria-pressed', x === b)); atualizar();
+  };
+  $('bt-mais').onclick = () => { est.mostrar += LOTE; atualizar(true); };
+  let tq; $('q').oninput = (e) => { clearTimeout(tq); tq = setTimeout(() => { est.q = e.target.value; atualizar(); }, 180); };
+  $('f-titulo').onchange = (e) => { est.titulo = e.target.value; atualizar(); };
+  const garantirSit = () => { if (!est.tipo && !est.imp) return; (est.g === 'novos' ? est.sitN : est.sitA).add(est.g === 'novos' ? 'Parcialmente igual' : 'Mantido com mudanças'); };
+  $('f-tipo').onchange = (e) => { est.tipo = e.target.value; garantirSit(); atualizar(); };
+  $('f-imp').onchange = (e) => { est.imp = e.target.value; garantirSit(); atualizar(); };
+  $('f-outros').onchange = (e) => { est.outros = e.target.checked; atualizar(); };
+  $('ordem').onchange = (e) => { est.ordem = e.target.value; atualizar(); };
+  $('bt-csv').onclick = () => {
+    const cel = (s) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+    const linhas = est.g === 'novos'
+      ? [['art_nova', 'situacao', 'tipo_mudanca', 'tipo_mudanca_outros', 'impacto', 'impacto_outros', 'arts_2015', 'titulo', 'observacao', 'texto_nova'].join(';')].concat(lista.map((a) => [a.n, a.sit, a.tipo, (a.tipo_outros || []).join('; '), a.impacto, (a.impacto_outros || []).join('; '), a.refs.join(', '), a.titulo, a.nota, a.texto].map(cel).join(';')))
+      : [['art_2015', 'situacao', 'tipos_mudanca', 'impactos', 'arts_nova', 'titulo', 'observacao', 'texto_2015'].join(';')].concat(lista.map((a) => [a.n, a.sit, (a.tipos || []).join('; '), (a.impactos || []).join('; '), a.em.join(', '), a.titulo, a.nota, a.texto].map(cel).join(';')));
+    const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const l = document.createElement('a'); l.href = URL.createObjectURL(blob); l.download = est.g === 'novos' ? 'nova_minuta_x_lei2015.csv' : 'lei2015_x_nova_minuta.csv'; l.click(); URL.revokeObjectURL(l.href);
+  };
+  function salvar() {
+    const p = new URLSearchParams(); if (est.g !== 'novos') p.set('g', est.g); if (est.q) p.set('q', est.q); if (est.titulo) p.set('titulo', est.titulo);
+    if (est.ordem !== 'lei') p.set('ordem', est.ordem);
+    if (est.tipo) p.set('tipo', est.tipo); if (est.imp) p.set('imp', est.imp); if (est.outros) p.set('outros', '1');
+    p.set('sit', [...(est.g === 'novos' ? est.sitN : est.sitA)].join(','));
+    history.replaceState(null, '', '?' + p.toString());
+  }
+  (function ler() {
+    const p = new URLSearchParams(location.search);
+    if (p.get('g') === 'antigos') { est.g = 'antigos'; document.querySelectorAll('.vista-geral button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.g === 'antigos')); }
+    if (p.has('q')) { est.q = p.get('q'); $('q').value = est.q; }
+    if (p.has('titulo')) est.titulo = p.get('titulo');
+    if (p.has('tipo')) { est.tipo = p.get('tipo'); $('f-tipo').value = est.tipo; }
+    if (p.has('imp')) { est.imp = p.get('imp'); $('f-imp').value = est.imp; }
+    if (p.get('outros') === '1') { est.outros = true; $('f-outros').checked = true; }
+    if (p.has('ordem')) { est.ordem = p.get('ordem'); $('ordem').value = est.ordem; }
+    if (p.has('sit')) { const s = new Set(p.get('sit').split(',').filter(Boolean)); if (est.g === 'novos') est.sitN = s; else est.sitA = s; }
+  })();
+  $('rodape').textContent = `Antes: ${D.meta.antes}. Depois: ${D.meta.depois}. Comparação revisada artigo a artigo em ${D.meta.gerado_em.split('-').reverse().join('/')}.`;
+  atualizar();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Google Analytics (fluxo 16165894488) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-242PY3YEGE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-242PY3YEGE');
+  </script>
+<title>O que Mudou na Minuta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+<style>
+  .grade { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .grade > aside { position: sticky; top: 12px; display: flex; flex-direction: column; gap: 14px; }
+  @media (max-width: 900px) { .grade { grid-template-columns: minmax(0, 1fr); } .grade > aside { position: static; } }
+  .numero.vermelho b { color: var(--danger); }
+  .sit { font: 700 11.5px/1 var(--f-ui); letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--border); }
+  .sit.Alterado { background: #FFF4D1; color: #7A5A00; border-color: #F0D78A; }
+  .sit.Novo { background: var(--primary-soft); color: var(--primary); border-color: transparent; }
+  .sit.Ajuste { background: #E4EEF9; color: #2D5F99; border-color: transparent; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sit.Alterado { background: #3A3112; color: #F2C230; border-color: #5A4A14; } :root:not([data-theme="light"]) .sit.Ajuste { background: #1C2C40; color: #7DA9DE; } }
+  :root[data-theme="dark"] .sit.Alterado { background: #3A3112; color: #F2C230; border-color: #5A4A14; }
+  :root[data-theme="dark"] .sit.Ajuste { background: #1C2C40; color: #7DA9DE; }
+  .era { font: 500 13px/1.2 var(--f-mono); color: var(--ink-faint); }
+  .mantido { font: 500 12.5px/1 var(--f-mono); color: var(--ink-soft); margin-left: auto; }
+  .mantido i { display: inline-block; width: 60px; height: 6px; border-radius: 3px; background: var(--surface-2); vertical-align: middle; margin-right: 6px; overflow: hidden; position: relative; }
+  .mantido i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p); background: var(--g-remissao); }
+  .texto-diff { font: 16px/1.6 var(--f-lei); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .texto-diff del { color: var(--danger); background: var(--danger-soft); text-decoration: line-through; text-decoration-thickness: 1px; border-radius: 3px; }
+  .texto-diff ins { color: var(--primary); background: var(--primary-soft); text-decoration: none; font-weight: 600; border-radius: 3px; }
+  .texto-diff mark { background: var(--mark); color: var(--mark-ink); border-radius: 2px; }
+  .texto-diff.recolhido { max-height: 9.6em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+  .vista { display: inline-flex; gap: 2px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .vista button { appearance: none; border: 0; background: none; font: 600 12.5px/1 var(--f-ui); color: var(--ink-soft); padding: 6px 9px; border-radius: 6px; cursor: pointer; }
+  .vista button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .art-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .legenda-diff { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-soft); }
+  .legenda-diff del, .legenda-diff ins { font: 600 13px var(--f-lei); padding: 0 4px; border-radius: 3px; }
+  .legenda-diff del { color: var(--danger); background: var(--danger-soft); }
+  .legenda-diff ins { color: var(--primary); background: var(--primary-soft); text-decoration: none; }
+  .lugar { font-size: 13px; color: var(--c-prazo); }
+  .mais { align-self: center; }
+  aside .distrib-linha { grid-template-columns: minmax(0, 1fr) 3.2em; row-gap: 4px; }
+  aside .distrib-nome { grid-column: 1 / -1; white-space: normal; }
+</style>
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page wide">
+  <header class="topo">
+    <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
+    <p class="eyebrow">Revisão do Plano Diretor · versão de julho × versão de outubro de 2026</p>
+    <h1>O que mudou na minuta</h1>
+    <p class="subtitulo">Compara, artigo por artigo, a versão da consulta pública (julho/2026, 351 artigos) com a Rev.05 r1 (outubro/2026, 355 artigos). Os artigos foram pareados pelo texto, não pelo número, porque a numeração mudou a partir do art. 112.</p>
+  </header>
+
+  <nav class="abas" aria-label="Seções da ferramenta">
+    <a href="index.html#indice">Índice</a>
+    <a href="index.html#glossario">Glossário</a>
+    <a href="index.html#busca">Buscar na minuta</a>
+    <a href="grafo.html">Grafo de impactos</a>
+    <a href="versoes.html" class="ativa" aria-current="page">O que mudou</a>
+    <a href="lei2015.html">Lei de 2015 × nova</a>
+    <a href="index.html#pergunte">Pergunte usando I.A.</a>
+  </nav>
+
+  <div class="numeros" id="numeros"></div>
+
+  <section class="card">
+    <h2>Filtrar</h2>
+    <div class="busca-linha">
+      <input type="search" id="q" placeholder="Palavra ou expressão (ex.: TAUA, deverá, HIS) ou número do artigo (ex.: 113)" aria-label="Buscar nas alterações" autocomplete="off">
+    </div>
+    <div class="opcoes">
+      <span class="rotulo">Buscar em</span>
+      <span class="grupo">
+        <input type="radio" name="onde" id="onde-tudo" value="tudo" checked><label for="onde-tudo">Qualquer versão</label>
+        <input type="radio" name="onde" id="onde-ins" value="ins"><label for="onde-ins">Só no que entrou</label>
+        <input type="radio" name="onde" id="onde-del" value="del"><label for="onde-del">Só no que saiu</label>
+      </span>
+      <label class="check"><input type="checkbox" id="so-lugar"> Só artigos que mudaram de lugar</label>
+    </div>
+    <div class="chips" id="chips-sit" role="group" aria-label="Situação"></div>
+    <div class="chips" id="chips-grau" role="group" aria-label="Intensidade da alteração"></div>
+    <div class="filtros">
+      <div><label for="f-titulo">Título</label><select id="f-titulo"><option value="">Todos os títulos</option></select></div>
+      <div><label for="ordem">Ordenar por</label><select id="ordem"><option value="lei">Ordem da lei</option><option value="mudanca">Maior mudança primeiro</option></select></div>
+    </div>
+  </section>
+
+  <div class="grade">
+    <aside>
+      <section class="card">
+        <h2>Alterações por título</h2>
+        <p class="dica">Artigos alterados ou novos / total do título. Clique para filtrar.</p>
+        <div class="distrib" id="distrib"></div>
+      </section>
+      <section class="card suave">
+        <h2>Como ler</h2>
+        <div class="legenda-diff"><span><del>texto retirado</del></span><span><ins>texto incluído</ins></span></div>
+        <p class="dica"><b>Alterado:</b> mudou o conteúdo. A intensidade indica quanto do texto de julho foi mantido: leve (80% ou mais), moderada (40–80%), profunda (menos de 40%) ou reescrito.<br><b>Ajuste de forma:</b> só pontuação, maiúsculas, acentos ou espaços.<br><b>Novo:</b> sem correspondente em julho.</p>
+        <p class="dica">“era art. 112” indica o número que o artigo tinha em julho.</p>
+      </section>
+    </aside>
+    <main style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <div class="resumo"><p id="resumo"></p><div class="acoes"><button type="button" class="btn-sec" id="bt-expandir">Expandir todos</button><button type="button" class="btn-sec" id="bt-csv">Baixar CSV</button></div></div>
+      <div class="lista-artigos" id="lista"></div>
+      <button type="button" class="btn-sec mais" id="bt-mais" hidden>Mostrar mais</button>
+    </main>
+  </div>
+
+  <footer class="rodape" id="rodape"></footer>
+</div>
+
+<script src="dados/versoes_jul_out.js"></script>
+<script>
+(() => {
+  const V = window.VERSOES, A = V.artigos;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const semAc = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const LOTE = 40;
+  const SITS = [['Alterado', 'Alterado'], ['Novo', 'Novo'], ['Ajuste de forma', 'Ajuste de forma'], ['Sem alteração', 'Sem alteração']];
+  const GRAUS = ['Leve', 'Moderada', 'Profunda', 'Reescrito'];
+  const est = { q: '', onde: 'tudo', sits: new Set(['Alterado', 'Novo', 'Ajuste de forma']), graus: new Set(), titulo: '', lugar: false, ordem: 'lei', mostrar: LOTE, expandidos: new Set(), todos: false, vistas: {} };
+
+  // textos derivados do diff
+  A.forEach((a) => {
+    a.tJul = a.d.filter((x) => x[0] !== '+').map((x) => x[1]).join('');
+    a.tOut = a.d.filter((x) => x[0] !== '-').map((x) => x[1]).join('');
+    a.tIns = a.d.filter((x) => x[0] === '+').map((x) => x[1]).join(' ');
+    a.tDel = a.d.filter((x) => x[0] === '-').map((x) => x[1]).join(' ');
+    a.nAll = semAc(a.tJul + ' ' + a.tOut); a.nIns = semAc(a.tIns); a.nDel = semAc(a.tDel);
+    a.id = a.out ?? ('j' + a.jul);
+  });
+
+  // ---------- números ----------
+  const cont = (f) => A.filter(f).length;
+  const renum = cont((a) => a.out && a.jul && a.out !== a.jul);
+  $('numeros').innerHTML = [
+    [`${V.meta.antes.artigos} → ${V.meta.depois.artigos}`, 'artigos (jul → out)', ''],
+    [cont((a) => a.sit === 'Alterado'), 'artigos alterados', 'ouro'],
+    [cont((a) => a.sit === 'Novo'), 'artigos novos', 'verde'],
+    [cont((a) => a.sit === 'Removido'), 'artigos retirados', 'vermelho'],
+    [cont((a) => a.sit === 'Ajuste de forma'), 'só ajuste de forma', 'azul'],
+    [cont((a) => a.sit === 'Sem alteração'), 'sem alteração', ''],
+    [renum, 'mudaram de número', ''],
+  ].map(([b, s, c]) => `<div class="numero ${c}"><b>${b}</b><span>${s}</span></div>`).join('');
+
+  // ---------- chips ----------
+  function chips() {
+    $('chips-sit').innerHTML = '<span class="rotulo" style="align-self:center">Situação</span>' + SITS.filter(([s]) => cont((a) => a.sit === s)).map(([s, r]) =>
+      `<button type="button" class="chip" data-sit="${s}" aria-pressed="${est.sits.has(s)}" style="--cor:${s === 'Novo' ? 'var(--primary)' : s === 'Alterado' ? 'var(--c-prazo)' : s === 'Ajuste de forma' ? 'var(--g-remissao)' : 'var(--ink-faint)'}"><span class="ponto"></span>${r} <span class="qt">${cont((a) => a.sit === s)}</span></button>`).join('');
+    const mostrarGraus = est.sits.has('Alterado');
+    $('chips-grau').hidden = !mostrarGraus;
+    $('chips-grau').innerHTML = '<span class="rotulo" style="align-self:center">Intensidade (só alterados)</span>' + GRAUS.map((g) =>
+      `<button type="button" class="chip" data-grau="${g}" aria-pressed="${est.graus.has(g)}"><span class="ponto"></span>${g} <span class="qt">${cont((a) => a.grau === g)}</span></button>`).join('');
+  }
+  $('chips-sit').onclick = (e) => { const b = e.target.closest('[data-sit]'); if (!b) return; const s = b.dataset.sit; est.sits.has(s) ? est.sits.delete(s) : est.sits.add(s); atualizar(); };
+  $('chips-grau').onclick = (e) => { const b = e.target.closest('[data-grau]'); if (!b) return; const g = b.dataset.grau; est.graus.has(g) ? est.graus.delete(g) : est.graus.add(g); atualizar(); };
+
+  // ---------- títulos ----------
+  const titulos = [...new Set(A.map((a) => a.titulo))];
+  titulos.forEach((t) => { const o = document.createElement('option'); o.value = t; o.textContent = t.replace(/^TÍTULO ([IVX]+) – /, 'Título $1 – '); $('f-titulo').appendChild(o); });
+  function distrib() {
+    const linhas = titulos.map((t) => {
+      const doT = A.filter((a) => a.titulo === t && a.out);
+      const mud = doT.filter((a) => a.sit === 'Alterado' || a.sit === 'Novo').length;
+      return { t, tot: doT.length, mud };
+    });
+    $('distrib').innerHTML = linhas.map(({ t, tot, mud }) => {
+      const m = t.match(/^TÍTULO ([IVX]+) – (.*)$/) || [null, '', t];
+      return `<button type="button" class="distrib-linha${est.titulo === t ? ' sel' : ''}" data-t="${esc(t)}" title="${esc(t)}"><span class="distrib-nome"><b>Título ${m[1]}</b> · ${esc(m[2].toLowerCase().replace(/^./, (c) => c.toUpperCase()))}</span><span class="distrib-barra"><i style="width:${tot ? (mud / tot) * 100 : 0}%"></i></span><span class="distrib-num">${mud}/${tot}</span></button>`;
+    }).join('');
+  }
+  $('distrib').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; est.titulo = est.titulo === b.dataset.t ? '' : b.dataset.t; $('f-titulo').value = est.titulo; atualizar(); };
+
+  // ---------- filtro ----------
+  function filtrados() {
+    const q = est.q.trim(); const qn = semAc(q.replace(/^art\.?\s*/i, ''));
+    const num = /^\d+$/.test(qn) ? Number(qn) : null;
+    let L = A.filter((a) => {
+      if (num !== null) return a.out === num || a.jul === num;
+      if (est.graus.size) { if (!(a.sit === 'Alterado' && est.graus.has(a.grau))) return false; }
+      else if (!est.sits.has(a.sit)) return false;
+      if (est.titulo && a.titulo !== est.titulo) return false;
+      if (est.lugar && !a.lugar_jul) return false;
+      if (qn) { const alvo = est.onde === 'ins' ? a.nIns : est.onde === 'del' ? a.nDel : a.nAll; if (!alvo.includes(qn)) return false; }
+      return true;
+    });
+    if (est.ordem === 'mudanca') L = [...L].sort((x, y) => (x.sit === 'Novo' ? -1 : x.sem) - (y.sit === 'Novo' ? -1 : y.sem));
+    return L;
+  }
+
+  // ---------- render ----------
+  function marcar(html, termo) {
+    if (!termo) return html;
+    const t = semAc(termo).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return html.replace(/(<[^>]+>)|([^<]+)/g, (m, tag, txt) => {
+      if (tag) return tag;
+      const n = semAc(txt); let out = '', i = 0; const re = new RegExp(t, 'g'); let r;
+      while ((r = re.exec(n))) { out += txt.slice(i, r.index) + '<mark>' + txt.slice(r.index, r.index + r[0].length) + '</mark>'; i = r.index + r[0].length; if (!r[0].length) break; }
+      return out + txt.slice(i);
+    });
+  }
+  function corpo(a, vista) {
+    let html;
+    if (vista === 'jul') html = esc(a.tJul || '(artigo não existia em julho)');
+    else if (vista === 'out') html = esc(a.tOut || '(artigo retirado em outubro)');
+    else html = a.d.map(([op, t]) => op === '-' ? `<del>${esc(t)}</del>` : op === '+' ? `<ins>${esc(t)}</ins>` : esc(t)).join('');
+    const q = est.q.trim(); return /^\s*(art\.?\s*)?\d+\s*$/i.test(q) ? html : marcar(html, q);
+  }
+  function cartao(a) {
+    const vista = est.vistas[a.id] || (a.sit === 'Sem alteração' ? 'out' : 'dif');
+    const aberto = est.todos || est.expandidos.has(a.id);
+    const longo = (a.tOut.length + a.tDel.length) > 600;
+    const nOut = a.out ? `Art. ${a.out}` : `Art. ${a.jul} (jul)`;
+    const era = a.out && a.jul && a.out !== a.jul ? `<span class="era">era art. ${a.jul}</span>` : (a.sit === 'Novo' ? '<span class="era">sem correspondente em julho</span>' : '');
+    const cls = a.sit === 'Ajuste de forma' ? 'Ajuste' : a.sit.split(' ')[0];
+    const mant = a.sit === 'Alterado' || a.sit === 'Ajuste de forma' ? `<span class="mantido" title="Parcela do texto de julho mantida"><i style="--p:${Math.round(a.sem * 100)}%"></i>${Math.round(a.sem * 100)}% mantido</span>` : '';
+    const cam = [a.titulo.replace(/^TÍTULO ([IVX]+) – .*/, 'Título $1'), a.capitulo.replace(/^CAPÍTULO ([IVX]+) – .*/, 'Capítulo $1'), a.secao.split(' › ')[0].replace(/ – .*/, '')].filter(Boolean).join(' · ');
+    return `<article class="art" data-id="${a.id}">
+      <div class="art-cab"><span class="art-num">${nOut}</span>${era}<span class="sit ${cls}">${a.grau ? a.sit + ' · ' + a.grau : a.sit}</span>${mant}</div>
+      <div class="caminho"><span>${esc(cam)}</span></div>
+      ${a.lugar_jul ? `<div class="lugar">Mudou de lugar na estrutura. Antes: ${esc(a.lugar_jul)}</div>` : ''}
+      <div class="art-acoes"><span class="vista" role="group" aria-label="Versão exibida">
+        ${a.sit !== 'Sem alteração' ? `<button type="button" data-v="dif" aria-pressed="${vista === 'dif'}">Diferenças</button>` : ''}
+        ${a.tJul ? `<button type="button" data-v="jul" aria-pressed="${vista === 'jul'}">Julho</button>` : ''}
+        ${a.tOut ? `<button type="button" data-v="out" aria-pressed="${vista === 'out'}">Outubro</button>` : ''}
+      </span>${longo ? `<button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button>` : ''}</div>
+      <p class="texto-diff${longo && !aberto ? ' recolhido' : ''}">${corpo(a, vista)}</p>
+    </article>`;
+  }
+  let lista = [];
+  function atualizar(manterQtd) {
+    if (!manterQtd) est.mostrar = LOTE;
+    chips(); distrib();
+    lista = filtrados();
+    const q = est.q.trim();
+    let ocultos = 0;
+    if (q && !/^\s*(art\.?\s*)?\d+\s*$/i.test(q)) { const qn = semAc(q); ocultos = A.filter((a) => !lista.includes(a) && a.nAll.includes(qn)).length; }
+    $('resumo').innerHTML = (lista.length ? `<b>${lista.length}</b> artigo${lista.length > 1 ? 's' : ''}${q ? ` com “${esc(q)}”` : ''}` : 'Nenhum artigo com esses filtros.')
+      + (ocultos ? ` · <button type="button" class="link" id="bt-ocultos">mais ${ocultos} fora dos filtros (ex.: sem alteração)</button>` : '');
+    if (ocultos) $('bt-ocultos').onclick = () => { est.sits = new Set(SITS.map((x) => x[0])); est.graus.clear(); est.titulo = ''; $('f-titulo').value = ''; est.lugar = false; $('so-lugar').checked = false; atualizar(); };
+    $('lista').innerHTML = lista.slice(0, est.mostrar).map(cartao).join('') || '<div class="vazio">Tente outro termo ou marque mais situações.</div>';
+    $('bt-mais').hidden = lista.length <= est.mostrar;
+    $('bt-mais').textContent = `Mostrar mais (${lista.length - est.mostrar} restantes)`;
+    $('bt-expandir').textContent = est.todos ? 'Recolher todos' : 'Expandir todos';
+    salvarURL();
+  }
+  $('lista').onclick = (e) => {
+    const art = e.target.closest('.art'); if (!art) return;
+    const id = isNaN(art.dataset.id) ? art.dataset.id : Number(art.dataset.id);
+    const v = e.target.closest('[data-v]'); const x = e.target.closest('[data-exp]');
+    if (v) est.vistas[id] = v.dataset.v;
+    else if (x) est.expandidos.has(id) ? est.expandidos.delete(id) : est.expandidos.add(id);
+    else return;
+    const a = A.find((y) => y.id === id); art.outerHTML = cartao(a);
+  };
+  $('bt-mais').onclick = () => { est.mostrar += LOTE; atualizar(true); };
+  $('bt-expandir').onclick = () => { est.todos = !est.todos; est.expandidos.clear(); atualizar(true); };
+
+  let tq; $('q').oninput = (e) => { clearTimeout(tq); tq = setTimeout(() => { est.q = e.target.value; atualizar(); }, 180); };
+  document.querySelectorAll('input[name="onde"]').forEach((r) => r.onchange = () => { est.onde = r.value; atualizar(); });
+  $('so-lugar').onchange = (e) => { est.lugar = e.target.checked; atualizar(); };
+  $('f-titulo').onchange = (e) => { est.titulo = e.target.value; atualizar(); };
+  $('ordem').onchange = (e) => { est.ordem = e.target.value; atualizar(); };
+
+  // CSV do que está filtrado
+  $('bt-csv').onclick = () => {
+    const cel = (s) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+    const linhas = [['art_out', 'art_jul', 'situacao', 'intensidade', 'mantido_%', 'titulo', 'texto_jul', 'texto_out', 'saiu', 'entrou'].join(';')]
+      .concat(lista.map((a) => [a.out, a.jul, a.sit, a.grau, a.sit === 'Novo' ? '' : Math.round(a.sem * 100), a.titulo, a.tJul, a.tOut, a.tDel, a.tIns].map(cel).join(';')));
+    const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const l = document.createElement('a'); l.href = URL.createObjectURL(blob); l.download = 'alteracoes_minuta_jul_out_2026.csv'; l.click(); URL.revokeObjectURL(l.href);
+  };
+
+  // estado na URL (para compartilhar um filtro)
+  function salvarURL() {
+    const p = new URLSearchParams();
+    if (est.q) p.set('q', est.q); if (est.onde !== 'tudo') p.set('onde', est.onde);
+    if (est.titulo) p.set('titulo', est.titulo); if (est.lugar) p.set('lugar', '1'); if (est.ordem !== 'lei') p.set('ordem', est.ordem);
+    p.set('sit', [...est.sits].join(',')); if (est.graus.size) p.set('grau', [...est.graus].join(','));
+    history.replaceState(null, '', '?' + p.toString());
+  }
+  (function lerURL() {
+    const p = new URLSearchParams(location.search);
+    if (p.has('q')) { est.q = p.get('q'); $('q').value = est.q; }
+    if (p.has('onde')) { est.onde = p.get('onde'); const r = document.querySelector(`input[name="onde"][value="${est.onde}"]`); if (r) r.checked = true; }
+    if (p.has('titulo')) { est.titulo = p.get('titulo'); $('f-titulo').value = est.titulo; }
+    if (p.get('lugar') === '1') { est.lugar = true; $('so-lugar').checked = true; }
+    if (p.has('ordem')) { est.ordem = p.get('ordem'); $('ordem').value = est.ordem; }
+    if (p.has('sit')) est.sits = new Set(p.get('sit').split(',').filter(Boolean));
+    if (p.has('grau')) est.graus = new Set(p.get('grau').split(',').filter(Boolean));
+  })();
+
+  $('rodape').textContent = `Antes: ${V.meta.antes.descricao}. Depois: ${V.meta.depois.descricao}. Comparação gerada em ${V.meta.gerado_em.split('-').reverse().join('/')}; a análise é automática e não substitui a leitura jurídica.`;
+  atualizar();
+})();
+</script>
+</body>
+</html>
