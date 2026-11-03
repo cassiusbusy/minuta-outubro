@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Google Analytics (fluxo 16165894488) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-242PY3YEGE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-242PY3YEGE');
+  </script>
+<title>Comparativo Visual 2015 × Nova</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+<style>
+  :root { --s-igual: #00944F; --s-parcial: #B98A00; --s-novo: #447EC0; --s-contra: #C8323C; --s-sem: #8A94A3; }
+  .grade-vis { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; align-items: start; }
+  @media (max-width: 1100px) { .grade-vis { grid-template-columns: minmax(0, 1fr); } }
+  .diagrama { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .diagrama svg { display: block; width: 100%; min-width: 760px; height: auto; font-family: var(--f-ui); }
+  .diagrama .rot-col { font: 700 12px var(--f-ui); fill: var(--ink-soft); letter-spacing: .06em; text-transform: uppercase; }
+  .diagrama .rot-tit { font: 600 10.5px var(--f-ui); fill: var(--ink-faint); }
+  .diagrama .dot { cursor: pointer; stroke: var(--surface); stroke-width: 1; transition: opacity .15s; }
+  .diagrama .dot:hover { stroke: var(--ink); stroke-width: 1.5; }
+  .diagrama .dot.sel { stroke: var(--ink); stroke-width: 2.5; }
+  .diagrama .lk { fill: none; stroke-width: 1.1; opacity: .16; transition: opacity .15s; pointer-events: none; }
+  .diagrama.foco .lk { opacity: .03; }
+  .diagrama.foco .lk.on { opacity: .9; stroke-width: 1.8; }
+  .diagrama.foco .dot { opacity: .22; }
+  .diagrama.foco .dot.on { opacity: 1; }
+  .diagrama .no rect { rx: 8; cursor: pointer; }
+  .diagrama .no text { font: 700 12px var(--f-ui); fill: #fff; pointer-events: none; }
+  .diagrama .no text.qt { font: 500 11px var(--f-mono); }
+  .diagrama .no.off rect { opacity: .25; }
+  .barra-ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+  .barra-ctl label { display: block; font: 600 11.5px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 4px; }
+  .legenda-cores { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-soft); }
+  .legenda-cores span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); margin-right: 6px; vertical-align: -1px; }
+  #painel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+  @media (max-width: 1100px) { #painel { position: static; max-height: none; } }
+  .sit { font: 700 11.5px/1 var(--f-ui); letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; color: #fff; background: var(--cor); }
+  .p-cab { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .p-num { font: 700 20px var(--f-ui); color: var(--ink); }
+  .p-sec { margin-top: 14px; }
+  .p-sec h3 { font: 700 12px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font: 600 12.5px/1.2 var(--f-ui); padding: 3px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); }
+  .tag.imp { border-style: dashed; }
+  .lnk { appearance: none; border: 1px solid var(--border); background: var(--surface); border-radius: 6px; padding: 3px 8px; font: 600 12.5px var(--f-ui); color: var(--ink); cursor: pointer; }
+  .lnk:hover { border-color: var(--ink-faint); }
+  .num { appearance: none; min-width: 28px; height: 26px; padding: 0 6px; border-radius: 6px; border: 0; color: #fff; font: 600 12px var(--f-mono); cursor: pointer; background: var(--c, var(--ink-faint)); }
+  .num.amp { background: var(--surface); color: var(--ink-soft); border: 1.5px dashed var(--ink-faint); }
+  .num:hover, .num:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .fed { display: flex; flex-direction: column; gap: 6px; }
+  .fed button { appearance: none; text-align: left; display: flex; gap: 8px; align-items: baseline; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 6px 8px; cursor: pointer; font: 14px/1.35 var(--f-ui); color: var(--ink); }
+  .fed button:hover { border-color: var(--ink-faint); }
+  .fed .num { flex: none; cursor: inherit; }
+  .texto { font: 15px/1.6 var(--f-lei); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .texto.recolhido { max-height: 9em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 65%, transparent); mask-image: linear-gradient(#000 65%, transparent); }
+  .nota { margin: 0; font-size: 14px; line-height: 1.5; background: var(--surface-2); border-radius: 8px; padding: 8px 12px; border-left: 3px solid var(--cor, var(--ink-faint)); }
+  dialog { border: 1px solid var(--border); border-radius: 12px; padding: 0; max-width: min(640px, calc(100vw - 32px)); width: 100%; background: var(--surface); color: var(--ink); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(10, 16, 24, .45); }
+  dialog .d-corpo { padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+  dialog .d-cab { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
+  dialog h3 { margin: 0; font: 700 16px var(--f-ui); }
+  .vazio-p { color: var(--ink-soft); font-size: 14px; }
+  .busca-box { flex: 1 1 380px; min-width: 0; }
+  .busca-box input[type=search] { width: 100%; }
+  .busca-cab { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 18px; margin-bottom: 4px; }
+  .busca-cab > label { margin-bottom: 0; }
+  .busca-op { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 12.5px; color: var(--ink-soft); }
+  .busca-box #lado { width: auto; flex: none; }
+  .busca-box #busca { flex: 1; min-width: 0; }
+  .barra-ctl .btn-sec { min-height: 44px; }
+  @media (max-width: 600px) { .busca-box > span { flex-wrap: wrap; } .busca-box #busca { flex: 1 1 100%; } .busca-box #lado { flex: 1; } }
+  .busca-op label { display: inline-flex; gap: 5px; align-items: center; font: 12.5px var(--f-ui); letter-spacing: 0; text-transform: none; color: var(--ink-soft); margin: 0; cursor: pointer; }
+  .res-lista { display: flex; flex-direction: column; gap: 6px; }
+  .res-lista button { appearance: none; text-align: left; border: 1px solid var(--border); border-left: 4px solid var(--c); background: var(--surface); border-radius: 8px; padding: 6px 9px; cursor: pointer; font: 13.5px/1.4 var(--f-ui); color: var(--ink); }
+  .res-lista button:hover { border-color: var(--ink-faint); }
+  .res-lista .onde { font-size: 12px; color: var(--ink-soft); }
+  #painel mark, dialog mark { background: var(--mark, #FFE58A); color: var(--mark-ink, inherit); border-radius: 2px; padding: 0 1px; }
+  .aviso { font-size: 13.5px; background: #FFF4D6; border: 1px solid #E8C96A; color: #5C4600; border-radius: 8px; padding: 7px 10px; margin: 8px 0 0; }
+  .diagrama .anel { fill: none; stroke: var(--ink); stroke-width: 1.4; pointer-events: none; }
+  .diagrama.foco .anel { opacity: .25; } .diagrama.foco .anel.on { opacity: 1; }
+  .leg-anel::before { background: transparent !important; box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .just { margin-top: 14px; border: 1px solid var(--border); border-left: 4px solid var(--ink); border-radius: 8px; background: var(--surface-2); }
+  .just > summary { cursor: pointer; padding: 9px 12px; font: 700 13.5px var(--f-ui); color: var(--ink); list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  .just > summary::-webkit-details-marker { display: none; }
+  .just > summary::after { content: "Ver ▾"; font-weight: 600; color: var(--ink-soft); }
+  .just[open] > summary::after { content: "Fechar ▴"; }
+  .just .j-corpo { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+  .j-par { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 520px) { .j-par { grid-template-columns: 1fr; } }
+  .j-par div { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; font-size: 13.5px; line-height: 1.45; }
+  .j-par b { display: block; font: 700 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 3px; }
+  .j-txt { margin: 0; font-size: 14.5px; line-height: 1.55; white-space: pre-wrap; }
+  .j-lista { display: flex; flex-direction: column; gap: 8px; }
+  .j-lista button { appearance: none; text-align: left; border: 1px solid var(--border); border-left: 4px solid var(--c); background: var(--surface); border-radius: 8px; padding: 8px 10px; cursor: pointer; font: 14px/1.4 var(--f-ui); color: var(--ink); }
+  .j-lista button:hover { border-color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page wide">
+  <header class="topo">
+    <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
+    <p class="eyebrow">Revisão do Plano Diretor · Lei nº 14.771/2015 × Projeto de Lei Rev.05</p>
+    <h1>Comparativo com a lei anterior</h1>
+    <p class="subtitulo">À esquerda, os 194 artigos da lei de 2015; à direita, os 355 da nova minuta; no meio, a classificação que liga um lado ao outro. Clique numa bolinha para ver o artigo, as contribuições da população ligadas a ele e a relação com as leis federais.</p>
+  </header>
+
+  <nav class="abas" aria-label="Seções da ferramenta">
+    <a href="index.html#indice">Índice</a>
+    <a href="index.html#glossario">Glossário</a>
+    <a href="index.html#busca">Buscar na minuta</a>
+    <a href="grafo.html">Grafo de impactos</a>
+    <a href="versoes.html">O que mudou</a>
+    <a href="lei2015.html">Lei de 2015 × nova</a>
+    <a href="comparativo.html" class="ativa" aria-current="page">Comparativo visual</a>
+    <a href="index.html#pergunte">Pergunte usando I.A.</a>
+  </nav>
+
+  <section class="card">
+    <div class="barra-ctl">
+      <div><label for="modo">Pintar a minuta por</label>
+        <select id="modo">
+          <option value="sit">Classificação em relação a 2015</option>
+          <option value="tipo">Tipo de mudança (parcialmente iguais)</option>
+          <option value="imp">Impacto (parcialmente iguais)</option>
+          <option value="fed">Relação com leis federais</option>
+          <option value="ctb">Número de contribuições</option>
+        </select></div>
+      <div class="busca-box"><div class="busca-cab"><label for="busca">Buscar</label><div class="busca-op"><label><input type="checkbox" id="b-ctb"> incluir contribuições da população</label><label><input type="checkbox" id="b-just" checked> incluir justificativas técnicas</label></div></div>
+        <span style="display:flex;gap:6px"><input id="busca" type="search" autocomplete="off" placeholder="Palavra, “expressão” ou nº" title="Ex.: outorga · “área verde” · 62" aria-label="Buscar por palavra ou número do artigo"><select id="lado" aria-label="Lei do número" title="Para busca por número: em qual lei"><option value="n">Nova minuta</option><option value="a">Lei de 2015</option></select><button class="btn-sec" id="bt-ir" type="button">Buscar</button></span></div>
+      <div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sec" id="bt-just" type="button" hidden>Justificativas técnicas</button><button class="btn-sec" id="bt-limpar" type="button">Limpar seleção</button></div>
+    </div>
+    <div class="legenda-cores" id="legenda" style="margin-top:12px"></div>
+  </section>
+
+  <div class="grade-vis">
+    <section class="card">
+      <div class="diagrama" id="diagrama"></div>
+      <p class="dica" style="margin:8px 0 0">Clique numa classificação do meio para destacar só os artigos dela. As linhas de 2015 vão para a classificação de cada artigo correspondente na nova minuta.</p>
+    </section>
+    <aside class="card" id="painel" aria-live="polite">
+      <p class="vazio-p">Clique numa bolinha para abrir o artigo, ou busque uma palavra acima.</p>
+    </aside>
+  </div>
+
+  <footer class="rodape" id="rodape"></footer>
+</div>
+
+<dialog id="dlg"><div class="d-corpo"><div class="d-cab"><h3 id="dlg-tit"></h3><button class="btn-sec" type="button" id="dlg-x">Fechar</button></div><div id="dlg-corpo"></div></div></dialog>
+
+<script src="dados/lei2015_x_rev05.js"></script>
+<script src="dados/comparativo_vis.js"></script>
+<script src="dados/contribuicoes_vis.js"></script>
+<script src="dados/justificativas.js"></script>
+<script>
+(() => {
+  const D = window.LEI2015, VIS = window.VIS, CTB = window.CTB || { contrib: [], links: {} };
+  const NOV = D.novos, ANT = D.antigos, J = window.JUSTIFICATIVAS || {};
+  const temJ = (n) => Object.prototype.hasOwnProperty.call(J, String(n)) && J[n] && J[n].justificativa;
+  const N = new Map(NOV.map((a) => [a.n, a])), A = new Map(ANT.map((a) => [a.n, a]));
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rot = (n) => 'Art. ' + n + (n < 10 ? 'º' : '');
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim() || v;
+
+  // ---------- cores ----------
+  const COR_SIT = { 'Igual': '--s-igual', 'Parcialmente igual': '--s-parcial', 'Em oposição': '--s-contra', 'Novo': '--s-novo', 'Sem correspondente': '--s-sem' };
+  const SIT_ANT = { 'Mantido igual': 'Igual', 'Mantido com mudanças': 'Parcialmente igual', 'Alterado em oposição': 'Em oposição', 'Sem correspondente': 'Sem correspondente' };
+  const PAL_TIPO = { 'Ampliado': '#2F7FC1', 'Reduzido': '#C8323C', 'Regra alterada': '#B98A00', 'Delegado a outra norma': '#7B4FB5', 'Reorganizado/renomeado': '#5E8C6A' };
+  const PAL_IMP = { 'Mais restritivo': '#C8323C', 'Mais permissivo': '#E07B24', 'Mais detalhado': '#2F7FC1', 'Menos detalhado': '#8A6FB0', 'Só redação': '#7D8796' };
+  const PAL_FED = { 'R': '#00944F', 'D': '#2F7FC1', 'A': '#B98A00', '-': '#AEB6C1' };
+  const NOME_FED = { 'R': 'Remissão expressa', 'D': 'Fundamento direto', 'A': 'Abordagem ampla', '-': 'Sem relação identificada' };
+  const COB = { 'INTEGRAL': '#00944F', 'SIM': '#2F7FC1', 'NÃO': '#C8323C' };
+  const nCtb = (n) => (CTB.links[n] || []).length;
+  const fedMelhor = (n) => ((VIS.fed[n] || [])[0] || [])[3] || '-';
+  const escala = (k) => k === 0 ? '#D5DAE1' : k <= 2 ? '#BFD7EE' : k <= 5 ? '#86B5E0' : k <= 15 ? '#3F86C8' : k <= 40 ? '#1F5E9E' : '#0D3B6E';
+  const corSit = (s) => css(COR_SIT[s] || '--s-sem');
+  const est = { modo: 'sit', foco: null, sel: null, res: null };
+  const VAZIO = '<p class="vazio-p">Clique numa bolinha para abrir o artigo, ou busque uma palavra acima.</p>';
+  function corNova(a) {
+    if (est.modo === 'tipo') return a.tipo ? PAL_TIPO[a.tipo] : '#D5DAE1';
+    if (est.modo === 'imp') return a.impacto ? PAL_IMP[a.impacto] : '#D5DAE1';
+    if (est.modo === 'fed') return PAL_FED[fedMelhor(a.n)];
+    if (est.modo === 'ctb') return escala(nCtb(a.n));
+    return corSit(a.sit);
+  }
+  function legenda() {
+    let itens;
+    if (est.modo === 'tipo') itens = Object.entries(PAL_TIPO).concat([['Não se aplica', '#D5DAE1']]);
+    else if (est.modo === 'imp') itens = Object.entries(PAL_IMP).concat([['Não se aplica', '#D5DAE1']]);
+    else if (est.modo === 'fed') itens = Object.entries(PAL_FED).map(([k, c]) => [NOME_FED[k], c]);
+    else if (est.modo === 'ctb') itens = [['nenhuma', escala(0)], ['1–2', escala(1)], ['3–5', escala(3)], ['6–15', escala(6)], ['16–40', escala(16)], ['mais de 40', escala(41)]];
+    else itens = Object.keys(COR_SIT).map((k) => [k, corSit(k)]);
+    $('legenda').innerHTML = '<b style="color:var(--ink)">Nova minuta:</b> ' + itens.map(([t, c]) => `<span style="--c:${c}">${esc(t)}</span>`).join('') + (NOV.some((a) => temJ(a.n)) ? '<span class="leg-anel" style="margin-left:6px">com justificativa técnica</span>' : '');
+  }
+
+  // ---------- layout ----------
+  const W = 1000, R = 5.2, PASSO = 15;
+  const tituloCurto = (t) => (String(t || '').match(/^(T[ÍI]TULO\s+[IVXLC]+)/i) || [, 'Sem título'])[1].replace(/T[ÍI]TULO/i, 'Título');
+  function blocos(lista, x0, cols) {
+    const grupos = []; let g = null;
+    for (const a of lista) { const t = tituloCurto(a.titulo); if (!g || g.t !== t) { g = { t, itens: [] }; grupos.push(g); } g.itens.push(a); }
+    let y = 64; const pos = new Map(), rots = [];
+    for (const gr of grupos) {
+      rots.push({ x: x0, y: y + 8, t: gr.t + ' (' + gr.itens.length + ')' }); y += 18;
+      gr.itens.forEach((a, i) => pos.set(a.n, { x: x0 + R + (i % cols) * PASSO, y: y + R + Math.floor(i / cols) * PASSO }));
+      y += Math.ceil(gr.itens.length / cols) * PASSO + 10;
+    }
+    return { pos, rots, h: y };
+  }
+  const ESQ = blocos(ANT, 20, 17), DIR = blocos(NOV, 690, 20);
+  let H = Math.max(ESQ.h, DIR.h) + 10;
+  const ORDEM = ['Igual', 'Parcialmente igual', 'Em oposição', 'Novo', 'Sem correspondente'];
+  const qtd = Object.fromEntries(ORDEM.map((s) => [s, s === 'Sem correspondente' ? ANT.filter((a) => a.sit === 'Sem correspondente').length : NOV.filter((a) => a.sit === s).length]));
+  const tot = ORDEM.reduce((t, s) => t + qtd[s], 0), GAP = 16, ALT = H - 120 - GAP * (ORDEM.length - 1);
+  const NO = {}; let yy = 80;
+  for (const s of ORDEM) { const h = Math.max(34, ALT * qtd[s] / tot); NO[s] = { x: 410, y: yy, w: 170, h }; yy += h + GAP; }
+  H = Math.max(H, yy + 6);
+  const curva = (x1, y1, x2, y2) => { const mx = (x1 + x2) / 2; return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`; };
+
+  // linhas: nova minuta -> classificação; 2015 -> classificação do(s) artigo(s) correspondente(s)
+  const links = [];
+  const slot = {};
+  const yNo = (s, lado) => { const k = s + lado; slot[k] = (slot[k] || 0) + 1; const no = NO[s]; return no.y + 6 + (no.h - 12) * ((slot[k] - 0.5) / (lado === 'd' ? qtd[s] : contEsq[s])); };
+  const contEsq = {};
+  const PRIOR = ['Igual', 'Parcialmente igual', 'Em oposição', 'Novo'];
+  ANT.forEach((a) => { const ss = a.sit === 'Sem correspondente' ? ['Sem correspondente'] : [...new Set(a.em.map((n) => N.get(n).sit))].sort((x, y) => PRIOR.indexOf(x) - PRIOR.indexOf(y)); a._ss = ss; ss.forEach((s) => { contEsq[s] = (contEsq[s] || 0) + 1; }); });
+  NOV.forEach((a) => { const p = DIR.pos.get(a.n); links.push({ d: curva(NO[a.sit].x + NO[a.sit].w, yNo(a.sit, 'd'), p.x - R, p.y), s: a.sit, n: a.n, lado: 'n' }); });
+  ANT.forEach((a) => { const p = ESQ.pos.get(a.n); a._ss.forEach((s) => links.push({ d: curva(p.x + R, p.y, NO[s].x, yNo(s, 'e')), s, n: a.n, lado: 'a' })); });
+
+  function desenhar() {
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de ligação entre os artigos da lei de 2015 e da nova minuta">`;
+    svg += `<text class="rot-col" x="20" y="34">Lei de 2015 · 194 artigos</text><text class="rot-col" x="${W / 2}" y="34" text-anchor="middle">Classificação</text><text class="rot-col" x="690" y="34">Nova minuta · 355 artigos</text>`;
+    svg += '<g id="g-lk">' + links.map((l, i) => `<path class="lk" data-i="${i}" data-s="${esc(l.s)}" d="${l.d}" stroke="${corSit(l.s)}"/>`).join('') + '</g>';
+    for (const s of ORDEM) {
+      const no = NO[s];
+      svg += `<g class="no${est.foco && est.foco !== s ? ' off' : ''}" data-no="${esc(s)}" role="button" tabindex="0" aria-label="${esc(s)}: ${qtd[s]} artigos"><rect x="${no.x}" y="${no.y}" width="${no.w}" height="${no.h}" fill="${corSit(s)}"/>` +
+        `<text x="${no.x + 10}" y="${no.y + Math.min(no.h / 2 + 4, 22)}">${esc(s)}</text><text class="qt" x="${no.x + no.w - 10}" y="${no.y + Math.min(no.h / 2 + 4, 22)}" text-anchor="end">${qtd[s]}</text></g>`;
+    }
+    for (const r of ESQ.rots.concat(DIR.rots)) svg += `<text class="rot-tit" x="${r.x}" y="${r.y}">${esc(r.t)}</text>`;
+    // 2015: cor da classificação do(s) artigo(s) correspondente(s); se forem mais de uma, a bolinha é dividida em fatias (Igual primeiro)
+    svg += ANT.map((a) => {
+      const p = ESQ.pos.get(a.n), ss = a._ss;
+      const tip = a.em.length ? a.em.map((n) => rot(n) + ': ' + N.get(n).sit).join('; ') : 'sem correspondente';
+      let g = `<circle class="dot" data-l="a" data-n="${a.n}" cx="${p.x}" cy="${p.y}" r="${R}" fill="${corSit(ss[0])}"><title>2015 · ${rot(a.n)} — ${esc(a.sit)} (${esc(tip)})</title></circle>`;
+      if (ss.length > 1) {
+        const k = ss.length;
+        g += `<g class="fatias" data-n="${a.n}" pointer-events="none">` + ss.slice(1).map((s2, j) => {
+          const a0 = -Math.PI / 2 + 2 * Math.PI * (j + 1) / k, a1 = -Math.PI / 2 + 2 * Math.PI * (j + 2) / k;
+          const r2 = R - 0.5, x0 = p.x + r2 * Math.cos(a0), y0 = p.y + r2 * Math.sin(a0), x1 = p.x + r2 * Math.cos(a1), y1 = p.y + r2 * Math.sin(a1);
+          return `<path d="M${p.x},${p.y} L${x0.toFixed(2)},${y0.toFixed(2)} A${r2},${r2} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${corSit(s2)}"/>`;
+        }).join('') + '</g>';
+      }
+      return g;
+    }).join('');
+    svg += NOV.map((a) => { const p = DIR.pos.get(a.n); return `<circle class="dot" data-l="n" data-n="${a.n}" cx="${p.x}" cy="${p.y}" r="${R}" fill="${corNova(a)}"><title>Nova · ${rot(a.n)} — ${esc(a.sit)}${a.tipo ? ' · ' + esc(a.tipo) : ''} · ${nCtb(a.n)} contribuições</title></circle>`; }).join('');
+    svg += NOV.filter((a) => temJ(a.n)).map((a) => { const p = DIR.pos.get(a.n); return `<circle class="anel" data-n="${a.n}" cx="${p.x}" cy="${p.y}" r="${R + 2.2}"/>`; }).join('');
+    $('diagrama').innerHTML = svg + '</svg>';
+    marcar();
+  }
+  function marcar() {
+    const dg = $('diagrama'); const on = new Set(); const lk = new Set();
+    if (est.sel) {
+      const { l, n } = est.sel;
+      on.add(l + n);
+      if (l === 'n') { on.add('n' + n); N.get(n).refs.forEach((r) => on.add('a' + r)); }
+      else { A.get(n).em.forEach((r) => on.add('n' + r)); }
+      links.forEach((x, i) => { if (on.has(x.lado + x.n)) lk.add(i); });
+    } else if (est.res) {
+      est.res.n.forEach((_, n) => { if (naClasse('n', n)) on.add('n' + n); });
+      est.res.a.forEach((_, n) => { if (naClasse('a', n)) on.add('a' + n); });
+      links.forEach((x, i) => { if (on.has(x.lado + x.n) && (!est.foco || x.s === est.foco)) lk.add(i); });
+    } else if (est.foco) {
+      NOV.forEach((a) => { if (a.sit === est.foco) on.add('n' + a.n); });
+      ANT.forEach((a) => { if (a._ss.includes(est.foco)) on.add('a' + a.n); });
+      links.forEach((x, i) => { if (x.s === est.foco) lk.add(i); });
+    }
+    dg.classList.toggle('foco', !!(est.sel || est.foco || est.res));
+    dg.querySelectorAll('.dot').forEach((c) => { const k = c.dataset.l + c.dataset.n; c.classList.toggle('on', on.has(k)); c.classList.toggle('sel', !!est.sel && est.sel.l + est.sel.n === k); });
+    dg.querySelectorAll('.lk').forEach((p) => p.classList.toggle('on', lk.has(Number(p.dataset.i))));
+    dg.querySelectorAll('.anel').forEach((c) => c.classList.toggle('on', on.has('n' + c.dataset.n)));
+    dg.querySelectorAll('.no').forEach((g) => g.classList.toggle('off', !!est.foco && g.dataset.no !== est.foco));
+    // ao clicar num artigo da minuta, os artigos de 2015 ligados a ele assumem a cor da classificação dele
+    const tmp = est.sel && est.sel.l === 'n' ? new Set(N.get(est.sel.n).refs) : new Set();
+    const corTmp = est.sel && est.sel.l === 'n' ? corSit(N.get(est.sel.n).sit) : null;
+    dg.querySelectorAll('.dot[data-l="a"]').forEach((c) => { const n = Number(c.dataset.n); c.setAttribute('fill', tmp.has(n) ? corTmp : corSit(A.get(n)._ss[0])); });
+    dg.querySelectorAll('.fatias').forEach((g) => { g.style.opacity = tmp.has(Number(g.dataset.n)) ? 0 : ''; });
+    dg.querySelectorAll('.fatias').forEach((g) => { if (est.sel || est.foco || est.res) { const c = dg.querySelector(`.dot[data-l="a"][data-n="${g.dataset.n}"]`); if (c && !c.classList.contains('on')) g.style.opacity = .22; } });
+  }
+
+  // ---------- busca ----------
+  const semAc = (s) => String(s || '').normalize('NFC').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const VAZIAS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'o', 'a', 'os', 'as', 'em', 'no', 'na', 'nos', 'nas', 'para', 'por', 'com', 'que', 'ao', 'aos', 'ou', 'se', 'um', 'uma']);
+  const IDX = { n: new Map(), a: new Map() };
+  NOV.forEach((a) => IDX.n.set(a.n, { t: semAc(a.texto), nota: semAc(a.nota), j: temJ(a.n) ? semAc([J[a.n].justificativa, J[a.n].em_2015, J[a.n].na_minuta].join(' ')) : '' }));
+  ANT.forEach((a) => IDX.a.set(a.n, { t: semAc(a.texto), nota: semAc(a.nota) }));
+  let ctbIdx = null; const ctbTxt = () => ctbIdx || (ctbIdx = CTB.contrib.map((c) => semAc(c[2])));
+  function termos(q) {
+    const out = [];
+    String(q).replace(/[“"”]([^“"”]+)[“"”]|([^\s“"”]+)/g, (m, frase, pal) => {
+      const t = semAc(frase || pal).trim();
+      if (t && (frase || (!VAZIAS.has(t) && (t.length >= 2 || /\d/.test(t))))) out.push(t);
+      return m;
+    });
+    return out;
+  }
+  const tem = (txt, ts) => !!txt && ts.every((t) => txt.includes(t));
+  function buscar(q) {
+    const ts = termos(q), r = { q, ts, n: new Map(), a: new Map() };
+    if (!ts.length) return r;
+    const comC = $('b-ctb').checked, comJ = $('b-just').checked;
+    NOV.forEach((a) => {
+      const x = IDX.n.get(a.n), onde = [];
+      if (tem(x.t, ts)) onde.push('texto');
+      if (tem(x.nota, ts)) onde.push('nota da comparação');
+      if (comJ && tem(x.j, ts)) onde.push('justificativa técnica');
+      if (comC) { const k = (CTB.links[a.n] || []).filter((l) => tem(ctbTxt()[l[0]], ts)).length; if (k) onde.push(k + (k > 1 ? ' contribuições' : ' contribuição')); }
+      if (onde.length) r.n.set(a.n, onde);
+    });
+    ANT.forEach((a) => { const x = IDX.a.get(a.n), onde = []; if (tem(x.t, ts)) onde.push('texto'); if (tem(x.nota, ts)) onde.push('nota da comparação'); if (onde.length) r.a.set(a.n, onde); });
+    return r;
+  }
+  function hl(txt) {
+    const t = String(txt || '').normalize('NFC'), ts = est.res ? est.res.ts : [];
+    if (!ts.length) return esc(t);
+    const n = semAc(t), ms = [];
+    ts.forEach((x) => { let i = 0; while ((i = n.indexOf(x, i)) >= 0) { ms.push([i, i + x.length]); i += x.length; } });
+    ms.sort((x, y) => x[0] - y[0]);
+    let out = '', p = 0;
+    for (const [i, j] of ms) { if (i < p) continue; out += esc(t.slice(p, i)) + '<mark>' + esc(t.slice(i, j)) + '</mark>'; p = j; }
+    return out + esc(t.slice(p));
+  }
+  function trecho(txt) {
+    const t = String(txt || '').normalize('NFC').replace(/\s+/g, ' '), n = semAc(t);
+    const i = Math.min(...est.res.ts.map((x) => { const k = n.indexOf(x); return k < 0 ? Infinity : k; }));
+    if (!isFinite(i)) return hl(t.slice(0, 150)) + (t.length > 150 ? '…' : '');
+    const a = Math.max(0, i - 60), b = Math.min(t.length, i + 110);
+    return (a ? '…' : '') + hl(t.slice(a, b)) + (b < t.length ? '…' : '');
+  }
+  const naClasse = (l, n) => !est.foco || (l === 'n' ? N.get(n).sit === est.foco : A.get(n)._ss.includes(est.foco));
+  function painelRes() {
+    const r = est.res;
+    const nv = [...r.n.keys()].filter((n) => naClasse('n', n)).sort((x, y) => x - y);
+    const an = [...r.a.keys()].filter((n) => naClasse('a', n)).sort((x, y) => x - y);
+    let h = `<div class="p-cab"><span class="p-num">Busca</span><span class="dica">“${esc(r.q)}”</span></div>`;
+    h += `<p style="margin:8px 0 0;font-size:14.5px"><b>${nv.length}</b> artigo${nv.length !== 1 ? 's' : ''} na nova minuta · <b>${an.length}</b> na lei de 2015${est.foco ? `<br><span class="dica">Só “${esc(est.foco)}”. Clique de novo na classificação para ver todos.</span>` : ''}</p>`;
+    if (nv.length + an.length > 150) h += '<p class="aviso">Termo muito comum: aparece em boa parte das duas leis. Acrescente outra palavra ou use uma expressão entre aspas.</p>';
+    if (!nv.length && !an.length) h += '<p class="vazio-p" style="margin-top:10px">Nada encontrado. Tente outra palavra ou só o começo dela (ex.: “outorg”).</p>';
+    const item = (l, n) => {
+      const a = (l === 'n' ? N : A).get(n), onde = r[l].get(n), cor = corSit(l === 'n' ? a.sit : a._ss[0]);
+      const fonte = onde.includes('texto') ? a.texto : onde.includes('nota da comparação') ? a.nota : onde.includes('justificativa técnica') ? J[n].justificativa : a.texto;
+      return `<button data-ir="${l}${n}" style="--c:${cor}"><b>${rot(n)}</b> <span class="onde">· ${esc(a.sit)} · encontrado em: ${esc(onde.join(', '))}</span><br>${trecho(fonte)}</button>`;
+    };
+    if (nv.length) h += `<div class="p-sec"><h3>Nova minuta (${nv.length})</h3><div class="res-lista">${nv.map((n) => item('n', n)).join('')}</div></div>`;
+    if (an.length) h += `<div class="p-sec"><h3>Lei de 2015 (${an.length})</h3><div class="res-lista">${an.map((n) => item('a', n)).join('')}</div></div>`;
+    return h;
+  }
+  const voltar = () => est.res ? `<button class="lnk" id="p-voltar" style="margin-bottom:10px">← Voltar aos resultados de “${esc(est.res.q)}”</button>` : '';
+
+  // ---------- painel ----------
+  const cam = (a) => [a.titulo, a.capitulo, a.secao, a.subsecao].filter(Boolean).join(' › ');
+  function painelNova(n) {
+    const a = N.get(n), fed = VIS.fed[n] || [], ctb = CTB.links[n] || [];
+    const longo = a.texto.length > 500 && !est.res;
+    let h = voltar() + `<div class="p-cab"><span class="p-num">${rot(n)}</span><span class="sit" style="--cor:${corSit(a.sit)}">${esc(a.sit)}</span><span class="dica">nova minuta</span></div>
+      <p class="dica" style="margin:6px 0 0">${esc(cam(a))}</p>`;
+    h += blocoJust(n);
+    if (a.tipo) h += `<div class="p-sec"><h3>Tipo de mudança e impacto</h3><div class="tags"><span class="tag" title="Tipo de mudança">${esc(a.tipo)}</span><span class="tag imp" title="Impacto">${esc(a.impacto)}</span>` +
+      [...a.tipo_outros, ...a.impacto_outros].map((x) => `<span class="tag" style="opacity:.7" title="Secundária">${esc(x)}</span>`).join('') + '</div></div>';
+    h += `<div class="p-sec"><h3>Na lei de 2015</h3>${a.refs.length ? '<div class="tags">' + a.refs.map((r) => `<button class="lnk" data-ir="a${r}">${rot(r)}</button>`).join('') + '</div>' : '<span class="vazio-p">Sem correspondente (tema novo).</span>'}</div>`;
+    if (a.nota) h += `<div class="p-sec"><p class="nota" style="--cor:${corSit(a.sit)}">${hl(a.nota)}</p></div>`;
+    h += `<div class="p-sec"><h3>Texto</h3><p class="texto${longo ? ' recolhido' : ''}" id="p-texto">${hl(a.texto)}</p>${longo ? '<button class="lnk" id="p-exp" style="margin-top:6px">Ler tudo</button>' : ''}</div>`;
+    h += `<div class="p-sec"><h3>Contribuições da população (${ctb.length})</h3>`;
+    if (ctb.length) {
+      h += '<div class="tags">' + ctb.map((l, i) => { const c = CTB.contrib[l[0]]; return `<button class="num${l[6] ? ' amp' : ''}" style="--c:${COB[l[1]] || '#7D8796'}" data-ctb="${n}:${i}" title="${esc(c[2].slice(0, 300))}">${i + 1}</button>`; }).join('') + '</div>';
+      h += `<p class="dica" style="margin:6px 0 0">Cor = cobertura avaliada na etapa participativa: <span style="color:${COB.INTEGRAL}">●</span> integral · <span style="color:${COB.SIM}">●</span> sim · <span style="color:${COB['NÃO']}">●</span> não. Contorno tracejado = busca ampliada (semelhança de texto). Passe o mouse para ler; clique para abrir.</p>`;
+    } else h += '<span class="vazio-p">Nenhuma contribuição ligada a este artigo.</span>';
+    h += '</div>';
+    h += `<div class="p-sec"><h3>Relação com leis federais (${fed.length})</h3>`;
+    if (fed.length) h += '<div class="fed">' + fed.map((f, i) => { const L = VIS.leis[f[0]]; return `<button data-fed="${n}:${i}" title="${esc(NOME_FED[f[3]])}"><span class="num" style="--c:${PAL_FED[f[3]]}">${i + 1}</span><span><b>${esc(L[0])}</b> ${f[1] ? '· art. ' + esc(f[1]) + (f[2] && f[2] !== 'caput' ? ', ' + esc(f[2]) : '') : '· citada no texto'}<br><span class="dica">${esc(L[1])} — ${esc(NOME_FED[f[3]])}</span></span></button>`; }).join('') + '</div>';
+    else h += '<span class="vazio-p">Nenhuma das leis federais consultadas trata do assunto.</span>';
+    return h + '</div>';
+  }
+  const dataBR = (d) => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : esc(d || ''); };
+  function corpoJust(n) {
+    const j = J[n];
+    let h = '';
+    if (j.em_2015 || j.na_minuta) h += `<div class="j-par"><div><b>Em 2015${j.arts_2015 ? ' (' + esc(j.arts_2015) + ')' : ''}</b>${esc(j.em_2015 || '—')}</div><div><b>Na nova minuta</b>${esc(j.na_minuta || '—')}</div></div>`;
+    h += `<p class="j-txt">${hl(j.justificativa)}</p>`;
+    if (j.fonte || j.data) h += `<p class="dica" style="margin:0">Fonte: ${esc(j.fonte || '—')}${j.data ? ' · ' + dataBR(j.data) : ''}</p>`;
+    return h;
+  }
+  function blocoJust(n) {
+    if (!temJ(n)) return '';
+    return `<details class="just" id="p-just"><summary>Justificativa técnica</summary><div class="j-corpo">${corpoJust(n)}</div></details>`;
+  }
+  function painelAntigo(n) {
+    const a = A.get(n), s = SIT_ANT[a.sit]; const longo = a.texto.length > 500 && !est.res;
+    let h = voltar() + `<div class="p-cab"><span class="p-num">${rot(n)}</span><span class="sit" style="--cor:${corSit(s)}">${esc(a.sit)}</span><span class="dica">lei de 2015</span></div>
+      <p class="dica" style="margin:6px 0 0">${esc(cam(a))}</p>`;
+    if (a.tipos && a.tipos.length) h += `<div class="p-sec"><h3>Mudanças na nova minuta</h3><div class="tags">${a.tipos.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}${a.impactos.map((t) => `<span class="tag imp">${esc(t)}</span>`).join('')}</div></div>`;
+    if (a._ss.length > 1) h += `<div class="p-sec"><p class="nota">Este artigo foi dividido na nova minuta e os trechos têm classificações diferentes (${a._ss.map(esc).join(' e ')}). Por isso a bolinha aparece em fatias; ao clicar num artigo da minuta, ela assume a cor daquele artigo.</p></div>`;
+    h += `<div class="p-sec"><h3>Na nova minuta</h3>${a.em.length ? '<div class="tags">' + a.em.map((r) => `<button class="lnk" data-ir="n${r}" style="border-left:4px solid ${corSit(N.get(r).sit)}">${rot(r)}${temJ(r) ? ' · ⓘ justificativa' : ''}</button>`).join('') + '</div>' : '<span class="vazio-p">Não tem correspondente na nova minuta.</span>'}</div>`;
+    const comJ = a.em.filter(temJ);
+    if (comJ.length) h += `<p class="dica" style="margin:6px 0 0">${comJ.map(rot).join(', ')} ${comJ.length > 1 ? 'têm' : 'tem'} justificativa técnica: clique para abrir.</p>`;
+    if (a.nota) h += `<div class="p-sec"><p class="nota">${hl(a.nota)}</p></div>`;
+    h += `<div class="p-sec"><h3>Texto de 2015</h3><p class="texto${longo ? ' recolhido' : ''}" id="p-texto">${hl(a.texto)}</p>${longo ? '<button class="lnk" id="p-exp" style="margin-top:6px">Ler tudo</button>' : ''}</div>`;
+    return h;
+  }
+  function selecionar(l, n, rolar, abrirJ) {
+    if (!(l === 'n' ? N : A).has(n)) return;
+    est.sel = { l, n }; est.foco = null;
+    $('painel').innerHTML = l === 'n' ? painelNova(n) : painelAntigo(n);
+    if ((abrirJ || (l === 'n' && est.res && (est.res.n.get(n) || []).includes('justificativa técnica'))) && $('p-just')) $('p-just').open = true;
+    $('painel').scrollTop = 0;
+    marcar(); salvar();
+    if (rolar && window.innerWidth <= 1100) $('painel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function abrir(tit, corpo) { $('dlg-tit').textContent = tit; $('dlg-corpo').innerHTML = corpo; $('dlg').showModal(); }
+  $('dlg-x').onclick = () => $('dlg').close();
+  $('dlg').addEventListener('click', (e) => {
+    if (e.target === $('dlg')) { $('dlg').close(); return; }
+    const ir = e.target.closest('[data-ir]'); if (ir) { $('dlg').close(); selecionar(ir.dataset.ir[0], Number(ir.dataset.ir.slice(1)), true, true); }
+  });
+  // lista de todas as justificativas
+  const listaJ = NOV.filter((a) => temJ(a.n));
+  if (listaJ.length) {
+    $('bt-just').hidden = false; $('bt-just').textContent = `Justificativas técnicas (${listaJ.length})`;
+    $('bt-just').onclick = () => abrir(`Justificativas técnicas (${listaJ.length})`,
+      '<p class="dica" style="margin:0 0 8px">Artigos da nova minuta com justificativa técnica. Clique para abrir o artigo com a justificativa.</p><div class="j-lista">' +
+      listaJ.map((a) => { const j = J[a.n]; return `<button data-ir="n${a.n}" style="--c:${corSit(a.sit)}"><b>${rot(a.n)}</b> <span class="dica">· ${esc(a.sit)}${j.arts_2015 ? ' · 2015: ' + esc(j.arts_2015) : ''}</span><br>${esc(j.na_minuta || j.justificativa.slice(0, 160) + (j.justificativa.length > 160 ? '…' : ''))}</button>`; }).join('') + '</div>');
+  }
+
+  $('diagrama').addEventListener('click', (e) => {
+    const c = e.target.closest('.dot'); if (c) { selecionar(c.dataset.l, Number(c.dataset.n), true); return; }
+    const g = e.target.closest('.no'); if (g) { est.foco = est.foco === g.dataset.no ? null : g.dataset.no; est.sel = null; if (est.res) $('painel').innerHTML = painelRes(); marcar(); salvar(); }
+  });
+  $('diagrama').addEventListener('keydown', (e) => { const g = e.target.closest('.no'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); g.dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
+  $('painel').addEventListener('click', (e) => {
+    const ir = e.target.closest('[data-ir]'); if (ir) { selecionar(ir.dataset.ir[0], Number(ir.dataset.ir.slice(1))); return; }
+    if (e.target.id === 'p-voltar') { est.sel = null; $('painel').innerHTML = painelRes(); $('painel').scrollTop = 0; marcar(); salvar(); return; }
+    if (e.target.closest('#p-just > summary')) { setTimeout(salvar, 0); }
+    if (e.target.id === 'p-exp') { const t = $('p-texto'); t.classList.toggle('recolhido'); e.target.textContent = t.classList.contains('recolhido') ? 'Ler tudo' : 'Recolher'; return; }
+    const cb = e.target.closest('[data-ctb]');
+    if (cb) {
+      const [n, i] = cb.dataset.ctb.split(':').map(Number); const l = CTB.links[n][i], c = CTB.contrib[l[0]];
+      abrir(`Contribuição ${i + 1} · ${rot(n)}`, `<p class="texto">${hl(c[2])}</p>
+        <div class="tags"><span class="tag">Código ${esc(c[0])}</span><span class="tag">ID de origem ${esc(c[1])}</span>${l[6] ? `<span class="tag">Busca ampliada · semelhança ${Number(l[7]).toFixed(2)} · confiança ${esc(l[3])}</span>` : `<span class="tag" style="border-color:${COB[l[1]] || 'var(--border)'}">Cobertura: ${esc(l[1] || 'não avaliada')}</span>${l[2] === 'secundário' ? '<span class="tag">vínculo secundário</span>' : ''}${l[3] && l[3] !== 'alta' ? `<span class="tag">correspondência ${esc(l[3])}</span>` : ''}`}</div>
+        ${l[6] ? '<p class="dica">Esta proposta foi ligada ao artigo por semelhança de texto, não pela classificação da etapa participativa. Confira se ela de fato trata do tema.</p>' : ''}
+        ${l[4] ? `<p class="nota"><b>Avaliação da etapa participativa</b> (feita sobre o Art. ${esc(l[5])} da versão anterior da minuta, que corresponde ao ${rot(n)} atual): ${esc(l[4])}</p>` : ''}`);
+      return;
+    }
+    const fb = e.target.closest('[data-fed]');
+    if (fb) {
+      const [n, i] = fb.dataset.fed.split(':').map(Number); const f = VIS.fed[n][i], L = VIS.leis[f[0]];
+      abrir(`${L[0]} — ${L[1]}`, `<div class="tags"><span class="tag" style="border-color:${PAL_FED[f[3]]}">${esc(NOME_FED[f[3]])}</span>${f[1] ? `<span class="tag">art. ${esc(f[1])}${f[2] && f[2] !== 'caput' ? ', ' + esc(f[2]) : ''}</span>` : ''}</div>
+        ${f[4] ? `<p class="texto">${esc(f[4])}</p>` : '<p class="vazio-p">O artigo da minuta cita a lei sem indicar um dispositivo.</p>'}
+        <p class="nota"><b>Como se relaciona com o ${rot(n)}:</b> ${esc(f[5])}</p>`);
+    }
+  });
+  $('modo').onchange = (e) => { est.modo = e.target.value; legenda(); $('diagrama').querySelectorAll('.dot[data-l="n"]').forEach((c) => c.setAttribute('fill', corNova(N.get(Number(c.dataset.n))))); salvar(); };
+  function aplicarBusca(rolar) {
+    const q = $('busca').value.trim();
+    if (/^\d+$/.test(q)) { est.res = null; selecionar($('lado').value, Number(q), rolar); return; }
+    const r = q ? buscar(q) : null;
+    est.res = r && r.ts.length ? r : null; est.sel = null;
+    $('painel').innerHTML = est.res ? painelRes() : VAZIO; $('painel').scrollTop = 0;
+    marcar(); salvar();
+    if (rolar && est.res && window.innerWidth <= 1100) $('painel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  let tmr;
+  $('busca').addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { if (!/^\d+$/.test($('busca').value.trim())) aplicarBusca(false); }, 250); });
+  $('busca').addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(tmr); aplicarBusca(true); } });
+  $('bt-ir').onclick = () => aplicarBusca(true);
+  $('b-ctb').onchange = $('b-just').onchange = () => { if (est.res) aplicarBusca(false); else salvar(); };
+  $('bt-limpar').onclick = () => { est.sel = null; est.foco = null; est.res = null; $('busca').value = ''; $('painel').innerHTML = VAZIO; marcar(); salvar(); };
+
+  function salvar() {
+    const p = new URLSearchParams();
+    if (est.modo !== 'sit') p.set('cor', est.modo);
+    if (est.sel) p.set(est.sel.l === 'n' ? 'art' : 'art2015', est.sel.n);
+    if (est.sel && est.sel.l === 'n' && $('p-just') && $('p-just').open) p.set('just', '1');
+    if (est.foco) p.set('class', est.foco);
+    if (est.res) p.set('q', est.res.q);
+    if ($('b-ctb').checked) p.set('ctb', '1');
+    if (!$('b-just').checked) p.set('just_busca', '0');
+    history.replaceState(null, '', p.toString() ? '?' + p : location.pathname);
+  }
+  const p = new URLSearchParams(location.search);
+  if (p.has('cor')) { est.modo = p.get('cor'); $('modo').value = est.modo; }
+  if (p.has('class')) est.foco = p.get('class') === 'Na contramão' ? 'Em oposição' : p.get('class');
+  if (p.get('ctb') === '1') $('b-ctb').checked = true;
+  if (p.get('just_busca') === '0') $('b-just').checked = false;
+  if (p.has('q')) { $('busca').value = p.get('q'); const r = buscar(p.get('q')); est.res = r.ts.length ? r : null; }
+  legenda(); desenhar();
+  if (p.has('art')) selecionar('n', Number(p.get('art')), false, p.get('just') === '1'); else if (p.has('art2015')) selecionar('a', Number(p.get('art2015')));
+  else if (est.res) { $('painel').innerHTML = painelRes(); marcar(); }
+  $('rodape').textContent = `Antes: ${D.meta.antes}. Depois: ${D.meta.depois}. Contribuições: ${CTB.contrib.length} propostas das etapas participativas ligadas aos artigos da nova minuta. Leis federais: ${VIS.leis.length} normas consultadas.`;
+})();
+</script>
+</body>
+</html>

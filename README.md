@@ -8,6 +8,13 @@ Ferramenta estática para a Comissão da Câmara Municipal de Curitiba. Não pre
 |---|---|
 | `index.html` | Consulta: busca literal, índice, glossário e a aba "Pergunte à minuta" |
 | `grafo.html` | Grafo de impactos (rede radial com remissões) |
+| `versoes.html` | O que mudou: comparação artigo por artigo entre a versão de julho/2026 (351 artigos) e a Rev.05 r1 de outubro (355) |
+| `lei2015.html` | Lei de 2015 × nova: cada artigo da Rev.05 classificado como igual, parcialmente igual, novo ou em oposição à Lei nº 14.771/2015, os parcialmente iguais com tipo de mudança e impacto (principal + secundários), e os artigos de 2015 sem correspondente |
+| `dados/lei2015_x_rev05.js` | Dados dessa comparação |
+| `comparativo.html` | Comparativo visual: bolinhas dos artigos de 2015 e da nova minuta ligadas pela classificação; ao clicar, abre o artigo, as contribuições da população (numeradas) e a relação com as leis federais; busca por palavra, expressão entre aspas ou número (acende os artigos no diagrama, lista os resultados com o trecho destacado e pode incluir contribuições e justificativas; fica no link como `?q=`) |
+| `dados/comparativo_vis.js`, `dados/contribuicoes_vis.js` | Dados dessa página (vínculos com leis federais; contribuições e seus vínculos com os artigos) |
+| `dados/justificativas.js` | Justificativas técnicas por artigo da nova minuta (editável à mão: copie um bloco, troque o número do artigo e preencha os campos). Artigos que estão aqui ganham o anel no diagrama, o bloco "Justificativa técnica" no painel e entram na lista do botão "Justificativas técnicas" |
+| `dados/versoes_jul_out.js` | Dados da comparação (pareamento por texto e diferenças palavra a palavra) |
 | `assets/estilo.css` | Visual da Minuta Interativa (claro e escuro) |
 | `assets/busca.js` | Motor de busca e leitor de artigos, usado pelas duas páginas |
 | `dados/minuta_rev05.js` | Texto estruturado da minuta (carregado pelas páginas) |

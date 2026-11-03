@@ -60,7 +60,7 @@
     <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
     <p class="eyebrow">Revisão do Plano Diretor · Lei nº 14.771/2015 × Projeto de Lei Rev.05</p>
     <h1>Lei de 2015 e nova minuta</h1>
-    <p class="subtitulo">Cada artigo da nova minuta comparado com o Plano Diretor em vigor (Lei nº 14.771/2015): o que é igual, o que muda em parte, o que é novo e o que vai na contramão da regra atual. Também lista o que a lei de 2015 tinha e a nova minuta não traz.</p>
+    <p class="subtitulo">Cada artigo da nova minuta comparado com o Plano Diretor em vigor (Lei nº 14.771/2015): o que é igual, o que muda em parte, o que é novo e o que está em oposição à regra atual. Também lista o que a lei de 2015 tinha e a nova minuta não traz.</p>
   </header>
 
   <nav class="abas" aria-label="Seções da ferramenta">
@@ -70,6 +70,7 @@
     <a href="grafo.html">Grafo de impactos</a>
     <a href="versoes.html">O que mudou</a>
     <a href="lei2015.html" class="ativa" aria-current="page">Lei de 2015 × nova</a>
+    <a href="comparativo.html">Comparativo visual</a>
     <a href="index.html#pergunte">Pergunte usando I.A.</a>
   </nav>
 
@@ -92,7 +93,7 @@
       <div><label for="f-tipo">Tipo de mudança</label><select id="f-tipo"><option value="">Todos</option></select></div>
       <div><label for="f-imp">Impacto</label><select id="f-imp"><option value="">Todos</option></select></div>
       <div style="align-self:end"><label class="chk"><input type="checkbox" id="f-outros"> Incluir classificações secundárias</label></div>
-      <div id="ord-box"><label for="ordem">Ordenar por</label><select id="ordem"><option value="lei">Ordem da lei</option><option value="contra">Na contramão primeiro</option></select></div>
+      <div id="ord-box"><label for="ordem">Ordenar por</label><select id="ordem"><option value="lei">Ordem da lei</option><option value="contra">Em oposição primeiro</option></select></div>
     </div>
   </section>
 
@@ -130,17 +131,17 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const semAc = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const LOTE = 40;
-  const COR = { 'Igual': 'var(--s-igual)', 'Parcialmente igual': 'var(--s-parcial)', 'Novo': 'var(--s-novo)', 'Na contramão': 'var(--s-contra)',
-    'Mantido igual': 'var(--s-igual)', 'Mantido com mudanças': 'var(--s-parcial)', 'Alterado na contramão': 'var(--s-contra)', 'Sem correspondente': 'var(--s-sem)' };
-  const SN = ['Na contramão', 'Parcialmente igual', 'Igual', 'Novo'];
-  const SA = ['Sem correspondente', 'Alterado na contramão', 'Mantido com mudanças', 'Mantido igual'];
+  const COR = { 'Igual': 'var(--s-igual)', 'Parcialmente igual': 'var(--s-parcial)', 'Novo': 'var(--s-novo)', 'Em oposição': 'var(--s-contra)',
+    'Mantido igual': 'var(--s-igual)', 'Mantido com mudanças': 'var(--s-parcial)', 'Alterado em oposição': 'var(--s-contra)', 'Sem correspondente': 'var(--s-sem)' };
+  const SN = ['Em oposição', 'Parcialmente igual', 'Igual', 'Novo'];
+  const SA = ['Sem correspondente', 'Alterado em oposição', 'Mantido com mudanças', 'Mantido igual'];
   const EXPL = {
     'Igual': 'mesmo conteúdo normativo, só ajustes de redação.',
     'Parcialmente igual': 'o tema já existia em 2015; mantém o núcleo e amplia, detalha ou muda parte da regra.',
     'Novo': 'tema ou instrumento sem correspondente na lei de 2015.',
-    'Na contramão': 'inverte a regra de 2015: obrigação vira faculdade, garantia ou controle social é reduzido, proteção é estreitada ou matéria que exigia lei passa para ato do Executivo.',
+    'Em oposição': 'inverte a regra de 2015: obrigação vira faculdade, garantia ou controle social é reduzido, proteção é estreitada ou matéria que exigia lei passa para ato do Executivo.',
     'Sem correspondente': 'artigo de 2015 que a nova minuta não traz.',
-    'Alterado na contramão': 'artigo de 2015 cuja regra é invertida pela nova minuta.',
+    'Alterado em oposição': 'artigo de 2015 cuja regra é invertida pela nova minuta.',
     'Mantido com mudanças': 'o tema continua na nova minuta, com mudanças.',
     'Mantido igual': 'reproduzido na nova minuta sem mudança de conteúdo.' };
   const DEF_T = { 'Ampliado': 'acrescenta objetivos, diretrizes, hipóteses ou instrumentos ao que havia em 2015.', 'Reduzido': 'retira parte do conteúdo de 2015 (incisos, programas, exigências, prioridades).', 'Regra alterada': 'muda prazo, valor, percentual, critério, área de incidência ou procedimento.', 'Delegado a outra norma': 'o que estava escrito na lei passa a depender de lei específica, regulamento ou ato do Executivo.', 'Reorganizado/renomeado': 'mesmo tema com nova estrutura, nome ou enquadramento (ex.: PMDUS → PDUIS).' };
@@ -155,12 +156,12 @@
     : (a.tipos && a.tipos.length) ? `<div class="sub"><span class="outros">Mudanças:</span>${a.tipos.map((t) => `<span class="tag">${t}</span>`).join('')}${a.impactos.map((t) => `<span class="tag imp">${t}</span>`).join('')}</div>` : '';
   NOV.forEach((a) => { a.busca = semAc(a.texto + ' ' + a.nota + ' ' + a.refs.map((r) => V.get(r).texto).join(' ')); });
   ANT.forEach((a) => { a.busca = semAc(a.texto + ' ' + a.nota); });
-  const est = { g: 'novos', q: '', sitN: new Set(SN), sitA: new Set(['Sem correspondente', 'Alterado na contramão']), titulo: '', tipo: '', imp: '', outros: false, ordem: 'lei', mostrar: LOTE, abertos: new Set() };
+  const est = { g: 'novos', q: '', sitN: new Set(SN), sitA: new Set(['Sem correspondente', 'Alterado em oposição']), titulo: '', tipo: '', imp: '', outros: false, ordem: 'lei', mostrar: LOTE, abertos: new Set() };
 
   const cont = (L, s) => L.filter((a) => a.sit === s).length;
   $('numeros').innerHTML = [
     ['194 → 355', 'artigos (2015 → nova minuta)', ''],
-    [cont(NOV, 'Na contramão'), 'na contramão de 2015', 'vermelho'],
+    [cont(NOV, 'Em oposição'), 'em oposição a 2015', 'vermelho'],
     [cont(NOV, 'Parcialmente igual'), 'parcialmente iguais', 'ouro'],
     [cont(NOV, 'Igual'), 'iguais', 'verde'],
     [cont(NOV, 'Novo'), 'novos', 'azul'],
@@ -221,7 +222,7 @@
     const id = 'n' + a.n; const aberto = est.abertos.has(id); const longo = a.texto.length > 600;
     const corpo = a.diff ? a.diff.map(([op, t]) => op === '-' ? `<del>${esc(t)}</del>` : op === '+' ? `<ins>${esc(t)}</ins>` : esc(t)).join('') : esc(a.texto);
     const antigos = a.refs.map((r) => { const v = V.get(r); return `<details class="antigo"><summary>Lei de 2015 · Art. ${r} <span class="dica">(${esc(cam(v))})</span></summary><p class="texto">${marcar(esc(v.texto))}</p></details>`; }).join('');
-    return `<article class="art${a.sit === 'Na contramão' ? ' contra' : ''}" data-id="${id}" style="--cor:${COR[a.sit]}">
+    return `<article class="art${a.sit === 'Em oposição' ? ' contra' : ''}" data-id="${id}" style="--cor:${COR[a.sit]}">
       <div class="art-cab"><span class="art-num">Art. ${a.n}</span><span class="sit" style="--cor:${COR[a.sit]}">${a.sit}</span>${a.refs.length ? `<span class="era" style="font:500 13px var(--f-mono);color:var(--ink-faint)">em 2015: art. ${a.refs.join(', ')}</span>` : ''}</div>
       ${subHtml(a)}
       <div class="caminho"><span>${esc(cam(a))}</span></div>
@@ -234,7 +235,7 @@
   }
   function cartaoAntigo(a) {
     const id = 'a' + a.n; const aberto = est.abertos.has(id); const longo = a.texto.length > 600;
-    return `<article class="art${a.sit === 'Alterado na contramão' ? ' contra' : ''}" data-id="${id}">
+    return `<article class="art${a.sit === 'Alterado em oposição' ? ' contra' : ''}" data-id="${id}">
       <div class="art-cab"><span class="art-num">Art. ${a.n} (2015)</span><span class="sit" style="--cor:${COR[a.sit]}">${a.sit}</span>${a.em.length ? `<span style="font:500 13px var(--f-mono);color:var(--ink-faint)">na nova: art. ${a.em.join(', ')}</span>` : ''}</div>
       ${subHtml(a)}
       <div class="caminho"><span>${esc(cam(a))}</span></div>
