@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Google Analytics (fluxo 16165894488) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-242PY3YEGE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-242PY3YEGE');
+  </script>
+<title>Artigo por Artigo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/estilo.css">
+<style>
+  :root { --s-igual: #00944F; --s-parcial: #B98A00; --s-novo: #447EC0; --s-contra: #C8323C; --s-sem: #8A94A3; }
+  .grade { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .grade > aside { position: sticky; top: 12px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 24px); overflow: auto; }
+  @media (max-width: 900px) { .grade { grid-template-columns: minmax(0, 1fr); } .grade > aside { position: static; max-height: none; } }
+  .numero.vermelho b { color: var(--s-contra); } .numero.ouro b { color: var(--s-parcial); } .numero.azul b { color: var(--s-novo); }
+  .numero.destaque { border-color: var(--s-contra); background: color-mix(in srgb, var(--s-contra) 8%, var(--surface)); }
+  .sit { font: 700 11.5px/1 var(--f-ui); letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; color: #fff; background: var(--cor); white-space: nowrap; }
+  .sit small, .sitj small { font: 600 10px/1 var(--f-ui); opacity: .85; margin-right: 4px; letter-spacing: .06em; }
+  .sitj { font: 700 11.5px/1 var(--f-ui); letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--border); white-space: nowrap; }
+  .sitj.Alterado { background: #FFF4D1; color: #7A5A00; border-color: #F0D78A; }
+  .sitj.Novo { background: #EDE6F7; color: #5B3E8F; border-color: #D5C6EC; }
+  .sitj.Ajuste { background: #E4EEF9; color: #2D5F99; border-color: transparent; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sitj.Alterado { background: #3A3112; color: #F2C230; border-color: #5A4A14; } :root:not([data-theme="light"]) .sitj.Ajuste { background: #1C2C40; color: #7DA9DE; } :root:not([data-theme="light"]) .sitj.Novo { background: #2B2140; color: #C3A8F0; border-color: #3E3060; } }
+  :root[data-theme="dark"] .sitj.Alterado { background: #3A3112; color: #F2C230; border-color: #5A4A14; }
+  :root[data-theme="dark"] .sitj.Ajuste { background: #1C2C40; color: #7DA9DE; }
+  :root[data-theme="dark"] .sitj.Novo { background: #2B2140; color: #C3A8F0; border-color: #3E3060; }
+  .tem-j { font: 600 12.5px var(--f-ui); color: var(--ink); border: 1px solid var(--ink-faint); border-radius: 999px; padding: 2px 8px; }
+  .meta-art { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 500 13px/1.3 var(--f-mono); color: var(--ink-faint); }
+  .meta-art a { font-family: var(--f-ui); font-weight: 600; color: var(--primary); }
+  .lugar { color: var(--c-prazo); font-family: var(--f-ui); }
+  .sub { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font: 600 12.5px/1.2 var(--f-ui); }
+  .sub .tag { padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); }
+  .sub .tag.imp { border-style: dashed; }
+  .sub .outros { color: var(--ink-faint); font-weight: 500; }
+  .ti2 { display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; align-items: center; font: 600 12.5px/1.2 var(--f-ui); }
+  .ti2 .rot { font: 700 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+  .ti2 .linha { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .ti2 .tag { padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--ink); border: 1px solid var(--border); }
+  .ti2 .tag.sec { font-weight: 500; color: var(--ink-soft); background: var(--surface); }
+  .ti2 .tambem { color: var(--ink-faint); font-weight: 500; }
+  .art.contra { border-left: 4px solid var(--s-contra); }
+  .nota { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--surface-2); border-radius: 8px; padding: 8px 12px; border-left: 3px solid var(--cor, var(--ink-faint)); }
+  .texto { font: 16px/1.6 var(--f-lei); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .texto.recolhido { max-height: 9.6em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+  .texto del { color: var(--danger); background: var(--danger-soft); text-decoration: line-through; text-decoration-thickness: 1px; border-radius: 3px; }
+  .texto ins { color: var(--primary); background: var(--primary-soft); text-decoration: none; font-weight: 600; border-radius: 3px; }
+  .texto mark, .nota mark, .j-txt mark { background: var(--mark); color: var(--mark-ink); border-radius: 2px; }
+  details.antigo { border: 1px dashed var(--border); border-radius: 8px; padding: 8px 12px; background: var(--surface); }
+  details.antigo summary { cursor: pointer; font: 600 13.5px/1.3 var(--f-ui); color: var(--ink-soft); }
+  details.antigo .texto { font-size: 15px; color: var(--ink-soft); margin-top: 8px; }
+  .just { border: 1px solid var(--border); border-left: 4px solid var(--ink); border-radius: 8px; background: var(--surface-2); }
+  .just > summary { cursor: pointer; padding: 8px 12px; font: 700 13.5px var(--f-ui); color: var(--ink); }
+  .just .j-corpo { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .j-par { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 600px) { .j-par { grid-template-columns: 1fr; } }
+  .j-par div { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; font-size: 13.5px; line-height: 1.45; }
+  .j-par b { display: block; font: 700 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 3px; }
+  .j-txt { margin: 0; font-size: 14.5px; line-height: 1.55; white-space: pre-wrap; }
+  .art-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .abas-art { display: inline-flex; gap: 2px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .abas-art button, .vista button, .seg button { appearance: none; border: 0; background: none; font: 600 12.5px/1 var(--f-ui); color: var(--ink-soft); padding: 7px 10px; border-radius: 6px; cursor: pointer; }
+  .abas-art button[aria-pressed="true"], .vista button[aria-pressed="true"], .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .vista, .seg { display: inline-flex; gap: 2px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+  .seg button { font-size: 13.5px; padding: 8px 12px; }
+  .painel-aba { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .mantido { font: 500 12.5px/1 var(--f-mono); color: var(--ink-soft); }
+  .mantido i { display: inline-block; width: 60px; height: 6px; border-radius: 3px; background: var(--surface-2); vertical-align: middle; margin-right: 6px; overflow: hidden; position: relative; }
+  .mantido i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p); background: var(--g-remissao); }
+  .legenda-diff { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-soft); }
+  .legenda-diff del, .legenda-diff ins { font: 600 13px var(--f-lei); padding: 0 4px; border-radius: 3px; }
+  .legenda-diff del { color: var(--danger); background: var(--danger-soft); }
+  .legenda-diff ins { color: var(--primary); background: var(--primary-soft); text-decoration: none; }
+  .barra4 { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--surface-2); }
+  .barra4 i { display: block; height: 100%; }
+  aside .distrib-linha { grid-template-columns: minmax(0, 1fr) 3.2em; row-gap: 4px; }
+  aside .distrib-nome { grid-column: 1 / -1; white-space: normal; }
+  .legenda4 { display: flex; flex-direction: column; gap: 7px; font-size: 13px; color: var(--ink-soft); }
+  .legenda4 b { color: var(--ink); }
+  .legenda4 span.p { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--cor); margin-right: 6px; vertical-align: middle; }
+  .grupo-chips { display: flex; flex-direction: column; gap: 6px; }
+  .grupo-chips .rotulo { font: 700 11.5px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+  .duas-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  @media (max-width: 900px) { .duas-col { grid-template-columns: 1fr; } }
+  .atalhos { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .atalhos .rotulo { font: 700 11.5px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); margin-right: 4px; }
+  .atalhos button { appearance: none; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 6px 12px; font: 600 13px var(--f-ui); color: var(--ink); cursor: pointer; }
+  .atalhos button:hover { border-color: var(--ink-faint); }
+  .atalhos button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .atalhos button .qt { font: 500 11.5px var(--f-mono); opacity: .75; margin-left: 4px; }
+  table.cruz { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.cruz th { font: 700 10.5px var(--f-ui); letter-spacing: .03em; text-transform: uppercase; color: var(--ink-soft); padding: 4px 3px; text-align: center; vertical-align: bottom; }
+  table.cruz th.lin { text-align: left; text-transform: none; font-size: 12.5px; letter-spacing: 0; color: var(--ink); vertical-align: middle; }
+  table.cruz th.lin span { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--cor); margin-right: 5px; }
+  table.cruz td { padding: 2px; text-align: center; }
+  table.cruz td button { appearance: none; width: 100%; border: 1px solid var(--border); background: var(--surface); border-radius: 6px; padding: 5px 0; font: 600 13px var(--f-mono); color: var(--ink); cursor: pointer; }
+  table.cruz td button:hover { border-color: var(--ink-faint); }
+  table.cruz td button.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  table.cruz td button.zero { color: var(--ink-faint); }
+  table.cruz td.tot { font: 500 12px var(--f-mono); color: var(--ink-soft); }
+  .mais { align-self: center; }
+  button.numero { display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; color: inherit; }
+  button.numero:hover { border-color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="faixa" aria-hidden="true"></div>
+<div class="page wide">
+  <header class="topo">
+    <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
+    <p class="eyebrow">Revisão do Plano Diretor · Lei nº 14.771/2015 · consulta pública (jul/2026) · Rev.05 r1 (out/2026)</p>
+    <h1>Artigo por artigo</h1>
+    <p class="subtitulo">Cada um dos 355 artigos da nova minuta comparado de duas formas: com a lei em vigor (Lei nº 14.771/2015) e com a versão da consulta pública (julho/2026). Também lista os artigos da lei de 2015 que a nova minuta não traz.</p>
+  </header>
+
+  <nav class="abas" aria-label="Seções da ferramenta">
+    <a href="index.html#indice">Índice</a>
+    <a href="index.html#glossario">Glossário</a>
+    <a href="index.html#busca">Buscar na minuta</a>
+    <a href="grafo.html">Grafo de impactos</a>
+    <a href="comparativo.html">Comparativo visual</a>
+    <a href="artigos.html" class="ativa" aria-current="page">Artigo por artigo</a>
+    <a href="index.html#pergunte">Pergunte usando I.A.</a>
+  </nav>
+
+  <div class="numeros" id="numeros"></div>
+
+  <section class="card">
+    <div class="art-acoes" style="justify-content:space-between">
+      <h2>Filtrar</h2>
+      <span class="seg" id="g" role="group" aria-label="O que listar">
+        <button type="button" data-g="novos" aria-pressed="true">Artigos da nova minuta (355)</button>
+        <button type="button" data-g="antigos" aria-pressed="false">Artigos da lei de 2015 (194)</button>
+      </span>
+    </div>
+    <div class="busca-linha">
+      <input type="search" id="q" placeholder="Palavra, “expressão entre aspas” ou nº do artigo (ex.: outorga, “área verde”, 113)" aria-label="Buscar" autocomplete="off">
+    </div>
+    <div class="opcoes" id="opcoes-novos">
+      <span class="rotulo">Buscar em</span>
+      <span class="grupo">
+        <input type="radio" name="onde" id="onde-tudo" value="tudo" checked><label for="onde-tudo">Tudo</label>
+        <input type="radio" name="onde" id="onde-ins" value="ins"><label for="onde-ins">Só no que entrou desde julho</label>
+        <input type="radio" name="onde" id="onde-del" value="del"><label for="onde-del">Só no que saiu desde julho</label>
+      </span>
+      <label class="check"><input type="checkbox" id="so-lugar"> Só os que mudaram de lugar</label>
+      <label class="check"><input type="checkbox" id="so-just"> Só com justificativa técnica</label>
+    </div>
+    <div class="atalhos" id="atalhos"></div>
+    <div class="duas-col" id="chips-novos">
+      <div class="grupo-chips"><span class="rotulo">Em relação à lei de 2015</span><div class="chips" id="chips-15"></div></div>
+      <div class="grupo-chips"><span class="rotulo">Desde a consulta pública (jul/2026)</span><div class="chips" id="chips-jul"></div><div class="chips" id="chips-grau"></div></div>
+    </div>
+    <div class="chips" id="chips-ant" hidden></div>
+    <div class="filtros">
+      <div><label for="f-titulo">Título</label><select id="f-titulo"><option value="">Todos os títulos</option></select></div>
+      <div class="so-novos"><label for="f-tipo">Tipo de mudança (2015)</label><select id="f-tipo"><option value="">Todos</option></select></div>
+      <div class="so-novos"><label for="f-imp">Impacto (2015)</label><select id="f-imp"><option value="">Todos</option></select></div>
+      <div class="so-novos"><label for="ordem">Ordenar por</label><select id="ordem"><option value="lei">Ordem da lei</option><option value="contra">Em oposição primeiro</option><option value="mudanca">Maior mudança desde julho primeiro</option></select></div>
+    </div>
+    <div class="art-acoes" style="justify-content:space-between">
+      <label class="check so-novos" style="display:inline-flex;gap:6px;align-items:center;font:500 14px var(--f-ui);text-transform:none;letter-spacing:0;color:var(--ink-soft);margin:0"><input type="checkbox" id="f-outros"> Incluir classificações secundárias de tipo e impacto</label>
+      <span class="art-acoes so-novos"><span class="dica" style="margin:0">Abrir os cartões em:</span><span class="seg" id="aba-padrao" role="group" aria-label="Aba aberta nos cartões"><button type="button" data-a="l15" aria-pressed="true">Em relação a 2015</button><button type="button" data-a="jul" aria-pressed="false">Desde a consulta</button></span></span>
+    </div>
+  </section>
+
+  <div class="grade">
+    <aside>
+      <section class="card so-novos">
+        <h2>As duas comparações cruzadas</h2>
+        <p class="dica" style="margin:0 0 6px">Linhas: em relação a 2015. Colunas: desde a consulta pública. Clique num número para filtrar.</p>
+        <div id="cruz"></div>
+      </section>
+      <section class="card">
+        <h2 id="dist-tit">Por título</h2>
+        <div class="distrib" id="distrib"></div>
+      </section>
+      <section class="card suave">
+        <h2>Como ler</h2>
+        <div class="legenda4" id="legenda"></div>
+        <details class="so-novos"><summary class="dica" style="cursor:pointer;font-weight:600">Desde a consulta pública</summary>
+          <p class="dica" style="margin:6px 0 0"><b>Alterado:</b> mudou o conteúdo. A intensidade indica quanto do texto de julho foi mantido: leve (80% ou mais), moderada (40–80%), profunda (menos de 40%) ou reescrito.<br><b>Ajuste de forma:</b> só pontuação, maiúsculas, acentos ou espaços.<br><b>Novo:</b> não existia na versão de julho.<br>Os artigos foram pareados pelo texto, não pelo número, porque a numeração mudou a partir do art. 112.</p>
+          <div class="legenda-diff" style="margin-top:6px"><span><del>texto retirado</del></span><span><ins>texto incluído</ins></span></div></details>
+        <details class="so-novos"><summary class="dica" style="cursor:pointer;font-weight:600">Tipo de mudança e impacto (2015)</summary>
+          <p class="dica" style="margin:6px 0 0">Cada artigo parcialmente igual recebe um tipo de mudança e um impacto principais e, quando cabe, outros secundários.</p>
+          <dl class="defs" id="defs" style="font-size:13px;line-height:1.45"></dl></details>
+        <p class="dica">A classificação foi feita lendo os textos, artigo a artigo. Serve para orientar a análise e não substitui a leitura jurídica.</p>
+      </section>
+    </aside>
+    <main style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <div class="resumo"><p id="resumo"></p><div class="acoes"><button type="button" class="btn-sec" id="bt-limpar">Limpar filtros</button><button type="button" class="btn-sec" id="bt-csv">Baixar CSV</button></div></div>
+      <div class="lista-artigos" id="lista"></div>
+      <button type="button" class="btn-sec mais" id="bt-mais" hidden>Mostrar mais</button>
+    </main>
+  </div>
+
+  <footer class="rodape" id="rodape"></footer>
+</div>
+
+<script src="dados/lei2015_x_rev05.js"></script>
+<script src="dados/versoes_jul_out.js"></script>
+<script src="dados/justificativas.js"></script>
+<script>
+(() => {
+  const D = window.LEI2015, VS = window.VERSOES, J = window.JUSTIFICATIVAS || {};
+  const NOV = D.novos, ANT = D.antigos, A15 = new Map(ANT.map((a) => [a.n, a]));
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const semAc = (s) => String(s || '').normalize('NFC').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const LOTE = 40;
+  const temJ = (n) => !!(J[n] && J[n].justificativa);
+  const J15 = window.JUSTIFICATIVAS_2015 || {};
+  const temJ15 = (n) => !!(J15[n] && J15[n].justificativa);
+  const COR = { 'Igual': 'var(--s-igual)', 'Parcialmente igual': 'var(--s-parcial)', 'Novo': 'var(--s-novo)', 'Em oposição': 'var(--s-contra)',
+    'Mantido igual': 'var(--s-igual)', 'Mantido com mudanças': 'var(--s-parcial)', 'Alterado em oposição': 'var(--s-contra)', 'Sem correspondente': 'var(--s-sem)' };
+  const S15 = ['Em oposição', 'Parcialmente igual', 'Igual', 'Novo'];
+  const SJ = ['Alterado', 'Novo', 'Ajuste de forma', 'Sem alteração'];
+  const COR_J = { 'Alterado': 'var(--c-prazo, #B98A00)', 'Novo': '#6B4FA8', 'Ajuste de forma': 'var(--g-remissao, #2D5F99)', 'Sem alteração': 'var(--ink-faint)' };
+  const GRAUS = ['Leve', 'Moderada', 'Profunda', 'Reescrito'];
+  const SA = ['Sem correspondente', 'Alterado em oposição', 'Mantido com mudanças', 'Mantido igual'];
+  const EXPL = {
+    'Igual': 'mesmo conteúdo normativo, só ajustes de redação.',
+    'Parcialmente igual': 'o tema já existia em 2015; mantém o núcleo e amplia, detalha ou muda parte da regra.',
+    'Novo': 'tema ou instrumento sem correspondente na lei de 2015.',
+    'Em oposição': 'inverte a regra de 2015: obrigação vira faculdade, garantia ou controle social é reduzido, proteção é estreitada ou matéria que exigia lei passa para ato do Executivo.',
+    'Sem correspondente': 'artigo de 2015 que a nova minuta não traz.',
+    'Alterado em oposição': 'artigo de 2015 cuja regra é invertida pela nova minuta.',
+    'Mantido com mudanças': 'o tema continua na nova minuta, com mudanças.',
+    'Mantido igual': 'reproduzido na nova minuta sem mudança de conteúdo.' };
+  const DEF_T = { 'Ampliado': 'acrescenta objetivos, diretrizes, hipóteses ou instrumentos ao que havia em 2015.', 'Reduzido': 'retira parte do conteúdo de 2015 (incisos, programas, exigências, prioridades).', 'Regra alterada': 'muda prazo, valor, percentual, critério, área de incidência ou procedimento.', 'Delegado a outra norma': 'o que estava escrito na lei passa a depender de lei específica, regulamento ou ato do Executivo.', 'Reorganizado/renomeado': 'mesmo tema com nova estrutura, nome ou enquadramento (ex.: PMDUS → PDUIS).' };
+  const DEF_I = { 'Mais restritivo': 'cria ou amplia obrigações, ônus ou controles.', 'Mais permissivo': 'flexibiliza parâmetros, amplia potencial construtivo ou retira proteção ou controle.', 'Mais detalhado': 'mais conteúdo normativo, sem inverter a direção da regra.', 'Menos detalhado': 'texto mais genérico; perde conteúdo operativo de 2015.', 'Só redação': 'muda a forma, não o efeito.' };
+  $('defs').innerHTML = '<dt style="margin-top:8px;font-weight:700">Tipo de mudança</dt>' + Object.entries(DEF_T).map(([k, v]) => `<dt style="font-weight:700;margin-top:6px">${k}</dt><dd style="margin:0;color:var(--ink-soft)">${v}</dd>`).join('') + '<dt style="margin-top:10px;font-weight:700">Impacto</dt>' + Object.entries(DEF_I).map(([k, v]) => `<dt style="font-weight:700;margin-top:6px">${k}</dt><dd style="margin:0;color:var(--ink-soft)">${v}</dd>`).join('');
+  $('f-tipo').innerHTML += Object.keys(DEF_T).map((k) => `<option value="${k}">${k} (${NOV.filter((a) => a.tipo === k).length})</option>`).join('');
+  $('f-imp').innerHTML += Object.keys(DEF_I).map((k) => `<option value="${k}">${k} (${NOV.filter((a) => a.impacto === k).length})</option>`).join('');
+
+  // ---------- junta as duas comparações ----------
+  const VJ = new Map(VS.artigos.filter((v) => v.out).map((v) => [v.out, v]));
+  NOV.forEach((a) => {
+    const v = VJ.get(a.n);
+    a.v = v; a.sj = v ? v.sit : 'Novo'; a.grau = v ? v.grau : ''; a.jul = v ? v.jul : null; a.lugar = v ? v.lugar_jul : '';
+    a.sem = v ? v.sem : 0;
+    const d = v ? v.d : [['+', a.texto]];
+    a.tJul = d.filter((x) => x[0] !== '+').map((x) => x[1]).join('');
+    a.tIns = d.filter((x) => x[0] === '+').map((x) => x[1]).join(' ');
+    a.tDel = d.filter((x) => x[0] === '-').map((x) => x[1]).join(' ');
+    a.bTudo = semAc([a.texto, a.nota, a.tJul, a.refs.map((r) => A15.get(r).texto).join(' '), temJ(a.n) ? [J[a.n].justificativa, J[a.n].em_2015, J[a.n].na_minuta].join(' ') : ''].join(' \n '));
+    a.bIns = semAc(a.tIns); a.bDel = semAc(a.tDel);
+  });
+  ANT.forEach((a) => { a.bTudo = semAc(a.texto + ' ' + a.nota + (temJ15(a.n) ? ' ' + J15[a.n].justificativa : '')); });
+
+  // ---------- busca ----------
+  const VAZIAS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'o', 'a', 'os', 'as', 'em', 'no', 'na', 'nos', 'nas', 'para', 'por', 'com', 'que', 'ao', 'aos', 'ou', 'se', 'um', 'uma']);
+  function termos(q) {
+    const out = [];
+    String(q).replace(/[“"”]([^“"”]+)[“"”]|([^\s“"”]+)/g, (m, frase, pal) => {
+      const t = semAc(frase || pal).trim();
+      if (t && (frase || (!VAZIAS.has(t) && (t.length >= 2 || /\d/.test(t))))) out.push(t);
+      return m;
+    });
+    return out;
+  }
+  const tem = (txt, ts) => !!txt && ts.every((t) => txt.includes(t));
+  function marcar(html) {
+    const ts = est.ts; if (!ts.length) return html;
+    return html.replace(/(<[^>]+>)|([^<]+)/g, (m, tag, txt) => {
+      if (tag) return tag;
+      const n = semAc(txt), ms = [];
+      ts.forEach((x) => { let i = 0; while ((i = n.indexOf(x, i)) >= 0) { ms.push([i, i + x.length]); i += x.length; } });
+      if (!ms.length) return txt;
+      ms.sort((x, y) => x[0] - y[0]); let out = '', p = 0;
+      for (const [i, j] of ms) { if (i < p) continue; out += txt.slice(p, i) + '<mark>' + txt.slice(i, j) + '</mark>'; p = j; }
+      return out + txt.slice(p);
+    });
+  }
+
+  // ---------- estado ----------
+  const novoEst = () => ({ g: 'novos', q: '', ts: [], num: null, numJul: false, onde: 'tudo', s15: new Set(S15), sj: new Set(SJ), graus: new Set(), sa: new Set(['Sem correspondente', 'Alterado em oposição']),
+    titulo: '', tipo: '', imp: '', outros: false, lugar: false, just: false, ordem: 'lei', aba: 'l15', mostrar: LOTE, abertos: new Set(), abas: {}, vistas: {} });
+  let est = novoEst();
+
+  // ---------- números ----------
+  const c = (f) => NOV.filter(f).length;
+  const opDepois = (a) => a.sit === 'Em oposição' && (a.sj === 'Alterado' || a.sj === 'Novo');
+  $('numeros').innerHTML = [
+    ['355', 'artigos na nova minuta', '', ''],
+    [c((a) => a.sit === 'Em oposição'), 'em oposição à lei de 2015', 'vermelho', ''],
+    [c((a) => a.sit === 'Novo'), 'novos em relação a 2015', 'azul', ''],
+    [c((a) => a.sj === 'Alterado'), 'alterados desde a consulta', 'ouro', ''],
+    [c((a) => a.sj === 'Novo'), 'entraram depois da consulta', '', ''],
+    [c(opDepois), 'em oposição e mudaram depois da consulta', 'vermelho destaque', 'op-depois'],
+    [ANT.filter((a) => a.sit === 'Sem correspondente').length, 'artigos de 2015 que saíram' + (ANT.some((a) => temJ15(a.n)) ? ` · ${ANT.filter((a) => a.sit === 'Sem correspondente' && temJ15(a.n)).length} com justificativa` : ''), '', 'saiu'],
+  ].map(([b, s, cl, at]) => at ? `<button type="button" class="numero ${cl}" data-at="${at}" style="text-align:left;cursor:pointer;font:inherit"><b>${b}</b><span>${s}</span></button>` : `<div class="numero ${cl}"><b>${b}</b><span>${s}</span></div>`).join('');
+
+  // ---------- atalhos ----------
+  const ATALHOS = {
+    'op-depois': ['Em oposição a 2015 e mudaram depois da consulta', opDepois, () => { est.s15 = new Set(['Em oposição']); est.sj = new Set(['Alterado', 'Novo']); }],
+    'pos-consulta': ['Entraram depois da consulta pública', (a) => a.sj === 'Novo', () => { est.sj = new Set(['Novo']); }],
+    'novo-alt': ['Novos em relação a 2015 e alterados depois da consulta', (a) => a.sit === 'Novo' && a.sj === 'Alterado', () => { est.s15 = new Set(['Novo']); est.sj = new Set(['Alterado']); }],
+    'profunda': ['Mudança profunda desde a consulta', (a) => a.grau === 'Profunda' || a.grau === 'Reescrito', () => { est.sj = new Set(['Alterado']); est.graus = new Set(['Profunda', 'Reescrito']); }],
+    'just': ['Com justificativa técnica', (a) => temJ(a.n), () => { est.just = true; }],
+  };
+  let atalhoAtivo = '';
+  function aplicarAtalho(k) {
+    const g = est.g, aba = est.aba; est = novoEst(); est.aba = aba; $('q').value = '';
+    if (k === 'saiu') { est.g = 'antigos'; est.sa = new Set(['Sem correspondente']); atalhoAtivo = ''; }
+    else if (atalhoAtivo === k) atalhoAtivo = '';
+    else { ATALHOS[k][2](); atalhoAtivo = k; if (k === 'pos-consulta' || k === 'profunda' || k === 'novo-alt') est.aba = 'jul'; }
+    sincronizarControles(); atualizar();
+  }
+  function atalhos() {
+    $('atalhos').hidden = est.g !== 'novos';
+    $('atalhos').innerHTML = '<span class="rotulo">Atalhos</span>' + Object.entries(ATALHOS).map(([k, [t, f]]) => `<button type="button" data-at="${k}" aria-pressed="${atalhoAtivo === k}">${t}<span class="qt">${c(f)}</span></button>`).join('');
+  }
+  document.body.addEventListener('click', (e) => { const b = e.target.closest('[data-at]'); if (b) aplicarAtalho(b.dataset.at); });
+
+  // ---------- chips ----------
+  function chips() {
+    $('chips-15').innerHTML = S15.map((s) => `<button type="button" class="chip" data-s15="${s}" aria-pressed="${est.s15.has(s)}" style="--cor:${COR[s]}"><span class="ponto"></span>${s} <span class="qt">${c((a) => a.sit === s)}</span></button>`).join('');
+    $('chips-jul').innerHTML = SJ.map((s) => `<button type="button" class="chip" data-sj="${s}" aria-pressed="${est.sj.has(s)}" style="--cor:${COR_J[s]}"><span class="ponto"></span>${s} <span class="qt">${c((a) => a.sj === s)}</span></button>`).join('');
+    $('chips-grau').hidden = !est.sj.has('Alterado');
+    $('chips-grau').innerHTML = '<span class="dica" style="align-self:center;margin:0">Intensidade:</span>' + GRAUS.map((g) => `<button type="button" class="chip" data-grau="${g}" aria-pressed="${est.graus.has(g)}"><span class="ponto"></span>${g} <span class="qt">${c((a) => a.grau === g)}</span></button>`).join('');
+    $('chips-ant').innerHTML = '<span class="rotulo" style="align-self:center">Situação</span>' + SA.map((s) => `<button type="button" class="chip" data-sa="${s}" aria-pressed="${est.sa.has(s)}" style="--cor:${COR[s]}"><span class="ponto"></span>${s} <span class="qt">${ANT.filter((a) => a.sit === s).length}</span></button>`).join('');
+  }
+  const alterna = (set, v) => { set.has(v) ? set.delete(v) : set.add(v); };
+  document.querySelector('.card').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-s15],[data-sj],[data-grau],[data-sa]'); if (!b) return;
+    if (b.dataset.s15) alterna(est.s15, b.dataset.s15);
+    else if (b.dataset.sj) alterna(est.sj, b.dataset.sj);
+    else if (b.dataset.grau) alterna(est.graus, b.dataset.grau);
+    else alterna(est.sa, b.dataset.sa);
+    atalhoAtivo = ''; atualizar();
+  });
+
+  // ---------- cruzamento ----------
+  function cruz() {
+    const curto = { 'Alterado': 'Alterado', 'Novo': 'Novo', 'Ajuste de forma': 'Ajuste', 'Sem alteração': 'Sem alt.' };
+    let h = '<table class="cruz"><tr><th></th>' + SJ.map((s) => `<th>${curto[s]}</th>`).join('') + '<th>Total</th></tr>';
+    for (const r of S15) {
+      h += `<tr><th class="lin" scope="row"><span style="--cor:${COR[r]}"></span>${r}</th>` + SJ.map((s) => {
+        const k = c((a) => a.sit === r && a.sj === s);
+        const on = est.s15.size === 1 && est.s15.has(r) && est.sj.size === 1 && est.sj.has(s);
+        return `<td><button type="button" data-cruz="${r}|${s}" class="${on ? 'on' : ''}${k ? '' : ' zero'}" title="${r} em relação a 2015 · ${s} desde a consulta">${k}</button></td>`;
+      }).join('') + `<td class="tot">${c((a) => a.sit === r)}</td></tr>`;
+    }
+    h += '<tr><th class="lin">Total</th>' + SJ.map((s) => `<td class="tot">${c((a) => a.sj === s)}</td>`).join('') + '<td class="tot">355</td></tr></table>';
+    $('cruz').innerHTML = h;
+  }
+  $('cruz').onclick = (e) => {
+    const b = e.target.closest('[data-cruz]'); if (!b) return;
+    const [r, s] = b.dataset.cruz.split('|');
+    if (b.classList.contains('on')) { est.s15 = new Set(S15); est.sj = new Set(SJ); }
+    else { est.s15 = new Set([r]); est.sj = new Set([s]); }
+    est.graus.clear(); atalhoAtivo = ''; atualizar();
+  };
+
+  // ---------- títulos ----------
+  const tituloCurto = (t) => { const m = (t || '').match(/^(T[ÍI]TULO\s+[IVXLC]+)\s+–\s+(.*)$/i); return m ? [m[1].replace(/T[ÍI]TULO/i, 'Título'), m[2].toLowerCase().replace(/^./, (x) => x.toUpperCase())] : [t, '']; };
+  function titulos() {
+    const L = est.g === 'novos' ? NOV : ANT;
+    const ts = [...new Set(L.map((a) => a.titulo))];
+    $('f-titulo').innerHTML = '<option value="">Todos os títulos</option>' + ts.map((t) => `<option value="${esc(t)}">${esc(tituloCurto(t).join(' – '))}</option>`).join('');
+    $('f-titulo').value = est.titulo;
+    $('dist-tit').textContent = est.g === 'novos' ? 'Por título da nova minuta' : 'Por título da lei de 2015';
+    const S = est.g === 'novos' ? S15 : SA;
+    $('distrib').innerHTML = ts.map((t) => {
+      const doT = L.filter((a) => a.titulo === t); const [r, n] = tituloCurto(t);
+      const seg = S.map((s) => { const k = doT.filter((a) => a.sit === s).length; return k ? `<i style="width:${(k / doT.length) * 100}%;background:${COR[s]}" title="${s}: ${k}"></i>` : ''; }).join('');
+      const extra = est.g === 'novos' ? ` · ${doT.filter((a) => a.sj === 'Alterado' || a.sj === 'Novo').length} mudaram desde julho` : '';
+      return `<button type="button" class="distrib-linha${est.titulo === t ? ' sel' : ''}" data-t="${esc(t)}"><span class="distrib-nome"><b>${esc(r)}</b> · ${esc(n)}<span class="dica" style="display:block;margin:0">${doT.length} artigos${extra}</span></span><span class="barra4">${seg}</span><span class="distrib-num">${doT.length}</span></button>`;
+    }).join('');
+    $('legenda').innerHTML = S.map((s) => `<div><span class="p" style="--cor:${COR[s]}"></span><b>${s}:</b> ${EXPL[s]}</div>`).join('');
+  }
+  $('distrib').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; est.titulo = est.titulo === b.dataset.t ? '' : b.dataset.t; atualizar(); };
+
+  // ---------- filtro ----------
+  const temTipo = (a, v) => a.tipo === v || (est.outros && (a.tipo_outros || []).includes(v));
+  const temImp = (a, v) => a.impacto === v || (est.outros && (a.impacto_outros || []).includes(v));
+  function filtrados() {
+    if (est.g === 'antigos') {
+      return ANT.filter((a) => {
+        if (est.num !== null) return a.n === est.num;
+        if (!est.sa.has(a.sit)) return false;
+        if (est.titulo && a.titulo !== est.titulo) return false;
+        if (est.ts.length && !tem(a.bTudo, est.ts)) return false;
+        return true;
+      });
+    }
+    let R = NOV.filter((a) => {
+      if (est.num !== null) return est.numJul ? a.jul === est.num : a.n === est.num;
+      if (!est.s15.has(a.sit) || !est.sj.has(a.sj)) return false;
+      if (est.graus.size && a.sj === 'Alterado' && !est.graus.has(a.grau)) return false;
+      if (est.titulo && a.titulo !== est.titulo) return false;
+      if (est.tipo && !temTipo(a, est.tipo)) return false;
+      if (est.imp && !temImp(a, est.imp)) return false;
+      if (est.lugar && !a.lugar) return false;
+      if (est.just && !temJ(a.n)) return false;
+      if (est.ts.length && !tem(est.onde === 'ins' ? a.bIns : est.onde === 'del' ? a.bDel : a.bTudo, est.ts)) return false;
+      return true;
+    });
+    if (est.ordem === 'contra') R = [...R].sort((x, y) => (S15.indexOf(x.sit) - S15.indexOf(y.sit)) || x.n - y.n);
+    if (est.ordem === 'mudanca') R = [...R].sort((x, y) => (x.sj === 'Novo' ? -1 : x.sj === 'Alterado' ? x.sem : 2) - (y.sj === 'Novo' ? -1 : y.sj === 'Alterado' ? y.sem : 2) || x.n - y.n);
+    return R;
+  }
+
+  // ---------- cartões ----------
+  const cam = (a) => [a.titulo, a.capitulo, a.secao, a.subsecao].filter(Boolean).map((x) => x.split(' – ')[0]).join(' · ');
+  const linhaTI = (rot, pri, outros, def) => `<span class="rot">${rot}</span><span class="linha">${pri.map((x) => `<span class="tag" title="${esc(def[x] || '')}">${esc(x)}</span>`).join('')}${outros.length ? `<span class="tambem">também:</span>${outros.map((x) => `<span class="tag sec" title="${esc(def[x] || '')}">${esc(x)}</span>`).join('')}` : ''}</span>`;
+  const subHtml = (a) => a.tipo ? `<div class="ti2">${linhaTI('Tipo de mudança', [a.tipo], a.tipo_outros || [], DEF_T)}${linhaTI('Impacto', [a.impacto], a.impacto_outros || [], DEF_I)}</div>`
+    : (a.tipos && a.tipos.length) ? `<div class="ti2">${linhaTI('Tipo de mudança', a.tipos, [], DEF_T)}${(a.impactos || []).length ? linhaTI('Impacto', a.impactos, [], DEF_I) : ''}</div>` : '';
+  const dataBR = (d) => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : esc(d || ''); };
+  function blocoJust(a, l = 'n') {
+    if (!(l === 'a' ? temJ15(a.n) : temJ(a.n))) return '';
+    const j = (l === 'a' ? J15 : J)[a.n];
+    return `<details class="just"${est.just || (est.ts.length && tem(semAc(j.justificativa), est.ts)) ? ' open' : ''}><summary>Justificativa técnica</summary><div class="j-corpo">
+      ${(j.em_2015 || j.na_minuta) ? `<div class="j-par"><div><b>Em 2015${j.arts_2015 ? ' (' + esc(j.arts_2015) + ')' : ''}</b>${marcar(esc(j.em_2015 || '—'))}</div><div><b>${l === 'a' ? 'O que a comparação registra' : 'Na nova minuta'}</b>${marcar(esc(j.na_minuta || '—'))}</div></div>` : ''}
+      <p class="j-txt">${marcar(esc(j.justificativa))}</p>${j.fonte || j.data ? `<p class="dica" style="margin:0">Fonte: ${esc(j.fonte || '—')}${j.data ? ' · ' + dataBR(j.data) : ''}</p>` : ''}</div></details>`;
+  }
+  const rec = (txt, aberto) => txt.length > 600 && !aberto;
+  function aba15(a, aberto) {
+    const corpo = a.diff ? a.diff.map(([op, t]) => op === '-' ? `<del>${esc(t)}</del>` : op === '+' ? `<ins>${esc(t)}</ins>` : esc(t)).join('') : esc(a.texto);
+    const antigos = a.refs.map((r) => { const v = A15.get(r); return `<details class="antigo"${est.ts.length && tem(semAc(v.texto), est.ts) ? ' open' : ''}><summary>Lei de 2015 · Art. ${r} <span class="dica">(${esc(cam(v))})</span></summary><p class="texto">${marcar(esc(v.texto))}</p></details>`; }).join('');
+    return `${a.nota ? `<p class="nota" style="--cor:${COR[a.sit]}">${marcar(esc(a.nota))}</p>` : ''}
+      ${blocoJust(a)}
+      ${a.diff ? '<p class="dica" style="margin:0">Diferenças em relação a 2015: <del style="color:var(--danger)">saiu</del> · <ins style="color:var(--primary);text-decoration:none;font-weight:600">entrou</ins></p>' : ''}
+      <p class="texto${rec(a.texto, aberto) ? ' recolhido' : ''}">${marcar(corpo)}</p>
+      ${a.texto.length > 600 ? `<div class="art-acoes"><button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button></div>` : ''}
+      ${antigos || '<p class="dica" style="margin:0">Sem correspondente na lei de 2015 (tema novo).</p>'}`;
+  }
+  function abaJul(a, aberto) {
+    const id = a.n;
+    if (a.sj === 'Novo') return `<p class="nota" style="--cor:#6B4FA8">Este artigo não existia na versão da consulta pública (julho/2026): entrou depois.</p><p class="texto${rec(a.texto, aberto) ? ' recolhido' : ''}">${marcar(esc(a.texto))}</p>${a.texto.length > 600 ? `<div class="art-acoes"><button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button></div>` : ''}`;
+    const vista = est.vistas[id] || (a.sj === 'Sem alteração' ? 'out' : 'dif');
+    let html;
+    if (vista === 'jul') html = esc(a.tJul);
+    else if (vista === 'out') html = esc(a.texto);
+    else html = a.v.d.map(([op, t]) => op === '-' ? `<del>${esc(t)}</del>` : op === '+' ? `<ins>${esc(t)}</ins>` : esc(t)).join('');
+    const tam = a.texto.length + a.tDel.length;
+    const mant = a.sj === 'Alterado' || a.sj === 'Ajuste de forma' ? `<span class="mantido" title="Parcela do texto de julho mantida"><i style="--p:${Math.round(a.sem * 100)}%"></i>${Math.round(a.sem * 100)}% mantido</span>` : '';
+    return `<div class="art-acoes"><span class="vista" role="group" aria-label="Versão exibida">
+        ${a.sj !== 'Sem alteração' ? `<button type="button" data-v="dif" aria-pressed="${vista === 'dif'}">Diferenças</button>` : ''}
+        <button type="button" data-v="jul" aria-pressed="${vista === 'jul'}">Julho${a.jul !== a.n ? ' (art. ' + a.jul + ')' : ''}</button>
+        <button type="button" data-v="out" aria-pressed="${vista === 'out'}">Outubro</button></span>${mant}</div>
+      ${a.sj === 'Sem alteração' ? '<p class="dica" style="margin:0">Mesmo texto da versão da consulta pública.</p>' : ''}
+      <p class="texto${rec(' '.repeat(tam), aberto) ? ' recolhido' : ''}">${marcar(html)}</p>
+      ${tam > 600 ? `<div class="art-acoes"><button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button></div>` : ''}`;
+  }
+  function cartaoNovo(a) {
+    const id = 'n' + a.n, aberto = est.abertos.has(id), aba = est.abas[id] || est.aba;
+    const clsJ = a.sj === 'Ajuste de forma' ? 'Ajuste' : a.sj.split(' ')[0];
+    const meta = [a.refs.length ? `em 2015: art. ${a.refs.join(', ')}` : 'sem correspondente em 2015',
+      a.sj === 'Novo' ? 'não existia em julho' : (a.jul !== a.n ? `era art. ${a.jul} em julho` : ''),
+      a.lugar ? `<span class="lugar" title="${esc(a.lugar)}">mudou de lugar desde julho</span>` : '',
+      `<a href="comparativo.html?art=${a.n}${temJ(a.n) ? '&just=1' : ''}">ver no comparativo visual</a>`].filter(Boolean);
+    return `<article class="art${a.sit === 'Em oposição' ? ' contra' : ''}" data-id="${id}">
+      <div class="art-cab"><span class="art-num">Art. ${a.n}</span><span class="sit" style="--cor:${COR[a.sit]}" title="Em relação à lei de 2015"><small>2015</small>${a.sit}</span><span class="sitj ${clsJ}" title="Desde a versão da consulta pública (jul/2026)"><small>consulta</small>${a.grau ? a.sj + ' · ' + a.grau : a.sj}</span>${temJ(a.n) ? '<span class="tem-j">ⓘ justificativa técnica</span>' : ''}</div>
+      <div class="meta-art">${meta.join('<span aria-hidden="true">·</span>')}</div>
+      ${subHtml(a)}
+      <div class="caminho"><span>${esc(cam(a))}</span></div>
+      <div class="art-acoes"><span class="abas-art" role="group" aria-label="Comparação exibida"><button type="button" data-aba="l15" aria-pressed="${aba === 'l15'}">Em relação a 2015</button><button type="button" data-aba="jul" aria-pressed="${aba === 'jul'}">Desde a consulta pública</button></span></div>
+      <div class="painel-aba">${aba === 'jul' ? abaJul(a, aberto) : aba15(a, aberto)}</div>
+    </article>`;
+  }
+  function cartaoAntigo(a) {
+    const id = 'a' + a.n, aberto = est.abertos.has(id), longo = a.texto.length > 600;
+    return `<article class="art${a.sit === 'Alterado em oposição' ? ' contra' : ''}" data-id="${id}">
+      <div class="art-cab"><span class="art-num">Art. ${a.n} (2015)</span><span class="sit" style="--cor:${COR[a.sit]}">${a.sit}</span>${temJ15(a.n) ? '<span class="tem-j">ⓘ justificativa técnica</span>' : ''}</div>
+      <div class="meta-art">${a.em.length ? `na nova minuta: ${a.em.map((n) => `<a href="artigos.html?q=${n}">art. ${n}</a>`).join(', ')}` : 'não aparece na nova minuta'}<span aria-hidden="true">·</span><a href="comparativo.html?art2015=${a.n}${temJ15(a.n) ? '&just=1' : ''}">ver no comparativo visual</a></div>
+      ${subHtml(a)}
+      <div class="caminho"><span>${esc(cam(a))}</span></div>
+      ${a.nota ? `<p class="nota" style="--cor:${COR[a.sit]}">${marcar(esc(a.nota))}</p>` : ''}
+      ${blocoJust(a, 'a')}
+      <p class="texto${longo && !aberto ? ' recolhido' : ''}">${marcar(esc(a.texto))}</p>
+      ${longo ? `<div class="art-acoes"><button type="button" class="link" data-exp>${aberto ? 'Recolher' : 'Ler tudo'}</button></div>` : ''}
+    </article>`;
+  }
+
+  // ---------- atualizar ----------
+  let lista = [];
+  function lerBusca() {
+    const q = est.q.trim();
+    const m = q.match(/^(jul(?:ho)?\.?\s*)?(?:art\.?\s*)?(\d+)$/i);
+    est.num = m ? Number(m[2]) : null; est.numJul = !!(m && m[1]);
+    est.ts = est.num === null ? termos(q) : [];
+  }
+  function atualizar(manter) {
+    if (!manter) est.mostrar = LOTE;
+    lerBusca();
+    const nov = est.g === 'novos';
+    document.querySelectorAll('.so-novos').forEach((x) => { x.hidden = !nov; });
+    $('opcoes-novos').hidden = !nov; $('chips-novos').hidden = !nov; $('chips-ant').hidden = nov;
+    document.querySelectorAll('#g button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.g === est.g));
+    document.querySelectorAll('#aba-padrao button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.a === est.aba));
+    chips(); atalhos(); cruz(); titulos();
+    lista = filtrados();
+    const q = est.q.trim();
+    let ocultos = 0;
+    if (est.ts.length) { const base = nov ? NOV : ANT; ocultos = base.filter((a) => !lista.includes(a) && tem(a.bTudo, est.ts)).length; }
+    $('resumo').innerHTML = (lista.length ? `<b>${lista.length}</b> artigo${lista.length > 1 ? 's' : ''} ${nov ? 'da nova minuta' : 'da lei de 2015'}${q ? ` com “${esc(q)}”` : ''}` : 'Nenhum artigo com esses filtros.')
+      + (est.num !== null && nov && !est.numJul ? ' · <span class="dica" style="margin:0">para o número de julho, digite “jul ' + est.num + '”</span>' : '')
+      + (ocultos ? ` · <button type="button" class="link" id="bt-ocultos">mais ${ocultos} fora dos filtros</button>` : '');
+    if (ocultos) $('bt-ocultos').onclick = () => { const q2 = est.q, g = est.g, aba = est.aba; est = novoEst(); est.q = q2; est.g = g; est.aba = aba; if (g === 'antigos') est.sa = new Set(SA); atalhoAtivo = ''; sincronizarControles(); atualizar(); };
+    $('lista').innerHTML = lista.slice(0, est.mostrar).map(nov ? cartaoNovo : cartaoAntigo).join('') || '<div class="vazio">Tente outro termo ou marque mais situações.</div>';
+    $('bt-mais').hidden = lista.length <= est.mostrar; $('bt-mais').textContent = `Mostrar mais (${lista.length - est.mostrar} restantes)`;
+    salvar();
+  }
+  function sincronizarControles() {
+    $('q').value = est.q;
+    const r = document.querySelector(`input[name="onde"][value="${est.onde}"]`); if (r) r.checked = true;
+    $('so-lugar').checked = est.lugar; $('so-just').checked = est.just;
+    $('f-tipo').value = est.tipo; $('f-imp').value = est.imp; $('f-outros').checked = est.outros; $('ordem').value = est.ordem;
+  }
+  $('lista').onclick = (e) => {
+    const art = e.target.closest('.art'); if (!art) return;
+    const id = art.dataset.id;
+    const ab = e.target.closest('[data-aba]'), v = e.target.closest('[data-v]'), x = e.target.closest('[data-exp]');
+    if (ab) est.abas[id] = ab.dataset.aba;
+    else if (v) est.vistas[+id.slice(1)] = v.dataset.v;
+    else if (x) alterna(est.abertos, id);
+    else return;
+    const a = id[0] === 'n' ? NOV.find((y) => y.n === +id.slice(1)) : A15.get(+id.slice(1));
+    art.outerHTML = id[0] === 'n' ? cartaoNovo(a) : cartaoAntigo(a);
+  };
+  $('g').onclick = (e) => { const b = e.target.closest('[data-g]'); if (!b || b.dataset.g === est.g) return; est.g = b.dataset.g; est.titulo = ''; atalhoAtivo = ''; atualizar(); };
+  $('aba-padrao').onclick = (e) => { const b = e.target.closest('[data-a]'); if (!b) return; est.aba = b.dataset.a; est.abas = {}; atualizar(true); };
+  $('bt-mais').onclick = () => { est.mostrar += LOTE; atualizar(true); };
+  $('bt-limpar').onclick = () => { const g = est.g, aba = est.aba; est = novoEst(); est.g = g; est.aba = aba; atalhoAtivo = ''; sincronizarControles(); atualizar(); };
+  let tq; $('q').oninput = (e) => { clearTimeout(tq); tq = setTimeout(() => { est.q = e.target.value; atualizar(); }, 200); };
+  document.querySelectorAll('input[name="onde"]').forEach((r) => r.onchange = () => { est.onde = r.value; if (r.value !== 'tudo') { est.aba = 'jul'; est.abas = {}; } atualizar(); });
+  $('so-lugar').onchange = (e) => { est.lugar = e.target.checked; if (est.lugar) { est.aba = 'jul'; est.abas = {}; } atualizar(); };
+  $('so-just').onchange = (e) => { est.just = e.target.checked; atalhoAtivo = ''; atualizar(); };
+  $('f-titulo').onchange = (e) => { est.titulo = e.target.value; atualizar(); };
+  const garantirParcial = () => { if (est.tipo || est.imp) est.s15.add('Parcialmente igual'); };
+  $('f-tipo').onchange = (e) => { est.tipo = e.target.value; garantirParcial(); atualizar(); };
+  $('f-imp').onchange = (e) => { est.imp = e.target.value; garantirParcial(); atualizar(); };
+  $('f-outros').onchange = (e) => { est.outros = e.target.checked; atualizar(); };
+  $('ordem').onchange = (e) => { est.ordem = e.target.value; if (est.ordem === 'mudanca') { est.aba = 'jul'; est.abas = {}; } atualizar(); };
+
+  // ---------- CSV ----------
+  $('bt-csv').onclick = () => {
+    const cel = (s) => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+    const linhas = est.g === 'novos'
+      ? [['art_nova', 'em_relacao_a_2015', 'tipo_mudanca', 'impacto', 'arts_2015', 'desde_a_consulta', 'intensidade', 'mantido_%', 'art_julho', 'titulo', 'observacao_2015', 'justificativa_tecnica', 'texto_out', 'texto_jul', 'saiu_desde_jul', 'entrou_desde_jul'].join(';')]
+        .concat(lista.map((a) => [a.n, a.sit, a.tipo, a.impacto, a.refs.join(', '), a.sj, a.grau, a.sj === 'Novo' ? '' : Math.round(a.sem * 100), a.jul, a.titulo, a.nota, temJ(a.n) ? J[a.n].justificativa : '', a.texto, a.tJul, a.tDel, a.tIns].map(cel).join(';')))
+      : [['art_2015', 'situacao', 'arts_nova', 'titulo', 'observacao', 'texto_2015'].join(';')].concat(lista.map((a) => [a.n, a.sit, a.em.join(', '), a.titulo, a.nota, a.texto].map(cel).join(';')));
+    const blob = new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const l = document.createElement('a'); l.href = URL.createObjectURL(blob); l.download = est.g === 'novos' ? 'artigo_por_artigo_nova_minuta.csv' : 'artigos_lei2015.csv'; l.click(); URL.revokeObjectURL(l.href);
+  };
+
+  // ---------- URL ----------
+  const conj = (s, todos) => s.size === todos.length ? null : [...s].join(',');
+  function salvar() {
+    const p = new URLSearchParams();
+    if (est.g !== 'novos') p.set('g', est.g);
+    if (est.q) p.set('q', est.q);
+    if (est.g === 'novos') {
+      if (atalhoAtivo) p.set('atalho', atalhoAtivo);
+      else {
+        const a = conj(est.s15, S15), b = conj(est.sj, SJ); if (a !== null) p.set('s15', a); if (b !== null) p.set('sj', b);
+        if (est.graus.size) p.set('grau', [...est.graus].join(','));
+        if (est.just) p.set('just', '1');
+      }
+      if (est.onde !== 'tudo') p.set('onde', est.onde);
+      if (est.tipo) p.set('tipo', est.tipo); if (est.imp) p.set('imp', est.imp); if (est.outros) p.set('outros', '1');
+      if (est.lugar) p.set('lugar', '1'); if (est.ordem !== 'lei') p.set('ordem', est.ordem);
+      if (est.aba !== 'l15') p.set('aba', est.aba);
+    } else { const a = conj(est.sa, SA); p.set('sa', a === null ? 'todas' : a); }
+    if (est.titulo) p.set('titulo', est.titulo);
+    history.replaceState(null, '', p.toString() ? '?' + p : location.pathname);
+  }
+  (function ler() {
+    const p = new URLSearchParams(location.search);
+    const fix = (s) => s.replace(/Alterado na contramão/g, 'Alterado em oposição').replace(/Na contramão/g, 'Em oposição');
+    const lista = (k, todos) => new Set(fix(p.get(k)).split(',').filter((x) => todos.includes(x)));
+    if (p.get('g') === 'antigos') est.g = 'antigos';
+    if (p.has('q')) est.q = p.get('q');
+    if (p.has('art')) est.q = p.get('art');
+    if (p.has('s15')) est.s15 = lista('s15', S15);
+    if (p.has('sj')) est.sj = lista('sj', SJ);
+    if (p.has('grau')) est.graus = lista('grau', GRAUS);
+    if (p.has('sa')) est.sa = p.get('sa') === 'todas' ? new Set(SA) : lista('sa', SA);
+    if (p.has('onde')) est.onde = p.get('onde');
+    if (p.has('tipo')) est.tipo = p.get('tipo'); if (p.has('imp')) est.imp = p.get('imp');
+    if (p.get('outros') === '1') est.outros = true; if (p.get('lugar') === '1') est.lugar = true; if (p.get('just') === '1') est.just = true;
+    if (p.has('ordem')) est.ordem = p.get('ordem');
+    if (p.has('aba')) est.aba = p.get('aba') === 'jul' ? 'jul' : 'l15';
+    const L = est.g === 'novos' ? NOV : ANT;
+    if (p.has('titulo')) { const t = p.get('titulo'); est.titulo = L.some((a) => a.titulo === t) ? t : ''; }
+    if (p.has('tit')) { const r = p.get('tit').toUpperCase(); const t = L.find((a) => (a.titulo.match(/^T[ÍI]TULO\s+([IVXLC]+)/i) || [])[1] === r); if (t) est.titulo = t.titulo; }
+    if (p.has('atalho') && ATALHOS[p.get('atalho')]) { ATALHOS[p.get('atalho')][2](); atalhoAtivo = p.get('atalho'); }
+    if (est.s15.size === 0) est.s15 = new Set(S15); if (est.sj.size === 0) est.sj = new Set(SJ);
+    sincronizarControles();
+  })();
+  $('rodape').textContent = `Lei de 2015: ${D.meta.antes}. Consulta pública: ${VS.meta.antes.descricao}. Nova minuta: ${D.meta.depois}. Comparações revisadas em ${D.meta.gerado_em.split('-').reverse().join('/')} (com 2015) e ${VS.meta.gerado_em.split('-').reverse().join('/')} (com julho); a análise não substitui a leitura jurídica.`;
+  atualizar();
+})();
+</script>
+</body>
+</html>
