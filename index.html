@@ -384,7 +384,7 @@
       const fontes = (data.fontes || []).map((f) => Number(f.artigo || f)).filter((n) => B.porNumero.has(n));
       $('resposta-fontes').innerHTML = fontes.length && !(data.lista || []).length ? `<span class="refs">Artigos usados: ${fontes.map((n) => `<button class="link" type="button" data-art="${n}">${B.rotuloArt(n)}</button>`).join(', ')}</span>` : '';
       const rota = $('resposta-rota');
-      rota.hidden = !data.aviso_rota; rota.textContent = data.aviso_rota || '';
+      rota.hidden = !data.aviso_rota; rota.textContent = (data.aviso_rota || '').replace(/^(Analisado por IA)\s*\([^)]*\)/, '$1');   // não mostra o nome do modelo
       rota.dataset.rota = data.rota || '';
       $('resposta-ia').hidden = false;
       renderOcorrencias(data.lista || []);
