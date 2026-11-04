@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Artigo por Artigo</title>
-<meta http-equiv="refresh" content="0; url=artigos.html?aba=jul">
+<meta http-equiv="refresh" content="0; url=comparativo.html">
 <script>
   // "O que mudou" agora faz parte de "Artigo por artigo": leva os filtros do link antigo para a página nova
+  // "Artigo por artigo" está escondida nesta fase: enquanto OCULTA = true, o link antigo leva ao Comparativo visual
+  var OCULTA = true;
   (function () {
+    if (OCULTA) { location.replace('comparativo.html'); return; }
     var p = new URLSearchParams(location.search), n = new URLSearchParams();
     n.set('aba', 'jul');
     if (p.get('q')) n.set('q', p.get('q'));
@@ -21,5 +24,5 @@
   })();
 </script>
 </head>
-<body><p>Esta página agora faz parte de <a href="artigos.html?aba=jul">Artigo por artigo</a>.</p></body>
+<body><p>Esta página foi substituída. Veja o <a href="comparativo.html">Comparativo visual</a>.</p></body>
 </html>

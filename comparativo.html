@@ -127,7 +127,8 @@
     <a href="index.html#busca">Buscar na minuta</a>
     <a href="grafo.html">Grafo de impactos</a>
     <a href="comparativo.html" class="ativa" aria-current="page">Comparativo visual</a>
-    <a href="artigos.html">Artigo por artigo</a>
+    <!-- "Artigo por artigo" escondida nesta fase: para mostrar de novo, apague o style="display:none" -->
+    <a href="artigos.html" style="display:none">Artigo por artigo</a>
     <a href="index.html#pergunte">Pergunte usando I.A.</a>
   </nav>
 
@@ -174,6 +175,8 @@
   const D = window.LEI2015, VIS = window.VIS, CTB = window.CTB || { contrib: [], links: {} };
   const NOV = D.novos, ANT = D.antigos, J = window.JUSTIFICATIVAS || {}, CJ = window.CONSULTA || {};
   const temJ = (n) => Object.prototype.hasOwnProperty.call(J, String(n)) && J[n] && J[n].justificativa;
+  // "Artigo por artigo" está escondida nesta fase; troque para true quando ela voltar ao menu
+  const MOSTRAR_ARTIGOS = false;
   const J15 = window.JUSTIFICATIVAS_2015 || {};
   const temJ15 = (n) => Object.prototype.hasOwnProperty.call(J15, String(n)) && J15[n] && J15[n].justificativa;
   const jDe = (l, n) => (l === 'a' ? J15 : J)[n];
@@ -400,7 +403,7 @@
       <p class="dica" style="margin:6px 0 0">${esc(cam(a))}</p>`;
     h += blocoJust(n);
     if (a.tipo) h += blocoTI([a.tipo], a.tipo_outros || [], [a.impacto], a.impacto_outros || [], true);
-    if (CJ[n]) h += `<div class="p-sec"><h3>Desde a consulta pública (jul/2026)</h3><p style="margin:0;font-size:14px;line-height:1.45"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PAL_JUL[chaveJul(n)]};margin-right:6px"></span>${esc(txtJul(n).replace(/^./, (x) => x.toUpperCase()))}. <a href="artigos.html?q=${n}&aba=jul">Ver as diferenças</a></p></div>`;
+    if (CJ[n]) h += `<div class="p-sec"><h3>Desde a consulta pública (jul/2026)</h3><p style="margin:0;font-size:14px;line-height:1.45"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PAL_JUL[chaveJul(n)]};margin-right:6px"></span>${esc(txtJul(n).replace(/^./, (x) => x.toUpperCase()))}.${MOSTRAR_ARTIGOS ? ` <a href="artigos.html?q=${n}&aba=jul">Ver as diferenças</a>` : ''}</p></div>`;
     h += `<div class="p-sec"><h3>Na lei de 2015</h3>${a.refs.length ? '<div class="tags">' + a.refs.map((r) => `<button class="lnk" data-ir="a${r}">${rot(r)}</button>`).join('') + '</div>' : '<span class="vazio-p">Sem correspondente (tema novo).</span>'}</div>`;
     if (a.nota) h += `<div class="p-sec"><p class="nota" style="--cor:${corSit(a.sit)}">${hl(a.nota)}</p></div>`;
     h += `<div class="p-sec"><h3>Texto</h3><p class="texto${longo ? ' recolhido' : ''}" id="p-texto">${hl(a.texto)}</p>${longo ? '<button class="lnk" id="p-exp" style="margin-top:6px">Ler tudo</button>' : ''}</div>`;

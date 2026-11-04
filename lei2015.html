@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Artigo por Artigo</title>
-<meta http-equiv="refresh" content="0; url=artigos.html">
+<meta http-equiv="refresh" content="0; url=comparativo.html">
 <script>
   // "Lei de 2015 × nova" agora faz parte de "Artigo por artigo": leva os filtros do link antigo para a página nova
+  // "Artigo por artigo" está escondida nesta fase: enquanto OCULTA = true, o link antigo leva ao Comparativo visual
+  var OCULTA = true;
   (function () {
+    if (OCULTA) { location.replace('comparativo.html'); return; }
     var p = new URLSearchParams(location.search), n = new URLSearchParams();
     var ant = p.get('g') === 'antigos';
     if (ant) n.set('g', 'antigos');
@@ -24,5 +27,5 @@
   })();
 </script>
 </head>
-<body><p>Esta página agora faz parte de <a href="artigos.html">Artigo por artigo</a>.</p></body>
+<body><p>Esta página foi substituída. Veja o <a href="comparativo.html">Comparativo visual</a>.</p></body>
 </html>
