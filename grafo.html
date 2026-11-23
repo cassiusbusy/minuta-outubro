@@ -407,7 +407,7 @@
     const no = e.target.closest('[data-no]'); if (no) detalharNo(porId.get(no.dataset.no));
   });
 
-  $('rodape').textContent = `Fonte: ${M.documento.arquivo} · remissões detectadas automaticamente no texto (“art. 45”, “Título VI desta Lei”); citações a leis federais ficam de fora.`;
+  $('rodape').textContent = `Fonte: ${M.documento.arquivo} · remissões detectadas automaticamente no texto`;
   paraFormulario();
   executar(true);
 </script>
