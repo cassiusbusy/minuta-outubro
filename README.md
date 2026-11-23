@@ -25,7 +25,7 @@ Ferramenta estática para a Comissão da Câmara Municipal de Curitiba. Não pre
 
 ## Versão carregada
 
-Rev.09 (Substitutivo Geral, CMC, 19/11/2026), 360 artigos. O texto foi conferido artigo a artigo com o PDF oficial. As classificações do comparativo (2015 × nova minuta), as contribuições, os vínculos com leis federais e as justificativas foram feitos sobre a Rev.05 r1 e remapeados para a numeração da Rev.09; artigos novos ou muito alterados desde a Rev.05 levam `revisar: true` em `lei2015_x_rev09.js`. O glossário é anexo da lei e não veio no arquivo da Rev.09: o da Rev.05 continua em uso.
+Rev.09 (Substitutivo Geral, CMC, 19/11/2026), 360 artigos. O texto foi conferido artigo a artigo com o PDF oficial. As classificações do comparativo (2015 × nova minuta), as contribuições, os vínculos com leis federais e as justificativas foram feitos sobre a Rev.05 r1 e remapeados para a numeração da Rev.09; artigos novos ou muito alterados desde a Rev.05 levam `revisar: true` em `lei2015_x_rev09.js`. O glossário (anexo da lei) é o da Rev.09, com 64 termos.
 
 ## Atualizar quando sair nova revisão
 
