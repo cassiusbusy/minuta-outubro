@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/estilo.css?v=20261104">
+<link rel="stylesheet" href="assets/estilo.css?v=20261123">
 <style>
   :root { --s-igual: #00944F; --s-parcial: #B98A00; --s-novo: #447EC0; --s-contra: #C8323C; --s-sem: #8A94A3; }
   .grade { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; align-items: start; }
@@ -117,9 +117,9 @@
 <div class="page wide">
   <header class="topo">
     <span class="selo">Ferramenta da Comissão · Câmara Municipal de Curitiba</span>
-    <p class="eyebrow">Revisão do Plano Diretor · Lei nº 14.771/2015 · consulta pública (jul/2026) · Rev.05 r1 (out/2026)</p>
+    <p class="eyebrow">Revisão do Plano Diretor · Lei nº 14.771/2015 · consulta pública (jul/2026) · Rev.09 CMC (nov/2026)</p>
     <h1>Artigo por artigo</h1>
-    <p class="subtitulo">Cada um dos 355 artigos da nova minuta comparado de duas formas: com a lei em vigor (Lei nº 14.771/2015) e com a versão da consulta pública (julho/2026). Também lista os artigos da lei de 2015 que a nova minuta não traz.</p>
+    <p class="subtitulo">Cada um dos 360 artigos da nova minuta comparado de duas formas: com a lei em vigor (Lei nº 14.771/2015) e com a versão da consulta pública (julho/2026). Também lista os artigos da lei de 2015 que a nova minuta não traz.</p>
   </header>
 
   <nav class="abas" aria-label="Seções da ferramenta">
@@ -138,7 +138,7 @@
     <div class="art-acoes" style="justify-content:space-between">
       <h2>Filtrar</h2>
       <span class="seg" id="g" role="group" aria-label="O que listar">
-        <button type="button" data-g="novos" aria-pressed="true">Artigos da nova minuta (355)</button>
+        <button type="button" data-g="novos" aria-pressed="true">Artigos da nova minuta (360)</button>
         <button type="button" data-g="antigos" aria-pressed="false">Artigos da lei de 2015 (194)</button>
       </span>
     </div>
@@ -206,9 +206,9 @@
   <footer class="rodape" id="rodape"></footer>
 </div>
 
-<script src="dados/lei2015_x_rev05.js?v=20261104"></script>
-<script src="dados/versoes_jul_out.js?v=20261104"></script>
-<script src="dados/justificativas.js?v=20261104"></script>
+<script src="dados/lei2015_x_rev09.js?v=20261123"></script>
+<script src="dados/versoes_jul_out.js?v=20261123"></script>
+<script src="dados/justificativas.js?v=20261123"></script>
 <script>
 (() => {
   const D = window.LEI2015, VS = window.VERSOES, J = window.JUSTIFICATIVAS || {};
@@ -291,7 +291,7 @@
   const c = (f) => NOV.filter(f).length;
   const opDepois = (a) => a.sit === 'Em oposição' && (a.sj === 'Alterado' || a.sj === 'Novo');
   $('numeros').innerHTML = [
-    ['355', 'artigos na nova minuta', '', ''],
+    [String(D.novos.length), 'artigos na nova minuta', '', ''],
     [c((a) => a.sit === 'Em oposição'), 'em oposição à lei de 2015', 'vermelho', ''],
     [c((a) => a.sit === 'Novo'), 'novos em relação a 2015', 'azul', ''],
     [c((a) => a.sj === 'Alterado'), 'alterados desde a consulta', 'ouro', ''],
@@ -351,7 +351,7 @@
         return `<td><button type="button" data-cruz="${r}|${s}" class="${on ? 'on' : ''}${k ? '' : ' zero'}" title="${r} em relação a 2015 · ${s} desde a consulta">${k}</button></td>`;
       }).join('') + `<td class="tot">${c((a) => a.sit === r)}</td></tr>`;
     }
-    h += '<tr><th class="lin">Total</th>' + SJ.map((s) => `<td class="tot">${c((a) => a.sj === s)}</td>`).join('') + '<td class="tot">355</td></tr></table>';
+    h += '<tr><th class="lin">Total</th>' + SJ.map((s) => `<td class="tot">${c((a) => a.sj === s)}</td>`).join('') + '<td class="tot">' + D.novos.length + '</td></tr></table>';
     $('cruz').innerHTML = h;
   }
   $('cruz').onclick = (e) => {

@@ -1,4 +1,4 @@
-# Consulta à Minuta do Plano Diretor (Rev.05)
+# Consulta à Minuta do Plano Diretor (Substitutivo Geral Rev.09 – CMC, 19/11/2026)
 
 Ferramenta estática para a Comissão da Câmara Municipal de Curitiba. Não precisa de servidor: funciona no GitHub Pages, na Vercel ou abrindo o `index.html` direto do computador.
 
@@ -8,9 +8,9 @@ Ferramenta estática para a Comissão da Câmara Municipal de Curitiba. Não pre
 |---|---|
 | `index.html` | Consulta: busca literal, índice, glossário e a aba "Pergunte à minuta" |
 | `grafo.html` | Grafo de impactos (rede radial com remissões) |
-| `artigos.html` | **Escondida nesta fase** (fora do menu; para voltar, ver comentários em `index.html`, `grafo.html`, `comparativo.html` — `MOSTRAR_ARTIGOS` — e `OCULTA` em `versoes.html`/`lei2015.html`). Artigo por artigo: os 355 artigos da Rev.05 r1 com as duas comparações juntas — em relação à Lei nº 14.771/2015 (igual, parcialmente igual, novo, em oposição; tipo de mudança e impacto) e desde a versão da consulta pública de julho/2026 (alterado com intensidade, novo, ajuste de forma, sem alteração; diferenças palavra a palavra). Filtros combináveis, cruzamento das duas classificações, atalhos (ex.: em oposição e mudaram depois da consulta), justificativas técnicas e a lista dos artigos de 2015 sem correspondente |
+| `artigos.html` | **Escondida nesta fase** (fora do menu; para voltar, ver comentários em `index.html`, `grafo.html`, `comparativo.html` — `MOSTRAR_ARTIGOS` — e `OCULTA` em `versoes.html`/`lei2015.html`). Artigo por artigo: os 360 artigos da Rev.09 com as duas comparações juntas — em relação à Lei nº 14.771/2015 (igual, parcialmente igual, novo, em oposição; tipo de mudança e impacto) e desde a versão da consulta pública de julho/2026 (alterado com intensidade, novo, ajuste de forma, sem alteração; diferenças palavra a palavra). Filtros combináveis, cruzamento das duas classificações, atalhos (ex.: em oposição e mudaram depois da consulta), justificativas técnicas e a lista dos artigos de 2015 sem correspondente |
 | `versoes.html`, `lei2015.html` | Antigas páginas "O que mudou" e "Lei de 2015 × nova": redirecionam para `artigos.html` levando os filtros do link; enquanto ela está escondida, levam ao `comparativo.html` |
-| `dados/lei2015_x_rev05.js` | Dados da comparação com a lei de 2015 |
+| `dados/lei2015_x_rev09.js` | Dados da comparação com a lei de 2015 |
 | `comparativo.html` | Comparativo visual: bolinhas dos artigos de 2015 e da nova minuta ligadas pela classificação; ao clicar, abre o artigo, as contribuições da população (numeradas) e a relação com as leis federais; pode pintar pela mudança desde a consulta pública; busca por palavra, expressão entre aspas ou número (acende os artigos no diagrama, lista os resultados com o trecho destacado e pode incluir contribuições e justificativas; fica no link como `?q=`) |
 | `dados/comparativo_vis.js`, `dados/contribuicoes_vis.js` | Dados dessa página (vínculos com leis federais; contribuições e seus vínculos com os artigos) |
 | `dados/justificativas.js` | Justificativas técnicas: `JUSTIFICATIVAS` por artigo da nova minuta e `JUSTIFICATIVAS_2015` por artigo da lei de 2015 sem correspondente (editável à mão: copie um bloco, troque o número do artigo e preencha os campos). Artigos que estão aqui ganham o anel no diagrama, o bloco "Justificativa técnica" no painel e entram na lista do botão "Justificativas técnicas" |
@@ -18,16 +18,20 @@ Ferramenta estática para a Comissão da Câmara Municipal de Curitiba. Não pre
 | `dados/consulta_vis.js` | Resumo da comparação julho × outubro por artigo, para pintar o comparativo visual (gerado de `versoes_jul_out.js`) |
 | `assets/estilo.css` | Visual da Minuta Interativa (claro e escuro) |
 | `assets/busca.js` | Motor de busca e leitor de artigos, usado pelas duas páginas |
-| `dados/minuta_rev05.js` | Texto estruturado da minuta (carregado pelas páginas) |
-| `dados/minuta_rev05.json` | Mesmo conteúdo em JSON puro |
-| `dados/minuta_rev05_chunks.jsonl` | Um chunk por artigo, com metadados, pronto para a ingestão no Qdrant |
+| `dados/minuta_rev09.js` | Texto estruturado da minuta (carregado pelas páginas) |
+| `dados/minuta_rev09.json` | Mesmo conteúdo em JSON puro |
+| `dados/minuta_rev09_chunks.jsonl` | Um chunk por artigo, com metadados, pronto para a ingestão no Qdrant |
 | `scripts/parse_minuta.py` | Gera os três arquivos de `dados/` a partir do .docx |
+
+## Versão carregada
+
+Rev.09 (Substitutivo Geral, CMC, 19/11/2026), 360 artigos. O texto foi conferido artigo a artigo com o PDF oficial. As classificações do comparativo (2015 × nova minuta), as contribuições, os vínculos com leis federais e as justificativas foram feitos sobre a Rev.05 r1 e remapeados para a numeração da Rev.09; artigos novos ou muito alterados desde a Rev.05 levam `revisar: true` em `lei2015_x_rev09.js`. O glossário é anexo da lei e não veio no arquivo da Rev.09: o da Rev.05 continua em uso.
 
 ## Atualizar quando sair nova revisão
 
 ```bash
 pip install python-docx
-python3 scripts/parse_minuta.py "nova_minuta.docx" dados
+REV=rev10 VERSAO="Rev.10" python3 scripts/parse_minuta.py "nova_minuta.docx" dados
 ```
 
 O script reconstrói a numeração automática do Word (artigos a partir do 10, incisos em romano, alíneas) e imprime avisos se a sequência digitada divergir da automática.
@@ -52,5 +56,5 @@ Quando ingerir uma minuta nova, troque `VERSAO` no node Configurar e Validar: o 
 
 ## Limites conhecidos
 
-- As remissões são detectadas por padrão de texto ("art. 45", "Título VI desta Lei", "Seção III deste Capítulo", "Anexo 3"). A Rev.05 quase não remete a artigos por número; por isso o grafo também liga entre si os artigos que contêm o termo buscado.
+- As remissões são detectadas por padrão de texto ("art. 45", "Título VI desta Lei", "Seção III deste Capítulo", "Anexo 3"). A minuta quase não remete a artigos por número; por isso o grafo também liga entre si os artigos que contêm o termo buscado.
 - Os tipos de comando (obrigação, permissão etc.) são classificados por expressões ("deverá", "poderá", "é vedado"...). Servem para triagem, não substituem a leitura.

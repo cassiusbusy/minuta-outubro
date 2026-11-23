@@ -1,7 +1,7 @@
-"""Extrai a minuta do Plano Diretor (Rev.05) de .docx para JSON estruturado.
+"""Extrai a minuta do Plano Diretor (qualquer revisão; padrão Rev.09) de .docx para JSON estruturado.
 
-Saída: dados/minuta_rev05.json e dados/minuta_rev05.js (window.MINUTA = {...})
-       dados/minuta_rev05_chunks.jsonl (um chunk por artigo, pronto para ingestão RAG)
+Saída: dados/minuta_<REV>.json e dados/minuta_<REV>.js (window.MINUTA = {...})
+       dados/minuta_<REV>_chunks.jsonl (um chunk por artigo, pronto para ingestão RAG)
 
 Estrutura reconhecida:
   TÍTULO > CAPÍTULO > Seção > Subseção > Art. > (caput, §, incisos, alíneas, itens)
@@ -16,6 +16,10 @@ from docx.oxml.ns import qn
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else 'minuta_rev05.docx'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'site/dados'
+import os
+REV = os.environ.get('REV', 'rev09')                     # prefixo dos arquivos de saída
+VERSAO = os.environ.get('VERSAO', 'Rev.09 CMC')           # rótulo da versão
+TITULO = os.environ.get('TITULO', 'Plano Diretor de Curitiba — Substitutivo Geral Rev.09 (CMC, 19/11/2026)')
 
 d = docx.Document(SRC)
 
@@ -93,7 +97,7 @@ LABEL_RE = {
 
 nodes = {}          # id -> estrutura
 order = []
-root = {'id': 'raiz', 'tipo': 'raiz', 'rotulo': 'Plano Diretor (Rev.05)', 'nome': '', 'pai': None}
+root = {'id': 'raiz', 'tipo': 'raiz', 'rotulo': f'Plano Diretor ({VERSAO})', 'nome': '', 'pai': None}
 nodes['raiz'] = root; order.append('raiz')
 current = {'titulo': None, 'capitulo': None, 'secao': None, 'subsecao': None}
 pending = None      # (nivel, rotulo) à espera do nome
@@ -380,8 +384,8 @@ for a in artigos:
 
 dados = {
     'documento': {
-        'titulo': 'Plano Diretor de Curitiba — Projeto de Lei Rev.05 r1 (atualizada)',
-        'arquivo': '14c. Plano Diretor - Projeto Rev.05_r1 ATUALIZADA.docx',
+        'titulo': TITULO,
+        'arquivo': os.path.basename(SRC),
         'ementa': ' '.join(ementa),
         'gerado_em': __import__('datetime').date.today().isoformat(),
     },
@@ -399,19 +403,19 @@ os.makedirs(OUT, exist_ok=True)
 textos = {a['n']: a['texto'] for a in artigos}
 for a in dados['artigos']:
     a.pop('texto', None); a.pop('caput', None)
-with open(os.path.join(OUT, 'minuta_rev05.json'), 'w', encoding='utf-8') as f:
+with open(os.path.join(OUT, f'minuta_{REV}.json'), 'w', encoding='utf-8') as f:
     json.dump(dados, f, ensure_ascii=False)
-with open(os.path.join(OUT, 'minuta_rev05.js'), 'w', encoding='utf-8') as f:
+with open(os.path.join(OUT, f'minuta_{REV}.js'), 'w', encoding='utf-8') as f:
     f.write('window.MINUTA = ')
     json.dump(dados, f, ensure_ascii=False)
     f.write(';\n')
-with open(os.path.join(OUT, 'minuta_rev05_chunks.jsonl'), 'w', encoding='utf-8') as f:
+with open(os.path.join(OUT, f'minuta_{REV}_chunks.jsonl'), 'w', encoding='utf-8') as f:
     for a in artigos:
         cam = ' > '.join((c['rotulo'] + (' — ' + c['nome'] if c['nome'] else '')) for c in a['caminho'])
         f.write(json.dumps({
-            'id': f"rev05-{a['id']}",
+            'id': f"{REV}-{a['id']}",
             'texto': f"{cam}\n{a['rotulo']} {textos[a['n']]}",
-            'metadata': {'versao': 'Rev.05 r1', 'artigo': a['n'], 'rotulo': a['rotulo'],
+            'metadata': {'versao': VERSAO, 'artigo': a['n'], 'rotulo': a['rotulo'],
                          'titulo': a['caminho'][0]['rotulo'] if a['caminho'] else None,
                          'caminho': cam, 'remete': a['remete'], 'citado_por': a['citado_por']}
         }, ensure_ascii=False) + '\n')

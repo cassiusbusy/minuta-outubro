@@ -1,5 +1,5 @@
 /* Justificativas técnicas.
-   JUSTIFICATIVAS: por artigo da nova minuta (Rev.05 r1). JUSTIFICATIVAS_2015: por artigo da lei de 2015 que não tem correspondente na nova minuta.
+   JUSTIFICATIVAS: por artigo da nova minuta (numeração da Rev.09, CMC 19/11/2026; quem veio de outro número na Rev.05 r1 tem o campo "rev05"). JUSTIFICATIVAS_2015: por artigo da lei de 2015 que não tem correspondente na nova minuta.
    Para incluir uma nova: copie um bloco, troque o número do artigo (a chave) e preencha os campos.
    - justificativa: texto que aparece no painel (quebras de linha com \n)
    - em_2015 / na_minuta: resumo opcional da mudança
@@ -46,61 +46,68 @@ window.JUSTIFICATIVAS = {
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
   "data": "2026-11-03"
  },
- "272": {
+ "275": {
   "em_2015": "Todo imóvel com bosque nativo relevante ficava fora do PEUC.",
   "na_minuta": "A exceção só vale para imóveis com menos de 5.000 m².",
   "justificativa": "Os critérios estabelecidos na Lei 14.771/2015 para aplicação da PEUC foram aprimorados para torna-la mais efetiva em sua regulamentação, incluindo a presença de bosques nativos.",
   "arts_2015": "art. 134",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 272
  },
- "282": {
+ "285": {
   "em_2015": "A lei fixava as finalidades dos recursos da outorga onerosa (HIS, regularização, patrimônio, áreas verdes).",
   "na_minuta": "As finalidades vão para lei futura.",
   "justificativa": "O Estatuto da Cidade (Lei Federal 10.257/2001) já fixa as finalidades dos recursos da outorga onerosa em seus art. 26 e 31, sendo que o art. 147 da Lei de 2015 repetia essas finalidades, tendo sido por isso, suprimido.\nA Lei regulamentadora irá, com base nisso, operacionalizar a distribuição dos recursos dentre as finalidades previstas no Estatuto da Cidade.",
   "arts_2015": "art. 147",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 282
  },
- "316": {
+ "321": {
   "em_2015": "O Relatório Ambiental Prévio (RAP) seria regulamentado por lei específica.",
   "na_minuta": "Atividades, conteúdo e procedimentos do RAP ficam para regulamentação.",
   "justificativa": "As atividades, conteúdos e procedimentos do RAP já estão previstos no art 4º ao art. 15  pela Lei 16.247/2023, que regulamenta o Sistema EIV no município de Curitiba.",
   "arts_2015": "art. 177",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 316
  },
- "318": {
+ "323": {
   "em_2015": "O Plano fixava o conteúdo mínimo do EIV e garantia publicidade e manifestação da população antes da decisão.",
   "na_minuta": "Tudo isso vai para regulamentação específica.",
   "justificativa": "Este conteúdo está previsto na Lei 16.247/2023. Em relação aos instrumentos urbanísticos, a Lei do Plano Diretor irá estabelecer princípios e diretrizes gerais, deixando o conteúdo operacional para a legislação específica, numa lógica de ecossistema legal.",
   "arts_2015": "arts. 177 a 179",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 318
  },
- "326": {
+ "331": {
   "em_2015": "Perímetros e parâmetros do SEHIS “deverão ser definidos em legislação específica”.",
   "na_minuta": "Passam a ser definidos por ato do Poder Executivo Municipal.",
   "justificativa": "Na Zonificação Mista e Inteligente, o instrumento de ajuste flexível é a Setorização Especial para Sustentabilidade Urbana, que incluem as SEHIS, que na atual LZUOS, é também parte do zoneamento.\nEste ajuste flexível ou calibragem legislativa é fundamental para manter o plano diretor flexível e ajustável, sendo por isso a setorização especial definida por ato do Poder Executivo Municipal.",
   "arts_2015": "art. 82",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 326
  },
- "337": {
+ "342": {
   "em_2015": "O Município “estabelecerá” incentivos de IPTU para práticas ambientais (reuso de água, energia solar, telhado verde).",
   "na_minuta": "O IPTU “poderá” ser usado como incentivo, sem a lista de práticas.",
   "justificativa": "O Sistema Fiscal Inteligente Territorial cria o conceito de IPTU Inteligente, que será posteriormente regulamentado e o amplia para todas as dimensões da sustentabilidade urbana (art. 14 da Minuta), não a limitando apenas à dimensão ambiental.",
   "arts_2015": "art. 65",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 337
  },
- "349": {
+ "354": {
   "em_2015": "Valia a legislação “vigente à época da análise do requerimento”.",
   "na_minuta": "Vale a legislação “vigente na data do protocolo” (pode ser lida como mais favorável ao requerente).",
   "justificativa": "Trata-se de um ajuste procedimental de pouco impacto na data e com um mecanismo de monitoramento (protocolo) mais concreto e rastreável.",
   "arts_2015": "art. 21",
   "fonte": "IPPUC – apresentação “Minuta PD × Lei 2015: casos opostos”",
-  "data": "2026-11-03"
+  "data": "2026-11-03",
+  "rev05": 349
  }
 };
 
@@ -171,7 +178,7 @@ window.JUSTIFICATIVAS_2015 = {
   "data": "2026-11-04"
  },
  "106": {
-  "justificativa": "As Unidades de Interesse Cultural foram substituídas pelos Setores Especiais de Sustentabilidade Cultural (art. 101, inciso II), garantindo a harmonização da nomenclatura dos instrumentos de ajuste flexível e calibragem da Zonificação Mista e Inteligente.",
+  "justificativa": "As Unidades de Interesse Cultural foram substituídas pelos Setores Especiais de Sustentabilidade Cultural (art. 101, § 3º, inciso II), garantindo a harmonização da nomenclatura dos instrumentos de ajuste flexível e calibragem da Zonificação Mista e Inteligente.",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  },
@@ -181,7 +188,7 @@ window.JUSTIFICATIVAS_2015 = {
   "data": "2026-11-04"
  },
  "108": {
-  "justificativa": "As Áreas de Proteção Cultural foram substituídas pelos Setores Especiais de Sustentabilidade Cultural (art. 101, inciso II), garantindo a harmonização da nomenclatura dos instrumentos de ajuste flexível e calibragem da Zonificação Mista e Inteligente.",
+  "justificativa": "As Áreas de Proteção Cultural foram substituídas pelos Setores Especiais de Sustentabilidade Cultural (art. 101, § 3º, inciso II), garantindo a harmonização da nomenclatura dos instrumentos de ajuste flexível e calibragem da Zonificação Mista e Inteligente.",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  },
@@ -201,7 +208,7 @@ window.JUSTIFICATIVAS_2015 = {
   "data": "2026-11-04"
  },
  "145": {
-  "justificativa": "O art. 287 estabelece os critérios para o Direito de Preempção, deixando este aspecto operacional para a legislação regulamentadora exigida pelo § 1o. O art. 145 está assegurado pelo art. 27 do Estatuto da Cidade, não sendo necessário repeti-lo na lei do plano diretor.",
+  "justificativa": "O art. 292 estabelece os critérios para o Direito de Preempção, deixando este aspecto operacional para a legislação regulamentadora exigida pelo § 1o. O art. 145 está assegurado pelo art. 27 do Estatuto da Cidade, não sendo necessário repeti-lo na lei do plano diretor.",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  },
@@ -211,7 +218,7 @@ window.JUSTIFICATIVAS_2015 = {
   "data": "2026-11-04"
  },
  "164": {
-  "justificativa": "Questões operacionais do instrumento urbanístico serão detalhados na lei regulamentadora, conforme § 1o do art. 289.",
+  "justificativa": "Questões operacionais do instrumento urbanístico serão detalhados na lei regulamentadora, conforme § 1o do art. 294.",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  },
@@ -221,12 +228,12 @@ window.JUSTIFICATIVAS_2015 = {
   "data": "2026-11-04"
  },
  "175": {
-  "justificativa": "Questões operacionais do instrumento urbanístico serão detalhados na lei regulamentadora, conforme § 1o do art. 289.",
+  "justificativa": "Questões operacionais do instrumento urbanístico serão detalhados na lei regulamentadora, conforme § 1o do art. 294.",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  },
  "180": {
-  "justificativa": "A Lei do Sistema EIV – 16.247/2023, já estabelece os critérios para adoção de estudos de impacto ambiental (arts. 315/316), impacto de vizinhança (arts. 317/318) e impacto de tráfego. (arts. 319/320)",
+  "justificativa": "A Lei do Sistema EIV – 16.247/2023, já estabelece os critérios para adoção de estudos de impacto ambiental (arts. 320/321), impacto de vizinhança (arts. 317/318) e impacto de tráfego. (arts. 324/325)",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  },
@@ -246,7 +253,7 @@ window.JUSTIFICATIVAS_2015 = {
   "data": "2026-11-04"
  },
  "193": {
-  "justificativa": "A legislação urbanística de Curitiba j[a estabelece essa proibição em diversas leis e decretos e o Plano Diretor avança na instituição de instrumentos que garantem a sanção em caso de não conformidade, previstos nos arts. 321 a 324 (Termo de Compromisso Urbano-Ambiental e Termo de Ajuste de Conduta Urbano-Ambiental)",
+  "justificativa": "A legislação urbanística de Curitiba j[a estabelece essa proibição em diversas leis e decretos e o Plano Diretor avança na instituição de instrumentos que garantem a sanção em caso de não conformidade, previstos nos arts. 326 a 329 (Termo de Compromisso Urbano-Ambiental e Termo de Ajuste de Conduta Urbano-Ambiental)",
   "fonte": "IPPUC – apresentação “Comparativo 2015 × nova minuta: artigos por seção” (revisão)",
   "data": "2026-11-04"
  }

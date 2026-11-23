@@ -1,5 +1,5 @@
 /* Motor de busca literal na minuta — compartilhado entre a Consulta e o Grafo.
-   Roda no navegador sobre dados/minuta_rev05.js (window.MINUTA). Sem servidor.
+   Roda no navegador sobre dados/minuta_rev09.js (window.MINUTA). Sem servidor.
 
    - Ignora acentos e maiúsculas por padrão ("seguranca viaria" acha "Segurança Viária").
    - Com "Diferenciar acentos", só os acentos contam: "Habitação" acha "habitação", mas não "habitacao".
@@ -8,7 +8,7 @@
    - Tipos de comando normativo (obrigação, permissão...) funcionam como filtro adicional. */
 (function () {
   const M = window.MINUTA;
-  if (!M) { console.error('dados/minuta_rev05.js não carregou'); return; }
+  if (!M) { console.error('dados/minuta_rev09.js não carregou'); return; }
 
   const COMANDOS = {
     obrigacao: { nome: 'Obrigações', exemplo: 'deverá, deve, é obrigatório', re: String.raw`(dever[áã]o|deverá|devem|deve|fica[m]? obrigad[oa]s?|é obrigat[óo]ri[oa]|s[ãa]o obrigat[óo]ri[oa]s|ser[áã]o? obrigat[óo]ri[oa]s?|obriga-se|obrigam-se)` },
